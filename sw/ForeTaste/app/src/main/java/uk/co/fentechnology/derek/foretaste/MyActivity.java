@@ -85,19 +85,7 @@ public class MyActivity extends AppCompatActivity {
 
   public void openSettings()
   {
-    Connector connector = new Connector();
-    ArrayList<Connection> listConnections = connector.list();
-    ArrayList<String> listNames = new ArrayList<String>(listConnections.size());
-    for (int i = 0; i<listConnections.size(); i++ )
-    {
-      listNames.add(i,listConnections.get(i).name());
-      Log.i("Connections", listNames.get(i));
-    }
-
-    Scanner scanner = connector.getScanner(Connector.METHOD_USB);
-
     Intent intent = new Intent(this, ConnectionActivity.class);
-    intent.putStringArrayListExtra("connections", listNames);
     startActivityForResult(intent, PICK_CONNECTION);
   }
 }

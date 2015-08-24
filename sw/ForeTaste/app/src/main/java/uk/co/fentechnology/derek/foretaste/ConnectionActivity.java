@@ -16,32 +16,6 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class ConnectionAdapter extends BaseAdapter
-{
-  @Override
-  public int getCount() {
-    return 0;
-  }
-
-  @Override
-  public Object getItem(int position)
-  {
-    return null;
-  }
-
-  @Override
-  public long getItemId(int position)
-  {
-    return position;
-  }
-
-  @Override
-  public View getView(int position, View convertView, ViewGroup parent)
-  {
-    return null;
-  }
-}
-
 public class ConnectionActivity extends AppCompatActivity
 {
 
@@ -51,12 +25,10 @@ public class ConnectionActivity extends AppCompatActivity
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_connection);
 
-    // Get the ArrayList from the Intent and give it to the adapter
-    final ArrayList<String> contentList = getIntent().getStringArrayListExtra("connections");
-    ArrayAdapter<String> contentAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,contentList);
+    ConnectionAdapter connectionAdapter = new ConnectionAdapter(this);
 
     final ListView nameList = (ListView)findViewById(R.id.listView);
-    nameList.setAdapter(contentAdapter);
+    nameList.setAdapter(connectionAdapter);
     nameList.setOnItemClickListener(new AdapterView.OnItemClickListener()
     {
       @Override
@@ -65,7 +37,7 @@ public class ConnectionActivity extends AppCompatActivity
         Intent result = new Intent("derek.foretaste.RESULT_ACTION");
         result.putExtra("selection",position);
         setResult(Activity.RESULT_OK,result);
-        Log.i("Clicked",contentList.get(position));
+        Log.i("Clicked",String.valueOf(position));
         finish();
       }
     });
