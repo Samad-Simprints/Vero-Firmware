@@ -9,8 +9,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:text="Sample text"
-        android:textSize="16dp"/>
+        android:textSize="24sp"
+        android:textStyle="bold"/>
 
     <TextView
         android:id="@+id/textView2"
@@ -18,6 +18,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/textView1"
         android:layout_alignParentLeft="true"
-        android:text="further text" />
+        android:textSize="16sp" />
 
 </RelativeLayout>

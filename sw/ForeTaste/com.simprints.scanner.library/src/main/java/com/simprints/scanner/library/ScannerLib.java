@@ -13,18 +13,11 @@ public class ScannerLib
 {
   private static ScannerLib ourInstance = new ScannerLib();
 
-  // connection methods
-  public static final int METHOD_USB = 0;
-  public static final int METHOD_BT = 1;
-  public static final int METHOD_BLE = 2;
-  public static final int METHOD_WIFI = 3;
-  public static final int METHOD_AJ = 4;
-
-  // only USB and BT are implemented
-  public static final int METHOD_COUNT = 5;
+  // only DEMO is implemented
+  public static final int CONNECTION_COUNT = 1;
 
   // arrayList of Connections, indexed by method
-  private ArrayList<Connection> connections = new ArrayList<Connection>(METHOD_COUNT);
+  private ArrayList<Connection> connections = new ArrayList<Connection>(CONNECTION_COUNT);
 
   // singleton "constructor"
   public static ScannerLib getInstance()
@@ -35,14 +28,22 @@ public class ScannerLib
   // private constructor
   private ScannerLib()
   {
-    connections.add(METHOD_USB,new Connection(METHOD_USB,"USB"));
-    connections.add(METHOD_BT,new Connection(METHOD_BT,"Bluetooth"));
-    connections.add(METHOD_BLE,new Connection(METHOD_BLE,"Bluetooth Low Energy"));
-    connections.add(METHOD_WIFI,new Connection(METHOD_WIFI,"WiFi"));
-    connections.add(METHOD_AJ,new Connection(METHOD_BT,"Audio Jack"));
+    connections.add(new DemoConnection());
+    /*
+    connections.add(new UsbConnection("USB"));
+    connections.add(new BtConnection("Bluetooth Classic"));
+    connections.add(new BleConnection("Bluetooth Low Energy"));
+    connections.add(new WifiConnection("WiFi"));
+    connections.add(new AjConnection("Audio Jack"));
+    */
   }
 
+  // public interface
   public ArrayList<Connection> list() {
     return connections;
+  }
+
+  public Connection get(int index) {
+    return connections.get(index);
   }
 }
