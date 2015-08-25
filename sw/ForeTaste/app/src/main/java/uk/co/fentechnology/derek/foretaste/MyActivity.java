@@ -11,16 +11,10 @@ import android.widget.EditText;
 
 import com.simprints.scanner.library.Connection;
 import com.simprints.scanner.library.Connector;
-import com.simprints.scanner.library.Scanner;
-import com.simprints.scanner.library.ScannerLib;
-
-import java.util.ArrayList;
-
-import javax.sql.ConnectionEvent;
 
 public class MyActivity extends AppCompatActivity {
   public final static String EXTRA_MESSAGE = "uk.co.fentechnology.derek.foretaste.MESSAGE";
-  private ScannerLib scannerLib = ScannerLib.getInstance();
+  private Connector connector = Connector.getInstance();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +34,7 @@ public class MyActivity extends AppCompatActivity {
       {
         int selection = data.getIntExtra("selection",0);
         Log.i("result",String.valueOf(selection));
-        Connection connection = scannerLib.get(selection);
+        Connection connection = connector.get(selection);
         if (!connection.isSetup())
         {
           connection.setup();

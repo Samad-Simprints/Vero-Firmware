@@ -5,10 +5,10 @@ package com.simprints.scanner.library;
  */
 public class Scanner
 {
-  private int method;
+  private Connection connection;
 
-  public Scanner(int method) {
-    this.method = method;
+  public Scanner(Connection connection) {
+    this.connection = connection;
   }
 
   public void getTemplate(Template template) {

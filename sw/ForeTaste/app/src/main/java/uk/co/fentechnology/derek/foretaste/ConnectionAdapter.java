@@ -9,34 +9,30 @@ import android.widget.TextView;
 
 import com.simprints.scanner.library.Connection;
 import com.simprints.scanner.library.Connector;
-import com.simprints.scanner.library.ScannerLib;
-
-import java.util.ArrayList;
 
 /**
  * Created by derek on 21/08/2015.
  */
 public class ConnectionAdapter extends BaseAdapter
 {
-  private ArrayList<Connection> connections;
+  private Connector connector;
   LayoutInflater layoutInflater;
 
   public ConnectionAdapter(Context context)
   {
-    ScannerLib scannerLib = ScannerLib.getInstance();
-    connections = scannerLib.list();
+    connector = Connector.getInstance();
     layoutInflater = LayoutInflater.from(context);
   }
 
   @Override
   public int getCount() {
-    return connections.size();
+    return connector.size();
   }
 
   @Override
   public Connection getItem(int position)
   {
-    return connections.get(position);
+    return connector.get(position);
   }
 
   @Override
