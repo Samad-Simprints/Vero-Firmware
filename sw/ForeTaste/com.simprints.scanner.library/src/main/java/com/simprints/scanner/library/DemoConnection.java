@@ -1,5 +1,7 @@
 package com.simprints.scanner.library;
 
+import android.app.Activity;
+
 /**
  * Created by derek on 24/08/2015.
  */
@@ -10,8 +12,9 @@ public class DemoConnection extends Connection
     super("Demonstration");
   }
 
-  public void init() {
-
+  public boolean init(Activity activity) {
+    isSetup = true;
+    return true;
   }
 
   public void read() {

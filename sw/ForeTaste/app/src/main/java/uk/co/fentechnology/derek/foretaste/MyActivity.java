@@ -34,11 +34,6 @@ public class MyActivity extends AppCompatActivity {
       {
         int selection = data.getIntExtra("selection",0);
         Log.i("result",String.valueOf(selection));
-        Connection connection = connector.get(selection);
-        if (!connection.isSetup())
-        {
-          connection.setup();
-        }
       }
     }
   }

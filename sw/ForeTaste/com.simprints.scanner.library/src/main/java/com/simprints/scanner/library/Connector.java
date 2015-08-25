@@ -13,7 +13,7 @@ public class Connector
 
   // arrayList of Connections
   // only DEMO is implemented
-  private static final int CONNECTION_SIZE = 1;
+  private static final int CONNECTION_SIZE = 3;
   private ArrayList<Connection> connections = new ArrayList<Connection>(CONNECTION_SIZE);
 
   // singleton "constructor"
@@ -25,9 +25,9 @@ public class Connector
   // private constructor
   private Connector() {
     connections.add(new DemoConnection());
+    connections.add(new BtConnection());
+    connections.add(new UsbConnection());
     /*
-    connections.add(new UsbConnection("USB"));
-    connections.add(new BtConnection("Bluetooth Classic"));
     connections.add(new BleConnection("Bluetooth Low Energy"));
     connections.add(new WifiConnection("WiFi"));
     connections.add(new AjConnection("Audio Jack"));

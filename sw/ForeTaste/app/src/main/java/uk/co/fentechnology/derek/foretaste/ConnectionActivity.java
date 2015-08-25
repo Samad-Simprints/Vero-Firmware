@@ -18,7 +18,6 @@ import java.util.ArrayList;
 
 public class ConnectionActivity extends AppCompatActivity
 {
-
   @Override
   protected void onCreate(Bundle savedInstanceState)
   {
@@ -37,10 +36,14 @@ public class ConnectionActivity extends AppCompatActivity
         Intent result = new Intent("derek.foretaste.RESULT_ACTION");
         result.putExtra("selection",position);
         setResult(Activity.RESULT_OK,result);
-        Log.i("Clicked",String.valueOf(position));
+        Log.i("Clicked","position " + position);
         finish();
       }
     });
   }
 
+  /* called when the user clicks the Init button */
+  public void initConnection(View view) {
+
+  }
 }

@@ -1,5 +1,7 @@
 package com.simprints.scanner.library;
 
+import android.app.Activity;
+
 /**
  * Created by derek on 19/08/2015.
  */
@@ -7,7 +9,8 @@ public abstract class Connection
 {
   private String name;
   private boolean isActive;
-  private boolean isSetup;
+  protected boolean isSetup;
+  protected String errorMessage;
 
   public Connection(String name) {
     this.name = name;
@@ -19,12 +22,12 @@ public abstract class Connection
 
   public boolean isSetup() { return this.isSetup; }
 
-  public void setup() {
-    this.isSetup = true;
+  public String getErrorMessage() {
+    return errorMessage;
   }
 
-  abstract void init();
-  abstract void read();
-  abstract void open();
-  abstract void close();
+  abstract public boolean init(Activity activity);
+  abstract public void read();
+  abstract public void open();
+  abstract public void close();
 }

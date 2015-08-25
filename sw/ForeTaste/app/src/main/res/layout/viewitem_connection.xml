@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:descendantFocusability="blocksDescendants" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/textName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -13,11 +14,20 @@
         android:textStyle="bold"/>
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/textStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/textView1"
+        android:layout_below="@id/textName"
         android:layout_alignParentLeft="true"
         android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/buttonInit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Init"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
 
 </RelativeLayout>
