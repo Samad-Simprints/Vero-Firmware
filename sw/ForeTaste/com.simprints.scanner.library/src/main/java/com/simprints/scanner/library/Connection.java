@@ -10,7 +10,7 @@ public abstract class Connection
   private String name;
   private boolean isActive;
   protected boolean isSetup;
-  protected String errorMessage;
+  protected String errorMessage = "No Error";
 
   public Connection(String name) {
     this.name = name;
