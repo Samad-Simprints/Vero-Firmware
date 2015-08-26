@@ -2,16 +2,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:layout_marginTop="10dp"
+    android:layout_marginLeft="10dp"
+    android:orientation="horizontal"
+    >
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Connection:"
-        android:id="@+id/connectLabel"/>
+        android:id="@+id/connectLabel"
+        android:layout_alignBaseline="@+id/connectBtn"
+        android:layout_alignBottom="@+id/connectBtn"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -19,8 +24,51 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="None"
         android:id="@+id/connectName"
-        android:layout_alignTop="@+id/connectLabel"
+        android:layout_alignBaseline="@+id/connectLabel"
+        android:layout_alignBottom="@+id/connectLabel"
         android:layout_toRightOf="@+id/connectLabel"
-        android:layout_toEndOf="@+id/connectLabel"
-        android:layout_marginLeft="5dp"/>
+        android:layout_toEndOf="@+id/connectLabel"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select"
+        android:id="@+id/connectBtn"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="selectConnection"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Scanner:"
+        android:id="@+id/scannerLabel"
+        android:layout_alignBaseline="@+id/scannerBtn"
+        android:layout_alignBottom="@+id/scannerBtn"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="None"
+        android:id="@+id/scannerName"
+        android:layout_alignBaseline="@+id/scannerLabel"
+        android:layout_alignBottom="@+id/scannerLabel"
+        android:layout_alignLeft="@+id/connectName"
+        android:layout_alignStart="@+id/connectName"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select"
+        android:id="@+id/scannerBtn"
+        android:layout_below="@+id/connectBtn"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="selectScanner"
+        android:enabled="false"/>
+
 </RelativeLayout>

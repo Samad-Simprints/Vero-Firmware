@@ -41,9 +41,4 @@ public class ConnectionActivity extends AppCompatActivity
       }
     });
   }
-
-  /* called when the user clicks the Init button */
-  public void initConnection(View view) {
-
-  }
 }

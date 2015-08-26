@@ -17,7 +17,7 @@ public class ApplicationTest extends ApplicationTestCase<Application>
 
   public void testconnector() throws Exception
   {
-    Connector connector = new Connector();
+    Connector connector = Connector.getInstance();
     ArrayList<Connection> listConnections = connector.list();
     if (!(listConnections.size()>0)) { throw new AssertionError(); }
     if (!(listConnections.size()==2)) { throw new AssertionError(); }

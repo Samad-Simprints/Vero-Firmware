@@ -2,6 +2,8 @@ package com.simprints.scanner.library;
 
 import android.app.Activity;
 
+import java.util.ArrayList;
+
 /**
  * Created by derek on 19/08/2015.
  */
@@ -27,7 +29,9 @@ public abstract class Connection
   }
 
   abstract public boolean init(Activity activity);
-  abstract public void read();
-  abstract public void open();
+  abstract public int[] deviceList();
+  abstract public String deviceName(int index);
+  abstract public void open(int index);
   abstract public void close();
+  abstract public void read();
 }

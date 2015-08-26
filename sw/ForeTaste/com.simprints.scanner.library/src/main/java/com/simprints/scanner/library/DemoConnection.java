@@ -7,6 +7,7 @@ import android.app.Activity;
  */
 public class DemoConnection extends Connection
 {
+  private int[] devices = new int[2];
   public DemoConnection()
   {
     super("Demonstration");
@@ -17,15 +18,25 @@ public class DemoConnection extends Connection
     return true;
   }
 
-  public void read() {
-
+  public int[] deviceList() {
+    return devices;
   }
 
-  public void open() {
+  public String deviceName(int index)
+  {
+    return String.valueOf(index);
+  }
+
+  public void open(int index) {
 
   }
 
   public void close() {
 
   }
+
+  public void read() {
+
+  }
+
 }
