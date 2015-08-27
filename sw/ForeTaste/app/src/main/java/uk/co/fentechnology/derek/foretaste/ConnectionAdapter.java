@@ -1,7 +1,6 @@
 package uk.co.fentechnology.derek.foretaste;
 
 import android.app.Activity;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +63,7 @@ public class ConnectionAdapter extends BaseAdapter
         public void onClick(View v)
         {
           Connection connection = connector.get(position);
-          if (!connection.init(activity))
+          if (!connection.init())
           {
             Toast.makeText(v.getContext(),connection.getErrorMessage(),Toast.LENGTH_LONG).show();
           }
@@ -87,7 +86,7 @@ public class ConnectionAdapter extends BaseAdapter
     return convertView;
   }
 
-  public class ViewHolder {
+  class ViewHolder {
     TextView textName;
     TextView textStatus;
     Button button;

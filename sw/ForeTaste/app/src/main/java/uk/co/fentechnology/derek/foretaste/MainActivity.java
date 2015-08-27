@@ -1,15 +1,14 @@
 package uk.co.fentechnology.derek.foretaste;
 
+import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,23 +18,17 @@ import com.simprints.scanner.library.Connector;
 public class MainActivity extends AppCompatActivity {
   private Connector connector = Connector.getInstance();
   private static Connection connection = null;
-  private TextView connectName;
-  private TextView scannerName;
-  private Button selectScanner;
-  private Button selectConnection;
-  private View scannerLayout;
+  private static int connectionIndex;
+  private static int scannerIndex = -1;
+  private ViewHolder viewHolder;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    connectName = (TextView) this.findViewById(R.id.connectName);
-    selectConnection = (Button) this.findViewById(R.id.connectBtn);
-    scannerName = (TextView) this.findViewById(R.id.scannerName);
-    selectScanner = (Button) this.findViewById(R.id.scannerBtn);
 
-    setName();
-    selectScanner.setEnabled(connection != null);
+    viewHolder = new ViewHolder(this);
+    viewHolder.update();
 
     Log.i("MainActivity", "onCreate");
   }
@@ -57,9 +50,7 @@ public class MainActivity extends AppCompatActivity {
           if (c.isSetup())
           {
             connection = c;
-            setName();
-            selectScanner.setEnabled(true);
-            selectConnection.setText("Clear");
+            connectionIndex = selection;
           }
           else
           {
@@ -68,8 +59,10 @@ public class MainActivity extends AppCompatActivity {
           break;
 
         case PICK_SCANNER:
+          scannerIndex = data.getIntExtra("scanner",0);
           break;
       }
+      viewHolder.update();
     }
   }
 
@@ -109,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
     startActivityForResult(intent, PICK_CONNECTION);
   }
 
+  // button handler - select/clear connection
   public void selectConnection(View view)
   {
     if (connection == null)
@@ -118,22 +112,79 @@ public class MainActivity extends AppCompatActivity {
     else
     {
       connection = null;
-      selectConnection.setText("Select");
+      scannerIndex = -1; // clearing connection also clears scanner
     }
-    setName();
+    viewHolder.update();
   }
 
+  // button handler - select/clear scanner
   public void selectScanner(View view) {
-    int[] devices = connection.deviceList();
-
-    if (devices.length>0)
+    if (scannerIndex<0)
     {
-      scannerName.setText(connection.deviceName(0));
-    }
-    // Intent intent = new Intent(this, S)
+      int[] devices = connection.deviceList();
 
+      if (devices.length==0)
+      {
+        Toast.makeText(this,"No Scanners Found",Toast.LENGTH_SHORT).show();
+      }
+      else if (devices.length==1)
+      {
+        scannerIndex = 1;
+      }
+      else
+      {
+        Intent intent = new Intent(this, SelectionActivity.class);
+        intent.putExtra("index",connectionIndex);
+        startActivityForResult(intent, PICK_SCANNER);
+      }
+    }
+    else
+    {
+      scannerIndex = -1;
+    }
+    viewHolder.update();
   }
 
-  private void setName() {
-    connectName.setText((connection==null)? "No Connection": connection.name());  }
+  class ViewHolder {
+    private TextView connectNameTxt;
+    private Button selectScannerBtn;
+    private TextView scannerNameTxt;
+    private Button selectConnectionBtn;
+
+    public ViewHolder(Activity activity)
+    {
+      connectNameTxt = (TextView) activity.findViewById(R.id.connectName);
+      selectConnectionBtn = (Button) activity.findViewById(R.id.connectBtn);
+      scannerNameTxt = (TextView) activity.findViewById(R.id.scannerName);
+      selectScannerBtn = (Button) activity.findViewById(R.id.scannerBtn);
+    }
+
+    public void setConnectName() {
+      connectNameTxt.setText((connection == null) ? "No Connection" : connection.name());
+    }
+
+    public void setScannerName() {
+      scannerNameTxt.setText((scannerIndex<0) ? "None": connection.deviceName(scannerIndex));
+    }
+
+    public void update()
+    {
+      if (connection==null)
+      {
+        selectConnectionBtn.setText("Select");
+        selectScannerBtn.setEnabled(false);
+      }
+      else
+      {
+        selectConnectionBtn.setText("Clear");
+        selectScannerBtn.setEnabled(true);
+      }
+
+      selectScannerBtn.setText((scannerIndex<0)? "Select": "Clear");
+
+      setConnectName();
+      setScannerName();
+    }
+  }
+
 }

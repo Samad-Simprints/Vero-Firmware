@@ -13,7 +13,7 @@ public class DemoConnection extends Connection
     super("Demonstration");
   }
 
-  public boolean init(Activity activity) {
+  public boolean init() {
     isSetup = true;
     return true;
   }
@@ -24,7 +24,11 @@ public class DemoConnection extends Connection
 
   public String deviceName(int index)
   {
-    return String.valueOf(index);
+    return "Demo Dev" + String.valueOf(index);
+  }
+
+  public String deviceDetail(int index) {
+    return "Demo Dev" + String.valueOf(index) + " Details";
   }
 
   public void open(int index) {

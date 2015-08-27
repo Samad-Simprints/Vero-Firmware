@@ -28,9 +28,10 @@ public abstract class Connection
     return errorMessage;
   }
 
-  abstract public boolean init(Activity activity);
+  abstract public boolean init();
   abstract public int[] deviceList();
   abstract public String deviceName(int index);
+  abstract public String deviceDetail(int index);
   abstract public void open(int index);
   abstract public void close();
   abstract public void read();
