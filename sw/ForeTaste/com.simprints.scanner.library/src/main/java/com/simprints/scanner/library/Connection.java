@@ -34,5 +34,5 @@ public abstract class Connection
   abstract public String deviceDetail(int index);
   abstract public void open(int index);
   abstract public void close();
-  abstract public void read();
+  abstract public void read(byte[] r);
 }

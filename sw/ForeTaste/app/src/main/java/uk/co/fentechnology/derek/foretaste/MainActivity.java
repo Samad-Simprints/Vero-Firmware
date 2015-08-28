@@ -14,12 +14,15 @@ import android.widget.Toast;
 
 import com.simprints.scanner.library.Connection;
 import com.simprints.scanner.library.Connector;
+import com.simprints.scanner.library.Scanner;
+import com.simprints.scanner.library.Template;
 
 public class MainActivity extends AppCompatActivity {
   private Connector connector = Connector.getInstance();
   private static Connection connection = null;
   private static int connectionIndex;
   private static int scannerIndex = -1;
+  private static Scanner scanner;
   private ViewHolder viewHolder;
 
   @Override
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         case PICK_SCANNER:
           scannerIndex = data.getIntExtra("scanner",0);
+          scanner = new Scanner(connection);
           break;
       }
       viewHolder.update();
@@ -145,11 +149,20 @@ public class MainActivity extends AppCompatActivity {
     viewHolder.update();
   }
 
+  // button handler - scan
+  public void scan(View view) {
+    Template template = scanner.getTemplate();
+    viewHolder.showTemplate(template.getData());
+  }
+
+  // local class for view update
   class ViewHolder {
     private TextView connectNameTxt;
     private Button selectScannerBtn;
     private TextView scannerNameTxt;
     private Button selectConnectionBtn;
+    private Button scanBtn;
+    private TextView templateTxt;
 
     public ViewHolder(Activity activity)
     {
@@ -157,6 +170,8 @@ public class MainActivity extends AppCompatActivity {
       selectConnectionBtn = (Button) activity.findViewById(R.id.connectBtn);
       scannerNameTxt = (TextView) activity.findViewById(R.id.scannerName);
       selectScannerBtn = (Button) activity.findViewById(R.id.scannerBtn);
+      scanBtn = (Button) activity.findViewById(R.id.scanBtn);
+      templateTxt = (TextView) activity.findViewById(R.id.templateTxt);
     }
 
     public void setConnectName() {
@@ -180,10 +195,30 @@ public class MainActivity extends AppCompatActivity {
         selectScannerBtn.setEnabled(true);
       }
 
-      selectScannerBtn.setText((scannerIndex<0)? "Select": "Clear");
+      if (scannerIndex<0)
+      {
+        scanBtn.setEnabled(false);
+        selectScannerBtn.setText("Select");
+      }
+      else
+      {
+        scanBtn.setEnabled(true);
+        selectScannerBtn.setText("Clear");
+      }
 
       setConnectName();
       setScannerName();
+    }
+
+    public void showTemplate(byte[] r) {
+      String str = "Template: ";
+
+      for ( byte b : r )
+      {
+        str = str.concat(String.valueOf((char)b));
+      }
+
+      templateTxt.setText(str);
     }
   }
 

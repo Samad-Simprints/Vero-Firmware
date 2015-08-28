@@ -11,4 +11,13 @@ public class Template
     data = new byte[400];
   }
 
+  public void setData(byte[] data)
+  {
+    this.data = data;
+  }
+
+  public byte[] getData()
+  {
+    return data;
+  }
 }

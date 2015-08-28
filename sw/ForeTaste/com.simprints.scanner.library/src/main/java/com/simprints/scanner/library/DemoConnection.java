@@ -1,6 +1,9 @@
 package com.simprints.scanner.library;
 
 import android.app.Activity;
+import android.util.Log;
+
+import java.util.Random;
 
 /**
  * Created by derek on 24/08/2015.
@@ -39,8 +42,13 @@ public class DemoConnection extends Connection
 
   }
 
-  public void read() {
-
+  public void read(byte[] r) {
+    Random rand = new Random();
+    for ( int i = 0; i<r.length; ++i )
+    {
+      r[i] = (byte)(rand.nextInt(26) + (int)'a');
+    }
+    Log.d("DemoConnection","read " + r.length + " bytes");
   }
 
 }

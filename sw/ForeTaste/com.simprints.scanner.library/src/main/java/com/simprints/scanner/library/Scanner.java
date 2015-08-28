@@ -1,5 +1,7 @@
 package com.simprints.scanner.library;
 
+import android.util.Log;
+
 /**
  * Created by derek on 18/08/2015.
  */
@@ -11,8 +13,13 @@ public class Scanner
     this.connection = connection;
   }
 
-  public void getTemplate(Template template) {
-    template = new Template();
+  public Template getTemplate() {
+    Template template = new Template();
+
+    connection.read(template.getData());
+    Log.d("Scanner.read","template " + template.getData()[0] + template.getData()[1] + template.getData()[2]);
+
+    return template;
   }
 
 }
