@@ -133,7 +133,8 @@ public class MainActivity extends AppCompatActivity {
       }
       else if (devices.length==1)
       {
-        scannerIndex = 1;
+        scannerIndex = 0;
+        scanner = new Scanner(connection);
       }
       else
       {

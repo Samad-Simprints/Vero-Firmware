@@ -31,7 +31,7 @@ public class DemoConnection extends Connection
   }
 
   public String deviceDetail(int index) {
-    return "Demo Dev" + String.valueOf(index) + " Details";
+    return "Demonstration Device " + String.valueOf(index) + " Details";
   }
 
   public void open(int index) {
