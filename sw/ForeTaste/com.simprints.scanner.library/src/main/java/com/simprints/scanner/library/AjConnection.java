@@ -18,7 +18,7 @@ public class AjConnection extends Connection
 
   private static final int AUDIO_SAMPLE_FREQUENCY = 44100;
   private AudioRecord audioRecord;
-  private AudioTrack audioTrack;
+  private int minBufferSize;
   byte[] audioData;
 
   public AjConnection()
@@ -27,9 +27,9 @@ public class AjConnection extends Connection
   }
 
   public boolean init() {
-    int minBufferSize = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_FREQUENCY,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
+    minBufferSize = AudioRecord.getMinBufferSize(AUDIO_SAMPLE_FREQUENCY,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
     audioData = new byte[minBufferSize];
-    audioRecord = new AudioRecord(MediaRecorder.AudioSource.DEFAULT,AUDIO_SAMPLE_FREQUENCY,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT,minBufferSize);
+    audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,AUDIO_SAMPLE_FREQUENCY,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT,minBufferSize);
 
     switch (audioRecord.getState())
     {
@@ -37,11 +37,9 @@ public class AjConnection extends Connection
         isSetup = true;
         break;
       case AudioRecord.STATE_UNINITIALIZED:
-
         Log.d("AudioRecord","State is uninitialized");
         break;
     }
-    // audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,AUDIO_SAMPLE_FREQUENCY,AudioFormat.CHANNEL_CONFIGURATION_MONO,AudioFormat.ENCODING_PCM_16BIT,minBufferSize,AudioTrack.MODE_STREAM);
 
     return true;
   }
@@ -80,15 +78,26 @@ public class AjConnection extends Connection
     audioRecord.stop();
     // audioRecord.release();
 
-    for ( int i = 0; i<min(r.length,audioData.length); ++i )
-    {
-      r[i] = audioData[i];
-    }
-    Log.d("Audio Jack","read " + r.length + " bytes");
+    System.arraycopy(audioData, 0, r, 0, min(r.length, nBytes));
+
+    Log.d("Audio Jack","read " + nBytes + " bytes");
   }
 
   public void write(byte[] w) {
-    // audioTrack.play();
+    AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,AUDIO_SAMPLE_FREQUENCY,AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT,minBufferSize,AudioTrack.MODE_STREAM);
 
+    if (audioTrack.getState()==AudioTrack.STATE_INITIALIZED)
+    {
+      audioTrack.write(audioData,0,audioData.length);
+      audioTrack.play();
+      audioTrack.stop();
+      audioTrack.flush();
+      audioTrack.release();
+      Log.d("write", "AudioTrack playback");
+    }
+    else
+    {
+      Log.d("write", "AudioTrack state is uninitialized");
+    }
   }
 }

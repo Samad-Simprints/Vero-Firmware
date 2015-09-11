@@ -35,4 +35,5 @@ public abstract class Connection
   abstract public void open(int index);
   abstract public void close();
   abstract public void read(byte[] r);
+  abstract public void write(byte[] w);
 }

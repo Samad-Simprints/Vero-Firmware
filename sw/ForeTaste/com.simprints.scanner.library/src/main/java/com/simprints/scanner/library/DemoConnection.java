@@ -51,4 +51,7 @@ public class DemoConnection extends Connection
     Log.d("DemoConnection","read " + r.length + " bytes");
   }
 
+  public void write(byte[] w) {
+
+  }
 }

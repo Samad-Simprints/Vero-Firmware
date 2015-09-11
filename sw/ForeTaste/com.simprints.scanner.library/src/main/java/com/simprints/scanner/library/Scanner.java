@@ -19,7 +19,13 @@ public class Scanner
     connection.read(template.getData());
     Log.d("Scanner.read","template " + template.getData()[0] + template.getData()[1] + template.getData()[2]);
 
+    // diagnostic only
+    connection.write(template.getData());
+
     return template;
   }
 
+  public int getBatteryPercent() {
+    return 50;
+  }
 }

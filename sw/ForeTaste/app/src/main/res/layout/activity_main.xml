@@ -95,4 +95,15 @@
         android:layout_alignRight="@+id/scannerBtn"
         android:layout_alignEnd="@+id/scannerBtn"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Battery"
+        android:id="@+id/batteryBtn"
+        android:onClick="battery"
+        android:enabled="false"
+        android:layout_alignBottom="@+id/scanBtn"
+        android:layout_toRightOf="@+id/scanBtn"
+        android:layout_toEndOf="@+id/scanBtn"/>
+
 </RelativeLayout>

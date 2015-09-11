@@ -17,13 +17,11 @@ import com.simprints.scanner.library.Connector;
  */
 public class ConnectionAdapter extends BaseAdapter
 {
-  private Activity activity;
   private Connector connector;
   private LayoutInflater layoutInflater;
 
   public ConnectionAdapter(Activity activity)
   {
-    this.activity = activity;
     connector = Connector.getInstance();
     layoutInflater = LayoutInflater.from(activity);
   }
@@ -48,6 +46,7 @@ public class ConnectionAdapter extends BaseAdapter
   @Override
   public View getView(final int position, View convertView, ViewGroup parent)
   {
+    final Connection connection = getItem(position);
     ViewHolder viewHolder;
 
     if (convertView == null)
@@ -62,7 +61,6 @@ public class ConnectionAdapter extends BaseAdapter
         @Override
         public void onClick(View v)
         {
-          Connection connection = connector.get(position);
           if (!connection.init())
           {
             Toast.makeText(v.getContext(),connection.getErrorMessage(),Toast.LENGTH_LONG).show();
@@ -79,9 +77,9 @@ public class ConnectionAdapter extends BaseAdapter
     }
 
     // set texts
-    Connection connection = getItem(position);
     viewHolder.textName.setText(connection.name());
     viewHolder.textStatus.setText(connection.isSetup() ? "Setup" : "Not ready");
+    viewHolder.button.setEnabled(!connection.isSetup());
 
     return convertView;
   }

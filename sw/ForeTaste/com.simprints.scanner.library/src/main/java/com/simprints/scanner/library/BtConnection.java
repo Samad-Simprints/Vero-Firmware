@@ -79,4 +79,8 @@ public class BtConnection extends Connection
   public void read(byte[] r) {
 
   }
+
+  public void write(byte[] w) {
+
+  }
 }

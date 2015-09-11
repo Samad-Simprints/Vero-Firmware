@@ -156,13 +156,19 @@ public class MainActivity extends AppCompatActivity {
     viewHolder.showTemplate(template.getData());
   }
 
-  // local class for view update
+  // button handler - battery
+  public void battery(View view) {
+    viewHolder.showBattery(scanner.getBatteryPercent());
+  }
+
+  // local class to handle view and updates
   class ViewHolder {
     private TextView connectNameTxt;
     private Button selectScannerBtn;
     private TextView scannerNameTxt;
     private Button selectConnectionBtn;
     private Button scanBtn;
+    private Button batteryBtn;
     private TextView templateTxt;
 
     public ViewHolder(Activity activity)
@@ -172,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
       scannerNameTxt = (TextView) activity.findViewById(R.id.scannerName);
       selectScannerBtn = (Button) activity.findViewById(R.id.scannerBtn);
       scanBtn = (Button) activity.findViewById(R.id.scanBtn);
+      batteryBtn = (Button) activity.findViewById(R.id.batteryBtn);
       templateTxt = (TextView) activity.findViewById(R.id.templateTxt);
     }
 
@@ -189,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
       {
         selectConnectionBtn.setText("Select");
         selectScannerBtn.setEnabled(false);
+
       }
       else
       {
@@ -199,11 +207,13 @@ public class MainActivity extends AppCompatActivity {
       if (scannerIndex<0)
       {
         scanBtn.setEnabled(false);
+        batteryBtn.setEnabled(false);
         selectScannerBtn.setText("Select");
       }
       else
       {
         scanBtn.setEnabled(true);
+        batteryBtn.setEnabled(true);
         selectScannerBtn.setText("Clear");
       }
 
@@ -219,6 +229,11 @@ public class MainActivity extends AppCompatActivity {
         str = str.concat(String.valueOf((char)b));
       }
 
+      templateTxt.setText(str);
+    }
+
+    public void showBattery(int b) {
+      String str = "Battery: " + b +"%";
       templateTxt.setText(str);
     }
   }

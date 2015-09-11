@@ -19,12 +19,10 @@ import com.simprints.scanner.library.Scanner;
  */
 public class SelectionAdapter extends BaseAdapter
 {
-  private Activity activity;
   private Connection connection;
   private LayoutInflater layoutInflater;
 
   public SelectionAdapter(Activity activity,int connectIndex) {
-    this.activity = activity;
     Connector connector = Connector.getInstance();
     connection = connector.get(connectIndex);
     layoutInflater = LayoutInflater.from(activity);

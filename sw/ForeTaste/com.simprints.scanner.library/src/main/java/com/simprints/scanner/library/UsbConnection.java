@@ -42,4 +42,8 @@ public class UsbConnection extends Connection
   public void read(byte[] r) {
 
   }
+
+  public void write(byte[] w) {
+
+  }
 }
