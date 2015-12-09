@@ -11,6 +11,7 @@ public abstract class Connection
 {
   private String name;
   private boolean isActive;
+
   protected boolean isSetup;
   protected String errorMessage = "No Error";
 
@@ -29,11 +30,10 @@ public abstract class Connection
   }
 
   abstract public boolean init();
-  abstract public int[] deviceList();
-  abstract public String deviceName(int index);
-  abstract public String deviceDetail(int index);
-  abstract public void open(int index);
+  abstract public String deviceName();
+  abstract public String deviceDetail();
+  abstract public void open();
   abstract public void close();
-  abstract public void read(byte[] r);
-  abstract public void write(byte[] w);
+  abstract public void writeCommand(byte cmd, int length, byte[] data);
+  abstract public void readResponse(int length, byte[] data);
 }

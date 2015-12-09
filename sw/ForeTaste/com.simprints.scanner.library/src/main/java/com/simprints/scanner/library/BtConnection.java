@@ -49,26 +49,23 @@ public class BtConnection extends Connection
       if (bluetoothDevices.size()>0)
       {
         Log.v("BtConnection","BT devices found");
+        result = true;
       }
     }
 
     return result;
   }
 
-  public int[] deviceList() {
-    return new int[0];
-  }
-
-  public String deviceName(int index)
+  public String deviceName()
   {
-    return "BT Dev" + String.valueOf(index);
+    return "BT Dev";
   }
 
-  public String deviceDetail(int index) {
-    return "BT Dev" + String.valueOf(index) + " Details";
+  public String deviceDetail() {
+    return "BT Dev Details";
   }
 
-  public void open(int index) {
+  public void open() {
 
   }
 
@@ -76,11 +73,11 @@ public class BtConnection extends Connection
 
   }
 
-  public void read(byte[] r) {
-
+  public void readResponse(int length, byte[] data)
+  {
   }
 
-  public void write(byte[] w) {
-
+  public void writeCommand(byte cmd, int length, byte[] data)
+  {
   }
 }

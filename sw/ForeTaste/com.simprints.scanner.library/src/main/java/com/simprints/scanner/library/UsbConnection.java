@@ -18,20 +18,16 @@ public class UsbConnection extends Connection
     return false;
   }
 
-  public int[] deviceList() {
-    return new int[0];
-  }
-
-  public String deviceName(int index)
+  public String deviceName()
   {
-    return "USB Dev" + String.valueOf(index);
+    return "USB Dev";
   }
 
-  public String deviceDetail(int index) {
-    return "USB Dev" + String.valueOf(index) + " Details";
+  public String deviceDetail() {
+    return "USB Dev Details";
   }
 
-  public void open(int index) {
+  public void open() {
 
   }
 
@@ -39,11 +35,11 @@ public class UsbConnection extends Connection
 
   }
 
-  public void read(byte[] r) {
-
+  public void readResponse(int length, byte[] data)
+  {
   }
 
-  public void write(byte[] w) {
-
+  public void writeCommand(byte cmd, int length, byte[] data)
+  {
   }
 }

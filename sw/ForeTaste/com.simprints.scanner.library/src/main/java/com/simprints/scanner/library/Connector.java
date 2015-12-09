@@ -23,14 +23,10 @@ public class Connector
 
   // private constructor
   private Connector() {
-    connections.add(new DemoConnection());
-    connections.add(new BtConnection());
     connections.add(new UsbConnection());
-    connections.add(new AjConnection());
-    /*
-    connections.add(new BleConnection("Bluetooth Low Energy"));
-    connections.add(new WifiConnection("WiFi"));
-    */
+    connections.add(new BleConnection());
+    connections.add(new BtConnection());
+    connections.add(new DemoConnection());
   }
 
   // public interface
@@ -40,6 +36,18 @@ public class Connector
 
   public Connection get(int index) {
     return connections.get(index);
+  }
+
+  public void init() {
+    for (Connection c: connections)
+    {
+      c.init();
+    }
+  }
+  
+  public Connection autoConnect() {
+    // @TODO: returns first connection for now
+    return connections.get(0);
   }
 
   public int size() {

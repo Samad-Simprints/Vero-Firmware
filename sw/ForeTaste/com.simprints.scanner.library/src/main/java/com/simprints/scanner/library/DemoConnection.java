@@ -10,7 +10,6 @@ import java.util.Random;
  */
 public class DemoConnection extends Connection
 {
-  private int[] devices = new int[2];
   public DemoConnection()
   {
     super("Demonstration");
@@ -21,20 +20,16 @@ public class DemoConnection extends Connection
     return true;
   }
 
-  public int[] deviceList() {
-    return devices;
-  }
-
-  public String deviceName(int index)
+  public String deviceName()
   {
-    return "Demo Dev" + String.valueOf(index);
+    return "Demo Dev";
   }
 
-  public String deviceDetail(int index) {
-    return "Demonstration Device " + String.valueOf(index) + " Details";
+  public String deviceDetail() {
+    return "Demo Device Details";
   }
 
-  public void open(int index) {
+  public void open() {
 
   }
 
@@ -42,16 +37,46 @@ public class DemoConnection extends Connection
 
   }
 
-  public void read(byte[] r) {
-    Random rand = new Random();
-    for ( int i = 0; i<r.length; ++i )
+  public void writeCommand(byte cmd, int length, byte[] data)
+  {
+    int i;
+
+    switch(cmd)
     {
-      r[i] = (byte)(rand.nextInt(26) + (int)'a');
+      case Scanner.CMD_IMAGE:
+        break;
+
+      case Scanner.CMD_TEMPLATE:
+        break;
+
+      case Scanner.CMD_GET_PARAMS:
+        break;
+
+      case Scanner.CMD_SET_PARAMS:
+        break;
+
+      case Scanner.CMD_STORE_IMAGE:
+        break;
+
+      case Scanner.CMD_FETCH_IMAGE:
+        break;
+
+      case Scanner.CMD_BATTERY:
+        break;
+
+      case Scanner.CMD_LEDS:
+        break;
     }
-    Log.d("DemoConnection","read " + r.length + " bytes");
   }
 
-  public void write(byte[] w) {
+  public void readResponse(int length, byte[] data)
+  {
+    int i;
 
+    for ( i = 0; i<length; ++i )
+    {
+      data[i] = 0;
+    }
   }
+
 }

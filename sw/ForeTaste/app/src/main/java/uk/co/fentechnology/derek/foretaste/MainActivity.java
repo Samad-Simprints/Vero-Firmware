@@ -16,12 +16,12 @@ import com.simprints.scanner.library.Connection;
 import com.simprints.scanner.library.Connector;
 import com.simprints.scanner.library.Scanner;
 import com.simprints.scanner.library.Template;
+import com.simprints.scanner.library.Image;
 
 public class MainActivity extends AppCompatActivity {
   private Connector connector = Connector.getInstance();
   private static Connection connection = null;
   private static int connectionIndex;
-  private static int scannerIndex = -1;
   private static Scanner scanner;
   private ViewHolder viewHolder;
 
@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
   // request values
   static final int PICK_CONNECTION = 1;
-  static final int PICK_SCANNER    = 2;
 
   @Override
   protected void onActivityResult(int requestCode,int resultCode,Intent data) {
@@ -59,11 +58,6 @@ public class MainActivity extends AppCompatActivity {
           {
             Toast.makeText(this,c.name() + " is not ready",Toast.LENGTH_SHORT).show();
           }
-          break;
-
-        case PICK_SCANNER:
-          scannerIndex = data.getIntExtra("scanner",0);
-          scanner = new Scanner(connection);
           break;
       }
       viewHolder.update();
@@ -106,6 +100,16 @@ public class MainActivity extends AppCompatActivity {
     startActivityForResult(intent, PICK_CONNECTION);
   }
 
+  // button handler - auto select connection
+  public void selectAutoConnection(View view)
+  {
+    if (connection == null)
+    {
+      connection = connector.autoConnect();
+    }
+    viewHolder.update();
+  }
+
   // button handler - select/clear connection
   public void selectConnection(View view)
   {
@@ -116,44 +120,34 @@ public class MainActivity extends AppCompatActivity {
     else
     {
       connection = null;
-      scannerIndex = -1; // clearing connection also clears scanner
+      scanner = null;
     }
     viewHolder.update();
   }
 
-  // button handler - select/clear scanner
-  public void selectScanner(View view) {
-    if (scannerIndex<0)
+  // button handler - connect/clear scanner
+  public void connectScanner(View view) {
+    if (scanner == null)
     {
-      int[] devices = connection.deviceList();
-
-      if (devices.length==0)
-      {
-        Toast.makeText(this,"No Scanners Found",Toast.LENGTH_SHORT).show();
-      }
-      else if (devices.length==1)
-      {
-        scannerIndex = 0;
-        scanner = new Scanner(connection);
-      }
-      else
-      {
-        Intent intent = new Intent(this, SelectionActivity.class);
-        intent.putExtra("index",connectionIndex);
-        startActivityForResult(intent, PICK_SCANNER);
-      }
+      scanner = new Scanner(connection);
     }
     else
     {
-      scannerIndex = -1;
+      scanner = null;
     }
     viewHolder.update();
   }
 
-  // button handler - scan
-  public void scan(View view) {
+  // button handler - scanTemplateBtn
+  public void scanTemplate(View view) {
     Template template = scanner.getTemplate();
     viewHolder.showTemplate(template.getData());
+  }
+
+  // button handler - scanImageBtn
+  public void scanImage(View view) {
+    Image image = scanner.getImage();
+    viewHolder.showImage(image.getData());
   }
 
   // button handler - battery
@@ -166,18 +160,22 @@ public class MainActivity extends AppCompatActivity {
     private TextView connectNameTxt;
     private Button selectScannerBtn;
     private TextView scannerNameTxt;
+    private Button selectAutoConnectionBtn;
     private Button selectConnectionBtn;
-    private Button scanBtn;
+    private Button scanTemplateBtn;
+    private Button scanImageBtn;
     private Button batteryBtn;
     private TextView templateTxt;
 
     public ViewHolder(Activity activity)
     {
       connectNameTxt = (TextView) activity.findViewById(R.id.connectName);
+      selectAutoConnectionBtn = (Button) activity.findViewById(R.id.connectAutoBtn);
       selectConnectionBtn = (Button) activity.findViewById(R.id.connectBtn);
       scannerNameTxt = (TextView) activity.findViewById(R.id.scannerName);
       selectScannerBtn = (Button) activity.findViewById(R.id.scannerBtn);
-      scanBtn = (Button) activity.findViewById(R.id.scanBtn);
+      scanTemplateBtn = (Button) activity.findViewById(R.id.scanTemplateBtn);
+      scanImageBtn = (Button) activity.findViewById(R.id.scanImageBtn);
       batteryBtn = (Button) activity.findViewById(R.id.batteryBtn);
       templateTxt = (TextView) activity.findViewById(R.id.templateTxt);
     }
@@ -187,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setScannerName() {
-      scannerNameTxt.setText((scannerIndex<0) ? "None": connection.deviceName(scannerIndex));
+      scannerNameTxt.setText((scanner == null) ? "None": connection.deviceName());
     }
 
     public void update()
@@ -195,24 +193,27 @@ public class MainActivity extends AppCompatActivity {
       if (connection==null)
       {
         selectConnectionBtn.setText("Select");
+        selectAutoConnectionBtn.setEnabled(true);
         selectScannerBtn.setEnabled(false);
-
       }
       else
       {
         selectConnectionBtn.setText("Clear");
+        selectAutoConnectionBtn.setEnabled(false);
         selectScannerBtn.setEnabled(true);
       }
 
-      if (scannerIndex<0)
+      if (scanner==null)
       {
-        scanBtn.setEnabled(false);
+        scanTemplateBtn.setEnabled(false);
+        scanImageBtn.setEnabled(false);
         batteryBtn.setEnabled(false);
-        selectScannerBtn.setText("Select");
+        selectScannerBtn.setText("Connect");
       }
       else
       {
-        scanBtn.setEnabled(true);
+        scanTemplateBtn.setEnabled(true);
+        scanImageBtn.setEnabled(true);
         batteryBtn.setEnabled(true);
         selectScannerBtn.setText("Clear");
       }
@@ -223,6 +224,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void showTemplate(byte[] r) {
       String str = "Template: ";
+
+      for ( byte b : r )
+      {
+        str = str.concat(String.valueOf((char)b));
+      }
+
+      templateTxt.setText(str);
+    }
+
+    public void showImage(byte[] r) {
+      String str = "Image: ";
 
       for ( byte b : r )
       {

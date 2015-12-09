@@ -5,15 +5,23 @@ package com.simprints.scanner.library;
  */
 public class Template
 {
+  private int length;
   private byte[] data;
 
   public Template() {
+    length = 0;
     data = new byte[400];
   }
 
-  public void setData(byte[] data)
+  public void setData(int length, byte[] data)
   {
+    this.length = length;
     this.data = data;
+  }
+
+  public int getLength()
+  {
+    return length;
   }
 
   public byte[] getData()
