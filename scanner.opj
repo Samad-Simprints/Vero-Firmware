@@ -1,0 +1,105 @@
+(ExpressProject "scanner"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library"
+      (File ".\scanner.olb"
+        (Type "Schematic Library")))
+    (NoModify)
+    (File ".\scanner.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x"))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (PartMRUSelector
+    (LPC1833_LBGA256
+      (FullPartName "LPC1833_LBGA256-20.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "19"))
+    ("IND 744030003"
+      (FullPartName "IND 744030003.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (LED_0603_GREEN
+      (FullPartName "LED_0603_GREEN.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (CAP_X5R_0805
+      (FullPartName "CAP_X5R_0805.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    ("IND LPS4018-332MRC"
+      (FullPartName "IND LPS4018-332MRC.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (LTC3542EDC
+      (FullPartName "LTC3542EDC.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (MOLEX_PICOBLADE_HDR_3x1.25mmP
+      (FullPartName "MOLEX_PICOBLADE_HDR_3x1.25mmP.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (IRLML0030TRPBF
+      (FullPartName "IRLML0030TRPBF.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (LTC4160
+      (FullPartName "LTC4160.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (TVS_ARRAY_WURTH_82400102
+      (FullPartName "TVS_ARRAY_WURTH_82400102.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (molex_waterproof_microUSB_B_skt
+      (FullPartName "molex_waterproof_microUSB_B_skt.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (WE-CBF_742792651
+      (FullPartName "WE-CBF_742792651.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (PORTRIGHT-R
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (PORTLEFT-R
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (CAP_NPO_0402
+      (FullPartName "CAP_NPO_0402.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (BTM805CL2B
+      (FullPartName "BTM805CL2B.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0")))
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources"
+         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn")
+      (Path "Design Resources"
+         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn" "SCHEMATIC1")
+      (Path "Design Resources"
+         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn" "CPU")
+      (Path "Design Resources"
+         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn"
+         "USB and Battery")
+      (Path "Design Resources"
+         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn"
+         "User Interface")
+      (Path "Design Resources"
+         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn"
+         "Design Cache")
+      (Path "Design Resources" "Library")
+      (Path "Design Resources" "Library"
+         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.olb"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 2 3 160 622 -8 -30 0 377 0 572"))
+      (Tab 0)))
+  (MPSSessionName "paul"))
