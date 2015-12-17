@@ -13,6 +13,56 @@
   (Folder "Outputs")
   (Folder "Referenced Projects")
   (PartMRUSelector
+    (FERRITE_BEAD
+      (FullPartName "FERRITE_BEAD.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (OFFPAGELEFT-L
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (OFFPAGELEFT-R
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    ("Samtec 2x5way, 1.27mmP, header"
+      (FullPartName "Samtec 2x5way, 1.27mmP, header.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (STM809
+      (FullPartName "STM809.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (CAP_NPO_0402
+      (FullPartName "CAP_NPO_0402.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (IS64WV25616BLL-10BLI
+      (FullPartName "IS64WV25616BLL-10BLI.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (AT45DB321E-SHF2B
+      (FullPartName "AT45DB321E-SHF2B.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (XTAL_TXC_7M
+      (FullPartName "XTAL_TXC_7M.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (PORTBOTH-L
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (PORTRIGHT-R
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (PORTLEFT-R
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
     (LPC1833_LBGA256
       (FullPartName "LPC1833_LBGA256-20.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
@@ -61,16 +111,6 @@
       (FullPartName "WE-CBF_742792651.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0"))
-    (PORTRIGHT-R
-      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
-      (DeviceIndex "0"))
-    (PORTLEFT-R
-      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
-      (DeviceIndex "0"))
-    (CAP_NPO_0402
-      (FullPartName "CAP_NPO_0402.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
     (BTM805CL2B
       (FullPartName "BTM805CL2B.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
@@ -79,27 +119,25 @@
     (FileView
       (Path "Design Resources")
       (Path "Design Resources"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn")
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn")
       (Path "Design Resources"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn" "SCHEMATIC1")
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "SCHEMATIC1")
       (Path "Design Resources"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn" "CPU")
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn" "CPU")
       (Path "Design Resources"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "External Memory")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"
          "USB and Battery")
-      (Path "Design Resources"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn"
-         "User Interface")
-      (Path "Design Resources"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.dsn"
-         "Design Cache")
       (Path "Design Resources" "Library")
-      (Path "Design Resources" "Library"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\scanner.olb"))
+      (Select "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
       (Frame
         (Placement "44 2 3 160 622 -8 -30 0 377 0 572"))
       (Tab 0)))
-  (MPSSessionName "paul"))
+  (MPSSessionName "mscott"))
