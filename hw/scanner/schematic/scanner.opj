@@ -13,23 +13,25 @@
   (Folder "Outputs")
   (Folder "Referenced Projects")
   (PartMRUSelector
-    (GND
-      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+    (BC857
+      (FullPartName "BC857.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0"))
-    ("Molex 12W FFC 0.5mm"
-      (FullPartName "Molex 12W FFC 0.5mm.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+    ("SPST-NO, KSEM31G LFS"
+      (FullPartName "SPST-NO, KSEM31G LFS.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0"))
-    (MIC94094YC6
-      (FullPartName "MIC94094YC6.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+    (LED_0603_GREEN
+      (FullPartName "LED_0603_GREEN.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0"))
-    (TPVIA
-      (FullPartName "TPVIA.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (PORTLEFT-R
-      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+    (LED_0603_RED
+      (FullPartName "LED_0603_RED.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0"))
     (FERRITE_BEAD
       (FullPartName "FERRITE_BEAD.Normal")
@@ -78,16 +80,15 @@
     (PORTRIGHT-R
       (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
       (DeviceIndex "0"))
+    (PORTLEFT-R
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
     (LPC1833_LBGA256
       (FullPartName "LPC1833_LBGA256-20.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "19"))
     ("IND 744030003"
       (FullPartName "IND 744030003.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (LED_0603_GREEN
-      (FullPartName "LED_0603_GREEN.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0"))
     (CAP_X5R_0805
@@ -113,60 +114,40 @@
     (LTC4160
       (FullPartName "LTC4160.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (TVS_ARRAY_WURTH_82400102
+      (FullPartName "TVS_ARRAY_WURTH_82400102.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0")))
   (GlobalState
     (FileView
       (Path "Design Resources")
-      (Path "Design Resources" ".\scanner.dsn")
-      (Path "Design Resources" ".\scanner.dsn" "SCHEMATIC1")
-      (Path "Design Resources" ".\scanner.dsn" "CPU")
-      (Path "Design Resources" ".\scanner.dsn" "Sensor Interface")
-      (Path "Design Resources" ".\scanner.dsn" "USB and Battery")
-      (Path "Design Resources" ".\scanner.dsn" "User Interface")
-      (Path "Design Resources" ".\scanner.dsn" "Design Cache")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "SCHEMATIC1")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "Bluetooth")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn" "CPU")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "External Memory")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "Sensor Interface")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "USB and Battery")
       (Path "Design Resources" "Library")
-      (Path "Design Resources" "Library" ".\scanner.olb")
-      (Select "Design Resources" ".\scanner.dsn" "Sensor Interface" "PAGE1"))
+      (Select "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
       (Frame
-        (Placement "44 2 3 -1 -1 -8 -30 0 200 0 415"))
-      (Tab 0))
-    (Doc
-      (Type "COrSchematicDoc")
-      (Frame
-        (Placement "44 0 1 -1 -1 -8 -30 100 1168 100 553")
-        (Scroll "33 19")
-        (Zoom "100")
-        (Occurrence "/"))
-      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
-      (Schematic "SCHEMATIC1")
-      (Page "PAGE1"))
-    (Doc
-      (Type "COrSchematicDoc")
-      (Frame
-        (Placement "44 0 1 -1 -1 -8 -30 150 1218 150 603")
-        (Scroll "623 338")
-        (Zoom "100")
-        (Occurrence "/CPU"))
-      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
-      (Schematic "CPU")
-      (Page "PAGE2"))) >>>>>>> .r20
-  (HierarchyView)
-  (Doc
-    (Type "COrCapturePMDoc")
-    (Frame
-      (Placement "44 2 3 160 622 -8 -30 0 377 0 572"))
-    (Tab 0))
-  (Doc
-    (Type "COrSchematicDoc")
-    (Frame
-      (Placement "44 0 1 -1 -1 -8 -30 150 1218 150 603")
-      (Scroll "417 478")
-      (Zoom "100")
-      (Occurrence "/"))
-    (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
-    (Schematic "SCHEMATIC1")
-    (Page "PAGE1"))
-  (MPSSessionName "paul"))
+        (Placement "44 2 3 160 622 -8 -30 0 377 0 572"))
+      (Tab 0)))
+  (MPSSessionName "mscott"))
