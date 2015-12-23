@@ -100,6 +100,10 @@
       (Type "Report")))
   (Folder "Referenced Projects")
   (PartMRUSelector
+    (TPVIA
+      (FullPartName "TPVIA.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
     (LED_0603_GREEN
       (FullPartName "LED_0603_GREEN.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
@@ -113,10 +117,6 @@
       (DeviceIndex "0"))
     ("SPST-NO, KSC341GLFS"
       (FullPartName "SPST-NO, KSC341GLFS.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (TPVIA
-      (FullPartName "TPVIA.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0"))
     (1N4148
@@ -211,6 +211,8 @@
       (Path "Design Resources"
          "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn" "SCHEMATIC1")
       (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn" "Bluetooth")
+      (Path "Design Resources"
          "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn" "CPU")
       (Path "Design Resources"
          "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn"
@@ -230,9 +232,7 @@
       (Path "Design Resources" "Library")
       (Path "Design Resources" "Library"
          "c:\working\index\trunk\hw\scanner\schematic\scanner.olb")
-      (Path "Outputs")
-      (Select "Design Resources"
-         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn"))
+      (Path "Outputs"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
@@ -240,17 +240,11 @@
         (Placement "44 2 3 -1 -1 -8 -30 0 200 0 415"))
       (Tab 0))
     (Doc
-      (Type "TextFile")
-      (Frame
-        (Placement "44 0 1 -1 -1 -8 -30 0 775 0 453"))
-      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.asc")
-      (Scroll "57"))
-    (Doc
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 50 1118 50 503")
-        (Scroll "-64 0")
-        (Zoom "54")
+        (Scroll "-72 0")
+        (Zoom "53")
         (Occurrence "/"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
       (Schematic "SCHEMATIC1")
@@ -269,8 +263,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 100 1168 100 553")
-        (Scroll "0 0")
-        (Zoom "106")
+        (Scroll "-72 0")
+        (Zoom "53")
         (Occurrence "/Sensor Interface"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
       (Schematic "Sensor Interface")
@@ -279,8 +273,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 125 1193 125 578")
-        (Scroll "0 0")
-        (Zoom "212")
+        (Scroll "-72 0")
+        (Zoom "53")
         (Occurrence "/User Interface"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
       (Schematic "User Interface")
@@ -309,8 +303,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 200 1268 200 653")
-        (Scroll "-72 0")
-        (Zoom "53")
+        (Scroll "27 3")
+        (Zoom "106")
         (Occurrence "/CPU"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
       (Schematic "CPU")
@@ -319,23 +313,12 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 25 1093 25 478")
-        (Scroll "722 608")
-        (Zoom "106")
+        (Scroll "-72 0")
+        (Zoom "53")
         (Occurrence "/USB and Battery"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
       (Schematic "USB and Battery")
-      (Page "PAGE1"))
-    (Doc
-      (Type "COrPartDoc")
-      (Frame
-        (Placement "44 0 1 -1 -1 -8 -30 125 1193 125 578")
-        (PackageScroll "0 0")
-        (PackageZoom "1")
-        (PartPackage "Part")
-        (Scroll "2392 1266")
-        (Zoom "533"))
-      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (Package "SPST-NO, KSC341GLFS"))) >>>>>>> .r24
+      (Page "PAGE1"))) >>>>>>> .r24
   (HierarchyView)
   (Doc
     (Type "COrCapturePMDoc")

@@ -55,7 +55,8 @@
     (OTHER_Switch3 "FALSE")
     (OTHER_Switch4 "FALSE")
     (OTHER_Switch5 "FALSE")
-    (OTHER_Switch6 "FALSE"))
+    (OTHER_Switch6 "FALSE")
+    (Board_sim_option "VHDL_flow"))
   (Folder "Outputs"
     (File ".\un20b_interface.bom"
       (Type "Report"))
@@ -89,18 +90,11 @@
   (GlobalState
     (FileView
       (Path "Design Resources")
-      (Path "Design Resources"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\un20b_interface.dsn")
-      (Path "Design Resources"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\un20b_interface.dsn"
-         "SCHEMATIC1")
       (Path "Design Resources" "Library")
-      (Path "Design Resources" "Library"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\un20b_interface.olb")
+      (Path "Design Resources" "Library" ".\un20b_interface.olb")
       (Path "Outputs")
-      (Select "Design Resources"
-         "C:\WORKING\index\TRUNK\hw\scanner\schematic\un20b_interface.dsn"
-         "SCHEMATIC1" "PAGE1"))
+      (Select "Design Resources" "Library" ".\un20b_interface.olb"
+         "Vibration Motor"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
