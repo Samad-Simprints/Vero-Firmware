@@ -79,7 +79,8 @@
     (OTHER_Switch6 "FALSE")
     (BOM_Scope "0")
     (BOM_Mode "0")
-    (BOM_Report_File "C:\WORKing\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.BOM")
+    (BOM_Report_File
+       "C:\WorkDirectory\INDEX\trunk\hw\scanner\schematic\SCANNER.BOM")
     (BOM_Merge_Include "FALSE")
     (BOM_Property_Combine_7.0
        "{Item}\t{Quantity}\t{Reference}\t{Value}\t{PCB Footprint}\t{Manufacturer}\t{Manufacturer Part Number}\t{Supplier}\t{Supplier Part number}\t\t")
@@ -209,6 +210,9 @@
       (Path "Design Resources")
       (Path "Design Resources"
          "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "Sensor Interface")
       (Path "Design Resources" "Library")
       (Path "Outputs")
       (Select "Design Resources"
@@ -218,17 +222,7 @@
       (Type "COrCapturePMDoc")
       (Frame
         (Placement "44 2 3 -1 -1 -8 -30 0 200 0 415"))
-      (Tab 0))
-    (Doc
-      (Type "COrSchematicDoc")
-      (Frame
-        (Placement "44 0 1 -1 -1 -8 -30 50 1178 50 539")
-        (Scroll "152 107")
-        (Zoom "100")
-        (Occurrence "/"))
-      (Path "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
-      (Schematic "SCHEMATIC1")
-      (Page "PAGE1"))) >>>>>>> .r24
+      (Tab 0))) >>>>>>> .r24
   (HierarchyView)
   (Doc
     (Type "COrCapturePMDoc")
