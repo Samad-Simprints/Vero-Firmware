@@ -1,5 +1,5 @@
 Top Level  Revised: Thursday, December 24, 2015
-Index Scanner          Revision: F
+Index Scanner          Revision: G
 
 Fen Technology Ltd
 Oakington Business Park
@@ -7,7 +7,7 @@ Oakington
 Cambridge
 CB24 3DQ
 
-Bill Of Materials       December 24,2015      12:12:59	Page1
+Bill Of Materials       December 24,2015      13:39:35	Page1
 
 Item	Quantity	Reference	Part	Footprint	Manufacturer	Manufacturer's Part Number	Supplier	Supplier Part Number		
 ______________________________________________
@@ -16,14 +16,15 @@ ______________________________________________
 		C32,C33,C34,C35,C36,C50
 2	8	C5,C6,C7,C8,C11,C12,C37,	2.2uF, X5R	0402	TDK	C1005X5R0J225K050BC	Farnell	2346873		
 		C39
-3	24	C9,C13,C16,C20,C21,C22,	100nF/50V	0402	TDK	CGA2B3X7R1H104K050	Farnell	2210822		
+3	25	C9,C13,C16,C20,C21,C22,	100nF/50V	0402	TDK	CGA2B3X7R1H104K050	Farnell	2210822		
 		C23,C24,C25,C26,C27,C28,
 		C29,C30,C31,C38,C40,C41,
-		C44,C48,C52,C53,C54,C56
+		C44,C48,C52,C53,C54,C56,
+		C57
 4	1	C17	10nF/50V	0402	TDK	CGA2B3X7R1H103K050	Farnell	2210821		
 5	1	C18	1nF/50V	0402	TDK	CGA2B2C0G1H101J050BA	Farnell	2210761		
 6	5	C19,C46,C47,C55,C58	10uF	0805	TDK	C2012X5R0J106M	Farnell	2309029		
-7	3	C42,C43,C57	100pF/50V	0402	Murata	GRM1555C1H101FA01D	Mouser	81-GRM1555C1H101FA01D		
+7	2	C42,C43	100pF/50V	0402	Murata	GRM1555C1H101FA01D	Mouser	81-GRM1555C1H101FA01D		
 8	1	C45	10nF/500V	0805	Yageo	CC0805KKX7RBBB103	Farnell	1284130		
 9	2	C49,C51	22uF	0805	Taiyo Yuden	JMK212BJ226KG-T	Farnell	2113069		
 10	1	D1	GREEN	LED_0603	Vishay Semiconductor	TLMG1100-GS08	Farnell	2293494		
