@@ -230,9 +230,7 @@
       (Path "Design Resources" "Library")
       (Path "Design Resources" "Library"
          "c:\working\index\trunk\hw\scanner\schematic\scanner.olb")
-      (Path "Outputs")
-      (Select "Design Resources"
-         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn"))
+      (Path "Outputs"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
