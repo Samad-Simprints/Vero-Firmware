@@ -64,6 +64,21 @@
       (Type "Report")))
   (Folder "Referenced Projects")
   (PartMRUSelector
+    (TPS60150
+      (FullPartName "TPS60150.Normal")
+      (LibraryName
+         "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\UN20B_INTERFACE.OLB")
+      (DeviceIndex "0"))
+    (MOLEX_PICOBLADE_HDR_5x1.25mm
+      (FullPartName "MOLEX_PICOBLADE_HDR_5x1.25mm.Normal")
+      (LibraryName
+         "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\UN20B_INTERFACE.OLB")
+      (DeviceIndex "0"))
+    (MOLEX_PICOBLADE_HDR_3x1.25mm
+      (FullPartName "MOLEX_PICOBLADE_HDR_3x1.25mm.Normal")
+      (LibraryName
+         "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\UN20B_INTERFACE.OLB")
+      (DeviceIndex "0"))
     (GND
       (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
       (DeviceIndex "0"))
@@ -90,11 +105,20 @@
   (GlobalState
     (FileView
       (Path "Design Resources")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.dsn")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.dsn"
+         "SCHEMATIC1")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.dsn"
+         "Design Cache")
       (Path "Design Resources" "Library")
-      (Path "Design Resources" "Library" ".\un20b_interface.olb")
+      (Path "Design Resources" "Library"
+         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.olb")
       (Path "Outputs")
-      (Select "Design Resources" "Library" ".\un20b_interface.olb"
-         "Vibration Motor"))
+      (Select "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.dsn"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
