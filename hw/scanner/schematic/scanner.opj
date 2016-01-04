@@ -101,6 +101,16 @@
       (Type "Report")))
   (Folder "Referenced Projects")
   (PartMRUSelector
+    (SN74LVC1G06
+      (FullPartName "SN74LVC1G06.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (LED_BLUE
+      (FullPartName "LED_BLUE.Normal")
+      (LibraryName
+         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
     (PORTLEFT-R
       (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
       (DeviceIndex "0"))
@@ -201,16 +211,12 @@
       (FullPartName "XTAL_TXC_7M.Normal")
       (LibraryName
          "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (PORTBOTH-L
-      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
-      (DeviceIndex "0"))
-    (PORTRIGHT-R
-      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
       (DeviceIndex "0")))
   (GlobalState
     (FileView
       (Path "Design Resources")
+      (Path "Design Resources"
+         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn")
       (Path "Design Resources" "Library")
       (Path "Outputs")
       (Select "Design Resources"
