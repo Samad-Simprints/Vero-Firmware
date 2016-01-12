@@ -1,5 +1,5 @@
-Top Level  Revised: Monday, January 04, 2016
-Index Scanner          Revision: H
+Top Level  Revised: Monday, January 11, 2016
+Index Scanner          Revision: I
 
 Fen Technology Ltd
 Oakington Business Park
@@ -7,7 +7,7 @@ Oakington
 Cambridge
 CB24 3DQ
 
-Bill Of Materials        January 4,2016      14:16:45	Page1
+Bill Of Materials        January 12,2016      18:36:18	Page1
 
 Item	Quantity	Reference	Part	Footprint	Manufacturer	Manufacturer's Part Number	Supplier	Supplier Part Number		
 ______________________________________________
@@ -67,8 +67,8 @@ ______________________________________________
 		R60,R61,R62,R63,R64,R65,
 		R66,R68,R69,R70,R71,R73
 43	1	R78	470K	0402	Multicomp	MC 0.0625W 0402 1% 470K	Farnell	1358114		
-44	2	S1,S2	KSC341GLFS	KSC341GLFS	C & K Components	KSC34GLFS	Farnell	2320120		
-45	27	TPVIA2,TPVIA3,TPVIA4,	TPVIA	TPVIA						
+44	2	S1,S2	KSC341JLFS	KSC341JLFS	C & K Components	KSC314JLFS	Farnell	2320040		
+45	32	TPVIA2,TPVIA3,TPVIA4,	TPVIA	TPVIA						
 		TPVIA5,TPVIA6,TPVIA7,
 		TPVIA8,TPVIA9,TPVIA10,
 		TPVIA11,TPVIA12,TPVIA13,
@@ -76,7 +76,9 @@ ______________________________________________
 		TPVIA17,TPVIA18,TPVIA19,
 		TPVIA20,TPVIA21,TPVIA22,
 		TPVIA23,TPVIA24,TPVIA25,
-		TPVIA26,TPVIA27,TPVIA28
+		TPVIA26,TPVIA27,TPVIA28,
+		TPVIA29,TPVIA30,TPVIA31,
+		TPVIA32,TPVIA33
 46	1	U1	BTM805CL2B		FlairMicro	BTM805CL2B	BCD	BTM805CL2B		
 47	1	U2	LPC1833_LBGA256	BGA256C100P16X16_1700X1700X155	NXP	LPC1833JET256	DigiKey	LPC1833JET256,551-ND		
 48	1	U3	STM809SWX6F	SOT23-3	ST Microelectronics	STM809SWX6F	Farnell	8690421		

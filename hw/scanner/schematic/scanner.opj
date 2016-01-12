@@ -101,16 +101,6 @@
       (Type "Report")))
   (Folder "Referenced Projects")
   (PartMRUSelector
-    (SN74LVC1G06
-      (FullPartName "SN74LVC1G06.Normal")
-      (LibraryName
-         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (LED_BLUE
-      (FullPartName "LED_BLUE.Normal")
-      (LibraryName
-         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
     (PORTLEFT-R
       (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
       (DeviceIndex "0"))
@@ -211,22 +201,109 @@
       (FullPartName "XTAL_TXC_7M.Normal")
       (LibraryName
          "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (PORTBOTH-L
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (PORTRIGHT-R
+      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
       (DeviceIndex "0")))
   (GlobalState
     (FileView
       (Path "Design Resources")
       (Path "Design Resources"
-         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn")
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn" "SCHEMATIC1")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn" "Bluetooth")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn" "CPU")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "External Memory")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "Sensor Interface")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "USB and Battery")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "User Interface")
+      (Path "Design Resources"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "Design Cache")
       (Path "Design Resources" "Library")
+      (Path "Design Resources" "Library"
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.olb")
       (Path "Outputs")
       (Select "Design Resources"
-         "c:\workdirectory\index\trunk\hw\scanner\schematic\scanner.dsn"))
+         "c:\working\index\trunk\hw\scanner\schematic\scanner.dsn"
+         "Design Cache" "IRLML0030TRPBF"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
       (Frame
-        (Placement "44 2 3 -1 -1 -8 -30 0 200 0 415"))
-      (Tab 0))) >>>>>>> .r24
+        (Placement "44 0 1 -1 -1 -8 -30 0 200 0 415"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 75 1143 75 528")
+        (Scroll "-72 0")
+        (Zoom "53")
+        (Occurrence "/User Interface"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
+      (Schematic "User Interface")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 2 3 -1 -1 -8 -30 100 1168 100 553")
+        (Scroll "0 488")
+        (Zoom "100")
+        (Occurrence "/USB and Battery"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
+      (Schematic "USB and Battery")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 0 1068 0 453")
+        (Scroll "407 448")
+        (Zoom "100")
+        (Occurrence "/"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 25 1093 25 478")
+        (Scroll "2216 27")
+        (Zoom "296")
+        (Occurrence "/Bluetooth"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
+      (Schematic "Bluetooth")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrPartDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 200 1268 200 653")
+        (PackageScroll "0 0")
+        (PackageZoom "1")
+        (PartPackage "Part")
+        (Scroll "2123 810")
+        (Zoom "519"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (Package "IRLML0030TRPBF"))
+    (Doc
+      (Type "TextFile")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 200 1268 200 653"))
+      (Path "c:\working\index\trunk\hw\scanner\schematic\scanner.asc")
+      (Scroll "0"))) >>>>>>> .r24
   (HierarchyView)
   (Doc
     (Type "COrCapturePMDoc")
@@ -263,5 +340,5 @@
     (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.DSN")
     (Schematic "USB and Battery")
     (Page "PAGE1"))
-  (MPSSessionName "mscott")
+  (MPSSessionName "paul")
   (ISPCBBASICLICENSE "false"))
