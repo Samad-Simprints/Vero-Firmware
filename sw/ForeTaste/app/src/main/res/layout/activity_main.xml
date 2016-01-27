@@ -85,46 +85,103 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Scan"
+        android:text="Scan\nTemplate"
         android:id="@+id/scanTemplateBtn"
         android:onClick="scanTemplate"
         android:enabled="false"
         android:layout_below="@+id/scannerBtn"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/connectLabel"
+        android:layout_alignEnd="@+id/connectLabel"/>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/templateTxt"
-        android:layout_below="@+id/scanTemplateBtn"
+        android:layout_below="@+id/powerBtn"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/scannerBtn"
-        android:layout_alignEnd="@+id/scannerBtn"/>
+        android:layout_alignParentStart="true"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Battery"
+        android:text="Get\nBattery"
         android:id="@+id/batteryBtn"
         android:onClick="battery"
         android:enabled="false"
-        android:layout_above="@+id/templateTxt"
+        android:layout_below="@+id/scannerBtn"
+        android:layout_toRightOf="@+id/connectAutoBtn"
+        android:layout_toEndOf="@+id/connectAutoBtn"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan\nImage"
+        android:id="@+id/scanImageBtn"
+        android:onClick="scanImage"
+        android:enabled="false"
+        android:layout_below="@+id/scanTemplateBtn"
+        android:layout_alignRight="@+id/scanTemplateBtn"
+        android:layout_alignEnd="@+id/scanTemplateBtn"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentStart="true"
+        android:layout_toEndOf="@id/scanTemplateBtn"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get\nQuality"
+        android:id="@+id/qualityBtn"
+        android:onClick="quality"
+        android:enabled="false"
+        android:layout_below="@+id/batteryBtn"
+        android:layout_alignLeft="@+id/batteryBtn"
+        android:layout_alignStart="@+id/batteryBtn"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Power\nOn"
+        android:id="@+id/powerBtn"
+        android:onClick="un20Power"
+        android:enabled="false"
+        android:layout_below="@+id/scanImageBtn"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get\nTemplate"
+        android:id="@+id/getTemplateBtn"
+        android:onClick="getTemplate"
+        android:enabled="false"
+        android:layout_alignTop="@+id/scanTemplateBtn"
+        android:layout_toRightOf="@+id/scanTemplateBtn"
+        android:layout_toEndOf="@+id/scanTemplateBtn"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get\nImage"
+        android:id="@+id/getImageBtn"
+        android:onClick="getImage"
+        android:enabled="false"
+        android:layout_above="@+id/buttonBtn"
         android:layout_toRightOf="@+id/scanImageBtn"
         android:layout_toEndOf="@+id/scanImageBtn"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Image"
-        android:id="@+id/scanImageBtn"
-        android:onClick="scanImage"
+        android:text="Button\nOn"
+        android:id="@+id/buttonBtn"
+        android:onClick="un20Button"
         android:enabled="false"
-        android:layout_alignTop="@+id/scanTemplateBtn"
-        android:layout_toRightOf="@+id/scanTemplateBtn"
-        android:layout_toEndOf="@+id/scanTemplateBtn"/>
+        android:layout_alignTop="@+id/powerBtn"
+        android:layout_toRightOf="@+id/scanImageBtn"
+        android:layout_toEndOf="@+id/scanImageBtn"/>
 
 </RelativeLayout>

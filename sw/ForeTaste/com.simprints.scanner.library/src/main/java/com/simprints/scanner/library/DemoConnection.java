@@ -49,24 +49,32 @@ public class DemoConnection extends Connection
       case Scanner.CMD_TEMPLATE:
         break;
 
-      case Scanner.CMD_GET_PARAMS:
+      case Scanner.CMD_BUTTON:
         break;
 
-      case Scanner.CMD_SET_PARAMS:
+      case Scanner.CMD_GET_IMAGE:
         break;
 
-      case Scanner.CMD_STORE_IMAGE:
+      case Scanner.CMD_GET_TEMPLATE:
         break;
 
-      case Scanner.CMD_FETCH_IMAGE:
+      case Scanner.CMD_GET_UI:
         break;
 
       case Scanner.CMD_BATTERY:
         break;
 
-      case Scanner.CMD_LEDS:
+      case Scanner.CMD_SET_UI:
+        break;
+
+      case Scanner.CMD_POWER:
+        break;
+
+      case Scanner.CMD_QUALITY:
         break;
     }
+
+    Log.v("demo","Write command " + cmd);
   }
 
   public void readResponse(int length, byte[] data)
@@ -75,7 +83,7 @@ public class DemoConnection extends Connection
 
     for ( i = 0; i<length; ++i )
     {
-      data[i] = 0;
+      data[i] = 50;
     }
   }
 

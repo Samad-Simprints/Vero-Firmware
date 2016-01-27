@@ -15,15 +15,20 @@ import android.widget.Toast;
 import com.simprints.scanner.library.Connection;
 import com.simprints.scanner.library.Connector;
 import com.simprints.scanner.library.Scanner;
+import com.simprints.scanner.library.ScannerCallback;
 import com.simprints.scanner.library.Template;
 import com.simprints.scanner.library.Image;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ScannerCallback {
   private Connector connector = Connector.getInstance();
   private static Connection connection = null;
   private static int connectionIndex;
   private static Scanner scanner;
   private ViewHolder viewHolder;
+  private boolean boPowerOn = false;
+  private boolean boButtonEnabled = false;
+  private boolean boScanReady = false;
+  private boolean boTemplateReady = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +39,33 @@ public class MainActivity extends AppCompatActivity {
     viewHolder.update();
 
     Log.i("MainActivity", "onCreate");
+  }
+
+  @Override
+  public void onStatusChange(String message)
+  {
+    // @TODO: something useful
+    Log.v("onStatusChange", message);
+    switch(message)
+    {
+      case "image:scan complete":
+        boScanReady = true;
+        break;
+
+      case "image:transfer complete":
+        boScanReady = false;
+        break;
+
+      case "template:conversion complete":
+        boTemplateReady = true;
+        break;
+
+      case "template:transfer complete":
+        boTemplateReady = false;
+        break;
+    }
+
+    viewHolder.update();
   }
 
   // request values
@@ -129,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
   public void connectScanner(View view) {
     if (scanner == null)
     {
-      scanner = new Scanner(connection);
+      scanner = new Scanner(connection,this);
     }
     else
     {
@@ -140,14 +172,42 @@ public class MainActivity extends AppCompatActivity {
 
   // button handler - scanTemplateBtn
   public void scanTemplate(View view) {
-    Template template = scanner.getTemplate();
+    int err = scanner.getTemplate();
+  }
+
+  // button handler - getTemplateBtn
+  public void getTemplate(View view) {
+    Template template = scanner.readTemplate();
     viewHolder.showTemplate(template.getData());
   }
 
   // button handler - scanImageBtn
   public void scanImage(View view) {
-    Image image = scanner.getImage();
+    int err = scanner.getImage();
+  }
+
+  // button handler - getImageBtn
+  public void getImage(View view) {
+    Image image = scanner.readImage();
     viewHolder.showImage(image.getData());
+  }
+
+  // button handler - power
+  public void un20Power(View view) {
+    if (Scanner.ERROR_NONE == scanner.setUn20bPower(!boPowerOn))
+    {
+      boPowerOn = !boPowerOn;
+      viewHolder.update();
+    }
+  }
+
+  // button handler - button
+  public void un20Button(View view) {
+    if (Scanner.ERROR_NONE == scanner.setButton(!boButtonEnabled))
+    {
+      boButtonEnabled = !boButtonEnabled;
+      viewHolder.update();
+    }
   }
 
   // button handler - battery
@@ -155,16 +215,29 @@ public class MainActivity extends AppCompatActivity {
     viewHolder.showBattery(scanner.getBatteryPercent());
   }
 
+  // button handler - quality
+  public void quality(View view) {
+    viewHolder.showQuality(scanner.getImageQuality());
+  }
+
   // local class to handle view and updates
   class ViewHolder {
+    // connection
     private TextView connectNameTxt;
     private Button selectScannerBtn;
     private TextView scannerNameTxt;
     private Button selectAutoConnectionBtn;
     private Button selectConnectionBtn;
+    // actions
     private Button scanTemplateBtn;
+    private Button getTemplateBtn;
     private Button scanImageBtn;
+    private Button getImageBtn;
     private Button batteryBtn;
+    private Button qualityBtn;
+    private Button powerBtn;
+    private Button buttonBtn;
+    //report
     private TextView templateTxt;
 
     public ViewHolder(Activity activity)
@@ -175,8 +248,13 @@ public class MainActivity extends AppCompatActivity {
       scannerNameTxt = (TextView) activity.findViewById(R.id.scannerName);
       selectScannerBtn = (Button) activity.findViewById(R.id.scannerBtn);
       scanTemplateBtn = (Button) activity.findViewById(R.id.scanTemplateBtn);
+      getTemplateBtn = (Button) activity.findViewById(R.id.getTemplateBtn);
       scanImageBtn = (Button) activity.findViewById(R.id.scanImageBtn);
+      getImageBtn = (Button) activity.findViewById(R.id.getImageBtn);
       batteryBtn = (Button) activity.findViewById(R.id.batteryBtn);
+      qualityBtn = (Button) activity.findViewById(R.id.qualityBtn);
+      powerBtn = (Button) activity.findViewById(R.id.powerBtn);
+      buttonBtn = (Button) activity.findViewById(R.id.buttonBtn);
       templateTxt = (TextView) activity.findViewById(R.id.templateTxt);
     }
 
@@ -205,21 +283,35 @@ public class MainActivity extends AppCompatActivity {
 
       if (scanner==null)
       {
+        selectScannerBtn.setText("Connect");
         scanTemplateBtn.setEnabled(false);
         scanImageBtn.setEnabled(false);
         batteryBtn.setEnabled(false);
-        selectScannerBtn.setText("Connect");
+        qualityBtn.setEnabled(false);
+        powerBtn.setEnabled(false);
+        buttonBtn.setEnabled(false);
+        boButtonEnabled = false;
+        boPowerOn = false;
       }
       else
       {
+        selectScannerBtn.setText("Clear");
         scanTemplateBtn.setEnabled(true);
         scanImageBtn.setEnabled(true);
         batteryBtn.setEnabled(true);
-        selectScannerBtn.setText("Clear");
+        qualityBtn.setEnabled(true);
+        powerBtn.setEnabled(true);
+        buttonBtn.setEnabled(true);
       }
 
       setConnectName();
       setScannerName();
+
+      getImageBtn.setEnabled(boScanReady);
+      getTemplateBtn.setEnabled(boTemplateReady);
+
+      powerBtn.setText(boPowerOn? "Power\nOff": "Power\nOn");
+      buttonBtn.setText(boButtonEnabled? "Button\nOff": "Button\nOn");
     }
 
     public void showTemplate(byte[] r) {
@@ -246,6 +338,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void showBattery(int b) {
       String str = "Battery: " + b +"%";
+      templateTxt.setText(str);
+    }
+
+    public void showQuality(int b) {
+      String str = "Quality: " + b +"%";
       templateTxt.setText(str);
     }
   }
