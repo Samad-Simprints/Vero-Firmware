@@ -1,5 +1,5 @@
-Top Level  Revised: Monday, January 11, 2016
-Index Scanner          Revision: I
+Top Level  Revised: Wednesday, January 27, 2016
+Index Scanner          Revision: J
 
 Fen Technology Ltd
 Oakington Business Park
@@ -7,7 +7,7 @@ Oakington
 Cambridge
 CB24 3DQ
 
-Bill Of Materials        January 12,2016      18:36:18	Page1
+Bill Of Materials        January 27,2016      10:14:05	Page1
 
 Item	Quantity	Reference	Part	Footprint	Manufacturer	Manufacturer's Part Number	Supplier	Supplier Part Number		
 ______________________________________________
@@ -35,7 +35,7 @@ ______________________________________________
 14	1	J1	FTSH-105-01-F-DV-K	CON_10W_DV_SM_FTSH	Samtec	FTSH-105-01-F-DV-K	Digikey	SAM8796-ND		
 15	1	J2	Molex 12W FFC 0.5mm	molex_52746-1271	Molex	52746-1271	Farnell	2060699		
 16	1	J3	1054431101	molex_1054431101	Molex	1054431101	Farnell	2500017		
-17	1	J4	53398-0371	53398-3way	Molex	53398-0371	Farnell	1125353		
+17	1	J4	53261-0371	53261-3way	Molex	53261-0371	Farnell	1125359		
 18	1	L1	600R/1A	742792651	Wurth Elektronik	742792651	Farnell	1635706		
 19	2	L2,L5	744231091	744231091	Wurth Elektronik	744231091	Farnell	1636469		
 20	4	L3,L4,L6,L9	WE-CBF_742792651	WE-CBF_742792651	Wurth	742792651	Farnell	1635706		
@@ -89,5 +89,5 @@ ______________________________________________
 53	1	U8	LTC3542EDC	DFN-8	Linear Tech	LTC3542EDC	Farnell	1715237		
 54	1	U9	LTC4160	QFN-20	Linear Tech	LTC4160EUDC	DigiKey	LTC4160EUDC#PBF-ND		
 55	1	U10	SN74LVC1G06DBVR	SOT23-5	TI	SN74LVC1G06DBVR	Farnell	1105928		
-56	1	VIB1	Vibration Motor		Jinlong 	C1027H300F	?			
+56	1	VIB1	DNF		Jinlong 	C1027H300F	?			
 57	1	Y1	12.00MHz	TXC_2.5X3.2	TXC	7M-12.000MAAJ-T	Farnell	1842056		
