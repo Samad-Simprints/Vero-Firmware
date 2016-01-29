@@ -1,0 +1,190 @@
+<!DOCTYPE CrossStudio_Project_File>
+<solution Name="index" target="8" version="2">
+  <project Name="index">
+    <configuration
+      Name="Common"
+      Placement="Flash A"
+      Target="LPC1833"
+      arm_architecture="v7M"
+      arm_core_type="Cortex-M3"
+      arm_gcc_target="arm-unknown-eabi"
+      arm_interwork="Default"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="1024"
+      arm_simulator_memory_simulation_filename="$(TargetsDir)/LPC1800/LPC1800SimulatorMemory.dll"
+      arm_simulator_memory_simulation_parameter="LPC1833;$(SPIFI_SIZE:0);$(CS0_SIZE:0);$(CS1_SIZE:0);$(CS2_SIZE:0);$(CS3_SIZE:0)"
+      arm_simulator_memory_simulation_parameter_macros="SPIFI_SIZE=0x400000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_loader_applicable_loaders="Flash"
+      arm_target_loader_default_loader="Flash"
+      build_intermediate_directory="$(Configuration)/lpc_1800"
+      build_quietly="Yes"
+      c_additional_options="-fms-extensions"
+      c_preprocessor_definitions="ARM_MATH_CM3;__LPC18XX__;CMSIS_BITPOSITIONS"
+      c_user_include_directories=".;$(ProjectDir)/../include;$(ProjectDir)/../rtos/include;$(ProjectDir)/../rtos/portable/GCC/ARM_CM3;$(ProjectDir)/../dotstack/samples/common/app/speed-test;$(ProjectDir)/../dotstack/samples/lpc18xx/freertos/common;$(ProjectDir)/../dotstack/samples/lpc18xx/common;$(ProjectDir)/../dotstack/samples/common-freertos;$(ProjectDir)/../dotstack/samples/common/include;$(ProjectDir)/../dotstack/samples/common/g7xx;$(ProjectDir)/../dotstack/samples/common/g721;$(ProjectDir)/../dotstack/samples/common/g723_24;$(ProjectDir)/../dotstack/samples/common/g723_40;$(ProjectDir)/../dotstack/samples/common/cvsd;$(ProjectDir)/../dotstack/samples/common/sbc;$(ProjectDir);$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpc1800cmsis/core/device/nxp/lpc18xx/include;$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpc1800cmsis/core/cmsis/include;$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include;$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpcusb;$(ProjectDir)/../dotstack/dotstack/cortex-m3-gcc/include"
+      debug_register_definition_file="$(TargetsDir)/LPC1800/LPC1800_Peripherals.xml"
+      linker_additional_files="$(ProjectDir)/../dotstack/dotstack/cortex-m3-gcc/lib/libdotstack_rel.a"
+      linker_memory_map_file="$(TargetsDir)/LPC1800/LPC1833_MemoryMap.xml"
+      linker_memory_map_macros="SPIFI_SIZE=0x400000"
+      linker_patch_build_command="&quot;$(StudioDir)/bin/crossscript&quot; &quot;load(\&quot;$(TargetsDir)/LPC1800/LinkPatch.js\&quot;);patch(0x1A000000, \&quot;$(TargetPath)\&quot;);&quot;"
+      linker_section_placement_file="$(StudioDir)/targets/Cortex_M/flash_placement.xml"
+      linker_section_placement_macros="FLASH_NAME=FLASHA;RAM_NAME=SRAM2"
+      project_directory=""
+      project_type="Executable"
+      property_groups_file_path="$(TargetsDir)/LPC1800/propertyGroups.xml"
+      target_get_partname_script="GetPartName()"
+      target_match_partname_script="MatchPartName(&quot;$(Target)&quot;)"
+      target_reset_script="Reset()" />
+    <configuration
+      Name="SPIFI"
+      arm_target_flash_loader_file_path="$(TargetsDir)/NGX_LPC1830_Xplorer/Release/SPIFI_Loader.elf"
+      arm_target_flash_loader_type="LIBMEM RPC Loader"
+      arm_target_loader_can_lock_all="No"
+      arm_target_loader_can_lock_range="No"
+      arm_target_loader_can_unlock_all="No"
+      arm_target_loader_can_unlock_range="No"
+      arm_target_loader_reset_after_download="No"
+      hidden="Yes"
+      target_loader_reset_script="SPIFIReset()" />
+    <configuration
+      Name="Flash"
+      arm_target_flash_loader_file_path="$(TargetsDir)/LPC1800/Release/Loader.elf"
+      arm_target_flash_loader_type="LIBMEM RPC Loader"
+      arm_target_loader_can_erase_all="No"
+      arm_target_loader_can_lock_all="No"
+      arm_target_loader_can_lock_range="No"
+      arm_target_loader_can_unlock_all="No"
+      arm_target_loader_can_unlock_range="No"
+      arm_target_loader_parameter="12000000" />
+    <folder Name="Source Files">
+      <configuration Name="Common" filter="c;cpp;cxx;cc;h;s;asm;inc" />
+      <folder Name="app">
+        <file file_name="../app/cli.c" />
+        <file file_name="../app/app_main.cpp" />
+        <file file_name="../app/haltest.c" />
+        <file file_name="../app/hal.cpp" />
+        <file file_name="../app/lpcapp.c" />
+        <file file_name="../app/protocol_msg.c" />
+        <file file_name="../app/test_msgs.c" />
+        <file file_name="../app/helpers.cpp" />
+      </folder>
+      <folder Name="dd">
+        <file file_name="../dd/gpio_dd.cpp">
+          <configuration Name="THUMB Debug" build_exclude_from_build="No" />
+        </file>
+        <file file_name="../dd/ser_dd.cpp">
+          <configuration Name="THUMB Debug" build_exclude_from_build="No" />
+        </file>
+        <file file_name="../dd/emc_dd.cpp">
+          <configuration Name="THUMB Debug" build_exclude_from_build="No" />
+        </file>
+        <file file_name="../dd/adc_dd.cpp" />
+      </folder>
+      <folder Name="fd" />
+      <folder Name="include">
+        <file file_name="../include/global.h" />
+        <file file_name="../include/proj_defs.h" />
+        <file file_name="../include/spi_dd.h" />
+        <file file_name="../include/FreeRTOSConfig.h" />
+        <file file_name="../include/index.h" />
+        <file file_name="../include/gpio_dd.hpp" />
+        <file file_name="../include/gpio_pindefs.hpp" />
+        <file file_name="../include/ser_dd.hpp" />
+        <file file_name="../include/hal.h" />
+        <file file_name="../include/msg_format.h" />
+        <file file_name="../include/emc_dd.hpp" />
+        <file file_name="../include/cli.h" />
+        <file file_name="../include/adc_dd.hpp" />
+        <file file_name="../include/lpcapp.h" />
+        <file file_name="../include/protocol_msg.h" />
+        <file file_name="../include/helpers.hpp" />
+      </folder>
+      <folder Name="rtos">
+        <file file_name="../rtos/croutine.c" />
+        <file file_name="../rtos/list.c" />
+        <file file_name="../rtos/queue.c" />
+        <file file_name="../rtos/tasks.c" />
+        <file file_name="../rtos/timers.c" />
+        <folder Name="portable">
+          <folder Name="GCC">
+            <folder Name="ARM_CM3">
+              <file file_name="../rtos/portable/GCC/ARM_CM3/port.c" />
+              <file file_name="../rtos/portable/GCC/ARM_CM3/portmacro.h" />
+            </folder>
+          </folder>
+          <folder Name="MemMang">
+            <file file_name="../rtos/portable/MemMang/heap_2.c" />
+          </folder>
+        </folder>
+        <folder Name="include">
+          <file file_name="../rtos/include/croutine.h" />
+          <file file_name="../rtos/include/FreeRTOS.h" />
+          <file file_name="../rtos/include/list.h" />
+          <file file_name="../rtos/include/mpu_wrappers.h" />
+          <file file_name="../rtos/include/portable.h" />
+          <file file_name="../rtos/include/projdefs.h" />
+          <file file_name="../rtos/include/queue.h" />
+          <file file_name="../rtos/include/semphr.h" />
+          <file file_name="../rtos/include/StackMacros.h" />
+          <file file_name="../rtos/include/task.h" />
+          <file file_name="../rtos/include/timers.h" />
+        </folder>
+      </folder>
+      <folder
+        Name="dotstack"
+        exclude=""
+        filter="*.c;*.h"
+        path="../dotstack"
+        recurse="Yes">
+        <configuration Name="Common" build_exclude_from_build="No" />
+      </folder>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="$(StudioDir)/source/thumb_crt0.s" />
+      <file file_name="NGX_LPC1830_Xplorer_ctl_board.c">
+        <configuration Name="THUMB Release" build_exclude_from_build="No" />
+      </file>
+      <file file_name="LPC1800_ctl.c">
+        <configuration Name="THUMB Debug" build_exclude_from_build="Yes" />
+        <configuration Name="THUMB Release" build_exclude_from_build="Yes" />
+      </file>
+      <file file_name="LPC1800_Startup.s" />
+      <file file_name="NGX_LPC1830_Xplorer_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+        <configuration Name="THUMB Release" build_exclude_from_build="No" />
+      </file>
+    </folder>
+    <configuration
+      Name="Release"
+      c_preprocessor_definitions="STARTUP_FROM_RESET"
+      linker_additional_files="$(ProjectDir)/../dotstack/dotstack/cortex-m3-gcc/lib/libdotstack_rel.a" />
+    <configuration
+      Name="Debug"
+      c_preprocessor_definitions="STARTUP_FROM_RESET;ENABLE_LOG" />
+  </project>
+  <configuration Name="THUMB Debug" inherited_configurations="THUMB;Debug" />
+  <configuration
+    Name="THUMB"
+    Platform="ARM"
+    arm_instruction_set="THUMB"
+    arm_library_instruction_set="THUMB"
+    c_preprocessor_definitions="__THUMB"
+    hidden="Yes" />
+  <configuration
+    Name="Debug"
+    c_preprocessor_definitions="DEBUG"
+    gcc_debugging_level="Level 2"
+    gcc_optimization_level="None"
+    hidden="Yes" />
+  <configuration
+    Name="THUMB Release"
+    inherited_configurations="THUMB;Release" />
+  <configuration
+    Name="Release"
+    c_preprocessor_definitions="NDEBUG"
+    gcc_debugging_level="Level 1"
+    gcc_optimization_level="Level 1"
+    hidden="Yes" />
+  <configuration Name="Common" linker_output_format="hex" />
+</solution>

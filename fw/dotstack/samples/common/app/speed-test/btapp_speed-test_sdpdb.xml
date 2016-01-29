@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<sdp xmlns="http://www.searanllc.com/sdp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.searanllc.com/sdp sdp.xsd">
+	<!-- Server -->
+	<record>
+		<attribute id="SDP_ATTRID_ServiceRecordHandle">
+			<uint32 value="0" />
+		</attribute>
+		<attribute id="SDP_ATTRID_VersionNumberList">
+			<sequence>
+				<uint16 value="0x0100" />
+				<uint16 value="0x0101" />
+			</sequence>
+		</attribute>
+		<attribute id="SDP_ATTRID_ServiceClassIDList">
+			<sequence>
+				<uuid16 value="SDP_CLSID_ServiceDiscoveryServerServiceClassID" />
+			</sequence>
+		</attribute>
+	</record>
+	
+	<!--  PNP Information -->
+	<record>
+		<attribute id="SDP_ATTRID_ServiceRecordHandle">
+			<uint32 value="0x10002" />
+		</attribute>
+		<attribute id="SDP_ATTRID_ServiceClassIDList">
+			<sequence>
+				<uuid16 value="SDP_CLSID_PNPInformation" />
+			</sequence>
+		</attribute>
+		<attribute id="SDP_ATTRID_BrowseGroupList">
+			<sequence>
+				<uuid16 value="SDP_CLSID_PublicBrowseGroup" />
+			</sequence>
+		</attribute>
+		<attribute id="SDP_ATTRID_DocumentationURL">
+			<url value="http://www.searanllc.com" />
+		</attribute>
+		<attribute id="SDP_ATTRID_ClientExecutableURL">
+			<url value="http://www.searanllc.com" />
+		</attribute>
+		<!-- SDP_ATTRID_PrimaryLanguageBaseId + SDP_ATTRID_OFFSET_ServiceDescription -->
+		<attribute id="0x0101">
+			<string value="Serial Port on DotStack Demo" />
+		</attribute>
+		<attribute id="SDP_ATTRID_DISpecificationId">
+			<uint16 value="0x0102" />
+		</attribute>
+		<attribute id="SDP_ATTRID_DIVendorId">
+			<uint16 value="0x0111" />
+		</attribute>
+		<attribute id="SDP_ATTRID_DIProductId">
+			<uint16 value="0x0001" />
+		</attribute>
+		<attribute id="SDP_ATTRID_DIVersion">
+			<uint16 value="0x0001" />
+		</attribute>
+		<attribute id="SDP_ATTRID_DIPrimaryRecord">
+			<bool value="true" />
+		</attribute>
+		<attribute id="SDP_ATTRID_DIVendorIdSource">
+			<uint16 value="0x0001" />
+		</attribute>
+	</record>
+	
+	<!-- RFCOMM -->
+	<record>
+		<attribute id="SDP_ATTRID_ServiceRecordHandle">
+			<uint32 value="0x10000" />
+		</attribute>
+		<attribute id="SDP_ATTRID_ServiceRecordState">
+			<uint32 value="0" />
+		</attribute>
+		<attribute id="SDP_ATTRID_ServiceClassIDList">
+			<sequence>
+				<uuid16 value="SDP_CLSID_SerialPort" />
+			</sequence>
+		</attribute>
+		<attribute id="SDP_ATTRID_ServiceID">
+			<uuid16 value="0x1234" />
+		</attribute>
+		<attribute id="SDP_ATTRID_ProtocolDescriptorList">
+			<sequence>
+				<sequence>
+					<uuid16 value="SDP_CLSID_L2CAP" />
+					<uint16 value="3" />
+				</sequence>
+				<sequence>
+					<uuid16 value="SDP_CLSID_RFCOMM" />
+					<uint8 value="1" />
+				</sequence>
+			</sequence>
+		</attribute>
+		<attribute id="SDP_ATTRID_BluetoothProfileDescriptorList">
+			<sequence>
+				<sequence>
+					<uuid16 value="SDP_CLSID_RFCOMM" />
+					<uint16 value="0x0101" />
+				</sequence>
+			</sequence>
+		</attribute>
+		<attribute id="SDP_ATTRID_BrowseGroupList">
+			<sequence>
+				<uuid16 value="SDP_CLSID_PublicBrowseGroup" />
+			</sequence>
+		</attribute>
+		<attribute id="SDP_ATTRID_LanguageBaseAttributeIDList">
+			<sequence>
+				<uint16 value="0x656E" /> <!-- English  -->
+				<uint16 value="0x006A" /> <!-- UTF-8 encoding -->
+				<uint16 value="0x0100" /> <!--  Primary langugae base ID (SDP_ATTRID_PrimaryLanguageBaseId) -->
+			</sequence>
+		</attribute>
+		<!-- SDP_ATTRID_PrimaryLanguageBaseId + SDP_ATTRID_OFFSET_ServiceName -->
+		<attribute id="0x0100">
+			<string value="Serial Port" />
+		</attribute>
+		<!-- SDP_ATTRID_PrimaryLanguageBaseId + SDP_ATTRID_OFFSET_ServiceDescription -->
+		<attribute id="0x0101">
+			<string value="Serial Port" />
+		</attribute>
+		<!-- SDP_ATTRID_PrimaryLanguageBaseId + SDP_ATTRID_OFFSET_ProviderName -->
+		<attribute id="0x0102">
+			<string value="SEARAN LLC" />
+		</attribute>
+		<attribute id="SDP_ATTRID_DocumentationURL">
+			<url value="http://www.searanllc.com" />
+		</attribute>
+		<attribute id="SDP_ATTRID_ClientExecutableURL">
+			<url value="http://www.searanllc.com" />
+		</attribute>
+		<attribute id="SDP_ATTRID_IconURL">
+			<url value="http://www.searanllc.com" />
+		</attribute>
+		<attribute id="SDP_ATTRID_VersionNumberList">
+			<sequence>
+				<uint16 value="0x0100" />
+				<uint16 value="0x0101" />
+			</sequence>
+		</attribute>
+		<attribute id="SDP_ATTRID_ServiceDatabaseState">
+			<uint32 value="0" />
+		</attribute>
+	</record>
+
+</sdp>

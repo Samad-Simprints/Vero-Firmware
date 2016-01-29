@@ -1,0 +1,17 @@
+<!DOCTYPE Board_Memory_Definition_File>
+<Root name="LPC1833">
+  <MemorySegment start="0x10000000" name="SRAM1" size="0x8000" access="Read/Write" />
+  <MemorySegment start="0x10080000" name="SRAM2" size="0xa000" access="Read/Write" />
+  <MemorySegment start="0x10400000" name="ROM" size="0x10000" access="ReadOnly" />
+  <MemorySegment start="0x14000000" name="$(SPIFI_NAME:SPIFI)" size="$(SPIFI_SIZE:0)" access="ReadOnly" />
+  <MemorySegment start="0x1A000000" name="FLASHA" size="0x40000" access="ReadOnly" />
+  <MemorySegment start="0x1B000000" name="FLASHB" size="0x40000" access="ReadOnly" />
+  <MemorySegment start="0x1C000000" name="$(CS0_NAME:CS0)" size="$(CS0_SIZE:0)" access="$(CS0_ACCESS:Read/Write)" />
+  <MemorySegment start="0x1D000000" name="$(CS1_NAME:CS1)" size="$(CS1_SIZE:0)" access="$(CS1_ACCESS:Read/Write)" />
+  <MemorySegment start="0x1E000000" name="$(CS2_NAME:CS2)" size="$(CS2_SIZE:0)" access="$(CS2_ACCESS:Read/Write)" />
+  <MemorySegment start="0x1F000000" name="$(CS3_NAME:CS3)" size="$(CS3_SIZE:0)" access="$(CS3_ACCESS:Read/Write)" />
+  <MemorySegment start="0x20000000" name="AHBSRAM1" size="0xc000" access="Read/Write" />
+  <MemorySegment start="0x2000C000" name="AHBSRAM2" size="0x4000" access="Read/Write" />
+  <MemorySegment start="0x28000000" name="$(DYCS0_NAME:DYCS0)" size="$(DYCS0_SIZE:0)" access="$(DYCS0_ACCESS:Read/Write)" />
+  <MemorySegment start="0x30000000" name="$(DYCS1_NAME:DYCS1)" size="$(DYCS1_SIZE:0)" access="$(DYCS1_ACCESS:Read/Write)" />
+</Root>

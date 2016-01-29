@@ -1,0 +1,154 @@
+/*-----------------------------------------------------------
+ * Application specific definitions.
+ *
+ * These definitions should be adjusted for your particular hardware and
+ * application requirements.
+ *
+ * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
+ * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
+ *----------------------------------------------------------*/
+
+#ifndef FREERTOS_CONFIG_H
+#define FREERTOS_CONFIG_H
+
+#include "btapp_config.h"
+
+#if defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__)    // protects from including by assembler
+#include "LPC18xx.h"
+#endif
+
+extern uint32_t SystemCoreClock;
+
+//#define configBTTASK_PRIORITY       5
+
+#define configUSE_PREEMPTION		1
+#define configUSE_IDLE_HOOK			0
+#define configMAX_PRIORITIES		( ( unsigned portBASE_TYPE ) 5 )
+#define configUSE_TICK_HOOK			1
+#define configCPU_CLOCK_HZ			( ( unsigned long ) SystemCoreClock )
+#define configTICK_RATE_HZ			( ( portTickType ) 1000 )
+#define configMINIMAL_STACK_SIZE	( ( unsigned short ) 80 )
+#define configMAX_TASK_NAME_LEN		( 12 )
+#define configUSE_TRACE_FACILITY	0
+#define configUSE_16_BIT_TICKS		0
+#define configIDLE_SHOULD_YIELD		1
+#define configUSE_CO_ROUTINES 		0
+#define configUSE_MUTEXES			1
+
+#define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
+
+#define configUSE_COUNTING_SEMAPHORES 	0
+#define configUSE_ALTERNATIVE_API 		0
+#ifndef NDEBUG
+#define configCHECK_FOR_STACK_OVERFLOW	2
+#else
+#define configCHECK_FOR_STACK_OVERFLOW	0
+#endif
+#define configUSE_RECURSIVE_MUTEXES		1
+#define configUSE_MALLOC_FAILED_HOOK	1
+#define configQUEUE_REGISTRY_SIZE		10
+//#define configGENERATE_RUN_TIME_STATS	1
+#define configGENERATE_RUN_TIME_STATS	0
+
+/* Set the following definitions to 1 to include the API function, or zero
+to exclude the API function. */
+
+#define INCLUDE_vTaskPrioritySet			1
+#define INCLUDE_uxTaskPriorityGet			1
+#define INCLUDE_vTaskDelete					1
+#define INCLUDE_vTaskCleanUpResources		0
+#define INCLUDE_vTaskSuspend				1
+#define INCLUDE_vTaskDelayUntil				1
+#define INCLUDE_vTaskDelay					1
+#define INCLUDE_uxTaskGetStackHighWaterMark	1
+
+/*-----------------------------------------------------------
+ * Ethernet configuration.
+ *-----------------------------------------------------------*/
+
+/* MAC address configuration. */
+#define configMAC_ADDR0	0x00
+#define configMAC_ADDR1	0x12
+#define configMAC_ADDR2	0x13
+#define configMAC_ADDR3	0x10
+#define configMAC_ADDR4	0x15
+#define configMAC_ADDR5	0x11
+
+/* IP address configuration. */
+#define configIP_ADDR0		192
+#define configIP_ADDR1		168
+#define configIP_ADDR2		0
+#define configIP_ADDR3		201
+
+/* Netmask configuration. */
+#define configNET_MASK0		255
+#define configNET_MASK1		255
+#define configNET_MASK2		255
+#define configNET_MASK3		0
+
+/* Use the system definition, if there is one */
+#ifdef __NVIC_PRIO_BITS
+	#define configPRIO_BITS       __NVIC_PRIO_BITS
+#else
+	#define configPRIO_BITS       5        /* 32 priority levels */
+#endif
+
+/* The lowest interrupt priority that can be used in a call to a "set priority"
+function. */
+#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY			0x1f
+
+/* The highest interrupt priority that can be used by any interrupt service
+routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
+INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
+PRIORITY THAN THIS! (higher priorities are lower numeric values. */
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY	5
+
+/* The lowest priority. */
+#define configKERNEL_INTERRUPT_PRIORITY 	( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+/* Priority 5, or 160 as only the top three bits are implemented. */
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+
+/* Priorities passed to NVIC_SetPriority() do not require shifting as the
+function does the shifting itself.  Note these priorities need to be equal to
+or lower than configMAX_SYSCALL_INTERRUPT_PRIORITY - therefore the numeric
+value needs to be equal to or greater than 5 (on the Cortex M3 the lower the
+numeric value the higher the interrupt priority). */
+#define configEMAC_INTERRUPT_PRIORITY		5
+#define configUSB_INTERRUPT_PRIORITY		6
+
+
+/*-----------------------------------------------------------
+ * Macros required to setup the timer for the run time stats.
+ *-----------------------------------------------------------*/
+#ifdef __ICCARM__    // protects from including by assembler
+extern void vConfigureTimerForRunTimeStats( void );
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() vConfigureTimerForRunTimeStats()
+#define portGET_RUN_TIME_COUNTER_VALUE() LPC_TIM0->TC
+#endif
+
+/* Normal assert() semantics without relying on the provision of an assert.h
+header file. */
+#define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for( ;; ); }	
+
+/* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
+standard names. */
+#define vPortSVCHandler SVC_Handler
+#define xPortPendSVHandler PendSV_Handler
+#define xPortSysTickHandler SysTick_Handler
+
+// Depending on the compiler (GCC or IAR) memory requirements are slightly different.
+// These differences are handled in compiler specific configuration files.
+#if defined(__GNUC__)
+	#include "FreeRTOSConfig_GCC.h"
+#elif defined(__ICCARM__)
+	#include "FreeRTOSConfig_IAR.h"
+#elif defined(__CC_ARM)
+	#include "FreeRTOSConfig_ARM.h"
+#endif
+
+
+// Macro for converting milliseconds to ticks
+#define MILLIS_IN_ONE_TICK()  (1000 / configTICK_RATE_HZ)
+#define MILLIS_TO_TICKS(ms)   ((configTICK_RATE_HZ * (ms + MILLIS_IN_ONE_TICK() - 1)) / 1000)
+
+#endif /* FREERTOS_CONFIG_H */

@@ -1,0 +1,244 @@
+/*******************************************************************************
+* Contains proprietary and confidential information of SEARAN LLC.
+* May not be used or disclosed to any other party except in accordance
+* with a license from SEARAN LLC.
+*
+* Copyright (c) 2011-2015 SEARAN LLC. All Rights Reserved.
+*******************************************************************************/
+
+#include "LPC18xx.h"
+#include "lpc18xx_pinsel.h"
+#include "lpc18xx_gpio.h"
+#include "error.h"
+#include "delay.h"
+#include "i2c.h"
+
+#define I2C_delay() DELAY_US(2)
+
+static unsigned char mStarted;
+static uint16_t mSclPort;
+static uint16_t mSdaPort;
+static uint16_t mSclPin;
+static uint16_t mSdaPin;
+
+static unsigned char readScl(void); // Set SCL as input and return current level of line, 0 or 1
+static unsigned char readSda(void); // Set SDA as input and return current level of line, 0 or 1
+static void clearScl(void); // Actively drive SCL signal low
+static void clearSda(void); // Actively drive SDA signal low
+static void arbitrationLost(void);
+
+void i2c_init(uint16_t sclPort, uint16_t sclPin, uint16_t sdaPort, uint16_t sdaPin)
+{
+	PINSEL_CFG_Type pinsel;
+	
+	mStarted = 0;
+	mSclPort = sclPort;
+	mSclPin = sclPin;
+	mSdaPort = sdaPort;
+	mSdaPin = sdaPin;
+	
+	// ACP_I2C SCL and SDA pins configuration --------------------------------
+	GPIO_SetDir(sclPort, (1 << sclPin), 0); // configure as input
+	pinsel.Portnum = sclPort;
+	pinsel.Pinnum = sclPin;
+	pinsel.Funcnum = 0;
+	pinsel.Pinmode = PINSEL_PINMODE_TRISTATE;
+	pinsel.OpenDrain = PINSEL_PINMODE_NORMAL;
+	PINSEL_ConfigPin(&pinsel);
+
+	GPIO_SetDir(sdaPort, (1 << sdaPin), 0); // configure as input
+	pinsel.Portnum = sdaPort;
+	pinsel.Pinnum = sdaPin;
+	PINSEL_ConfigPin(&pinsel);
+}
+
+void i2c_sendStart(void) 
+{
+	if (mStarted) 
+	{ // if started, do a restart cond
+		// set SDA to 1
+		readSda();
+		I2C_delay();
+		
+		while (readScl() == 0) 
+		{  // Clock stretching
+			// You should add timeout to this loop
+		}
+		
+		// Repeated start setup time, minimum 4.7us
+		I2C_delay();
+	}
+	
+	if (readSda() == 0) 
+	{
+		arbitrationLost();
+	}
+	
+	// SCL is high, set SDA from 1 to 0.
+	clearSda();
+	I2C_delay();
+	clearScl();
+	mStarted = 1;
+}
+ 
+void i2c_sendStop(void)
+{
+	// set SDA to 0
+	clearSda();
+	I2C_delay();
+	
+	// Clock stretching
+	while (readScl() == 0) 
+	{
+		// add timeout to this loop.
+	}
+	
+	// Stop bit setup time, minimum 4us
+	I2C_delay();
+	
+	// SCL is high, set SDA from 0 to 1
+	if (readSda() == 0) 
+	{
+		arbitrationLost();
+	}
+	
+	I2C_delay();
+	mStarted = 0;
+}
+ 
+// Write a bit to I2C bus
+static void i2c_writeBit(unsigned char bit) 
+{
+	if (bit) 
+	{
+		readSda();
+	} 
+	else 
+	{
+		clearSda();
+	}
+	
+	I2C_delay();
+	
+	while (readScl() == 0) 
+	{ // Clock stretching
+		// You should add timeout to this loop
+	}
+	
+	// SCL is high, now data is valid
+	// If SDA is high, check that nobody else is driving SDA
+	if (bit && readSda() == 0) 
+	{
+		arbitrationLost();
+	}
+	
+	I2C_delay();
+	clearScl();
+}
+ 
+// Read a bit from I2C bus
+static unsigned char i2c_readBit(void) 
+{
+	unsigned char bit;
+	
+	// Let the slave drive data
+	readSda();
+	
+	I2C_delay();
+	
+	while (readScl() == 0) 
+	{ // Clock stretching
+		// You should add timeout to this loop
+	}
+	
+	// SCL is high, now data is valid
+	bit = readSda();
+	
+	I2C_delay();
+	
+	clearScl();
+	
+	return bit;
+}
+ 
+// Write a byte to I2C bus. Return 0 if ack by the slave.
+unsigned char i2c_writeByte(unsigned char sendStart, unsigned char sendStop, unsigned char byte) 
+{
+	unsigned bit;
+	unsigned char nack;
+	
+	if (sendStart) 
+	{
+		i2c_sendStart();
+	}
+	
+	for (bit = 0; bit < 8; bit++) 
+	{
+		i2c_writeBit((byte & 0x80) != 0);
+		byte <<= 1;
+	}
+	
+	nack = i2c_readBit();
+	
+	if (sendStop) 
+	{
+		i2c_sendStop();
+	}
+	
+	return nack;
+}
+ 
+// Read a byte from I2C bus
+unsigned char i2c_readByte(unsigned char nack, unsigned char sendStop) 
+{
+	unsigned char byte = 0;
+	unsigned bit;
+	
+	for (bit = 0; bit < 8; bit++) 
+	{
+		byte = (byte << 1) | i2c_readBit();
+	}
+	
+	i2c_writeBit(nack);
+	if (sendStop) 
+	{
+		i2c_sendStop();
+	}
+	
+	return byte;
+}
+
+ // Set SCL as input and return current level of line, 0 or 1
+static unsigned char readScl(void)
+{
+	GPIO_SetDir(mSclPort, (1 << mSclPin), 0); // configure as input
+	
+	return (GPIO_ReadValue(mSclPort) & (1 << mSclPin)) ? 1 : 0;
+}
+
+ // Set SDA as input and return current level of line, 0 or 1
+static unsigned char readSda(void)
+{
+	GPIO_SetDir(mSdaPort, (1 << mSdaPin), 0); // configure as input
+	
+	return (GPIO_ReadValue(mSdaPort) & (1 << mSdaPin)) ? 1 : 0;
+}
+
+ // Actively drive SCL signal low
+static void clearScl(void)
+{
+	GPIO_ClearValue(mSclPort, (1 << mSclPin));
+	GPIO_SetDir(mSclPort, (1 << mSclPin), 1); // configure as output
+}
+
+ // Actively drive SDA signal low
+static void clearSda(void)
+{
+	GPIO_ClearValue(mSdaPort, (1 << mSdaPin));
+	GPIO_SetDir(mSdaPort, (1 << mSdaPin), 1); // configure as output
+}
+
+static void arbitrationLost(void)
+{
+	error_onFatalError();
+}
