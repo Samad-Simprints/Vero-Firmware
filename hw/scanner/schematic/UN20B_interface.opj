@@ -105,25 +105,33 @@
   (GlobalState
     (FileView
       (Path "Design Resources")
-      (Path "Design Resources"
-         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.dsn")
-      (Path "Design Resources"
-         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.dsn"
-         "SCHEMATIC1")
-      (Path "Design Resources"
-         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.dsn"
-         "Design Cache")
+      (Path "Design Resources" ".\un20b_interface.dsn")
+      (Path "Design Resources" ".\un20b_interface.dsn" "SCHEMATIC1")
+      (Path "Design Resources" ".\un20b_interface.dsn" "Design Cache")
       (Path "Design Resources" "Library")
-      (Path "Design Resources" "Library"
-         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.olb")
-      (Path "Outputs")
-      (Select "Design Resources"
-         "c:\working\index\trunk\hw\scanner\schematic\un20b_interface.dsn"))
+      (Path "Design Resources" "Library" ".\un20b_interface.olb")
+      (Path "Outputs"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
       (Frame
         (Placement "44 2 3 -1 -1 -8 -30 0 200 0 415"))
-      (Tab 0)))
+      (Tab 0))
+    (Doc
+      (Type "TextFile")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 0 1068 0 453"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\UN20B_INTERFACE.asc")
+      (Scroll "0"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 50 1118 50 503")
+        (Scroll "506 500")
+        (Zoom "106")
+        (Occurrence "/"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\UN20B_INTERFACE.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1")))
   (ISPCBBASICLICENSE "false")
   (MPSSessionName "paul"))
