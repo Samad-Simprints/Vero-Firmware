@@ -162,6 +162,7 @@ static bool boUsbState( char **papzArgs, int iInstance, int iNumArgs );
 static bool boBtState( char **papzArgs, int iInstance, int iNumArgs );
 
 static bool boUn20Power( char **papzArgs, int iInstance, int iNumArgs );
+static bool boUn20Reset( char **papzArgs, int iInstance, int iNumArgs );
 static bool boBattery( char **papzArgs, int iInstance, int iNumArgs );
 static bool boOff( char **papzArgs, int iInstance, int iNumArgs );
 static bool boVibrate( char **papzArgs, int iInstance, int iNumArgs );
@@ -177,6 +178,7 @@ static const tParserEntry asHalCLI[] =
   CLICMD("bt",                    "BT callback", 1, "", boBt, 0),
   CLICMD("disconn",               "Phone disconnect", 1, "", boDisconn, 0),
   CLICMD("un20",                  "Un20 power control", 2, "", boUn20Power, 0),
+  CLICMD("un20r",                 "Un20 reset control", 2, "", boUn20Reset, 0),
   CLICMD("battery",               "Battery state", 2, "", boBattery, 0),
   CLICMD("off",                   "Power off", 1, "", boOff, 0),
   CLICMD("vibrate",               "Vibrate state", 2, "", boVibrate, 0),
@@ -279,6 +281,16 @@ static bool boUn20Power( char **papzArgs, int iInstance, int iNumArgs )
     vPowerUn20On();
   else
     vPowerUn20Off();
+
+  return true;
+}
+
+// control the UN20 reset
+static bool boUn20Reset( char **papzArgs, int iInstance, int iNumArgs )
+{
+  int iReset = atoi(papzArgs[1]);
+
+  vUn20Reset(iReset);
 
   return true;
 }
@@ -552,8 +564,10 @@ void vUiInit()
   BUTTON_1_SCAN->vConfigure();
 
   // register callbacks for the buttons
+#if 0
   vGPIODDsetPinInterruptHandler( BUTTON_0_POWER,  PIN_INT1_IRQn, ieBoth /*ieFalling*/, ::vUIIsr );
   vGPIODDsetPinInterruptHandler( BUTTON_1_SCAN, PIN_INT2_IRQn, ieBoth /*ieRising*/,  ::vUIIsr );
+#endif
 #endif
 }
 
@@ -695,6 +709,8 @@ void vPowerInit()
   nPWR_DOWN->vSet( false );
 
   UN20B_POWER->vConfigure();
+  UN20B_POWER->vSet( true );
+
 #endif
   DEBUGMSG(ZONE_COMMANDS,("vPowerInit()\n"));
 }

@@ -81,6 +81,7 @@ typedef enum
 	NONE_BLOCKING = 0,		/**< None Blocking type */
 	BLOCKING,				/**< Blocking type */
 } TRANSFER_BLOCK_Type;
+typedef TRANSFER_BLOCK_Type TRANSFER_BLOCK_T;
 
 
 /** Pointer to Function returning Void (any number of parameters) */

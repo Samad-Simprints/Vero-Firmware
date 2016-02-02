@@ -22,13 +22,13 @@
       build_quietly="Yes"
       c_additional_options="-fms-extensions"
       c_preprocessor_definitions="ARM_MATH_CM3;__LPC18XX__;CMSIS_BITPOSITIONS"
-      c_user_include_directories=".;$(ProjectDir)/../include;$(ProjectDir)/../rtos/include;$(ProjectDir)/../rtos/portable/GCC/ARM_CM3;$(ProjectDir)/../dotstack/samples/common/app/speed-test;$(ProjectDir)/../dotstack/samples/lpc18xx/freertos/common;$(ProjectDir)/../dotstack/samples/lpc18xx/common;$(ProjectDir)/../dotstack/samples/common-freertos;$(ProjectDir)/../dotstack/samples/common/include;$(ProjectDir)/../dotstack/samples/common/g7xx;$(ProjectDir)/../dotstack/samples/common/g721;$(ProjectDir)/../dotstack/samples/common/g723_24;$(ProjectDir)/../dotstack/samples/common/g723_40;$(ProjectDir)/../dotstack/samples/common/cvsd;$(ProjectDir)/../dotstack/samples/common/sbc;$(ProjectDir);$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpc1800cmsis/core/device/nxp/lpc18xx/include;$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpc1800cmsis/core/cmsis/include;$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include;$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpcusb;$(ProjectDir)/../dotstack/dotstack/cortex-m3-gcc/include"
+      c_user_include_directories=".;$(ProjectDir)/../include;$(ProjectDir)/../app;$(ProjectDir)/../LPCUSBLib/Drivers/USB;$(ProjectDir)/../LPCUSBLib/Drivers/USB/Core;$(ProjectDir)/../rtos/include;$(ProjectDir)/../rtos/portable/GCC/ARM_CM3;$(ProjectDir)/../LPCUSBLib/IndexSupport;$(ProjectDir)/../dotstack/samples/common/app/speed-test;$(ProjectDir)/../dotstack/samples/lpc18xx/freertos/common;$(ProjectDir)/../dotstack/samples/lpc18xx/common;$(ProjectDir)/../dotstack/samples/common-freertos;$(ProjectDir)/../dotstack/samples/common/include;$(ProjectDir)/../dotstack/samples/common/g7xx;$(ProjectDir)/../dotstack/samples/common/g721;$(ProjectDir)/../dotstack/samples/common/g723_24;$(ProjectDir)/../dotstack/samples/common/g723_40;$(ProjectDir)/../dotstack/samples/common/cvsd;$(ProjectDir)/../dotstack/samples/common/sbc;$(ProjectDir);$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpc1800cmsis/core/device/nxp/lpc18xx/include;$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpc1800cmsis/core/cmsis/include;$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include;$(ProjectDir)/../dotstack/samples/lpc18xx/common/lpcusb;$(ProjectDir)/../dotstack/dotstack/cortex-m3-gcc/include"
       debug_register_definition_file="$(TargetsDir)/LPC1800/LPC1800_Peripherals.xml"
       linker_additional_files="$(ProjectDir)/../dotstack/dotstack/cortex-m3-gcc/lib/libdotstack_rel.a"
       linker_memory_map_file="$(TargetsDir)/LPC1800/LPC1833_MemoryMap.xml"
       linker_memory_map_macros="SPIFI_SIZE=0x400000"
       linker_patch_build_command="&quot;$(StudioDir)/bin/crossscript&quot; &quot;load(\&quot;$(TargetsDir)/LPC1800/LinkPatch.js\&quot;);patch(0x1A000000, \&quot;$(TargetPath)\&quot;);&quot;"
-      linker_section_placement_file="$(StudioDir)/targets/Cortex_M/flash_placement.xml"
+      linker_section_placement_file="$(ProjectDir)/flash_placement.xml"
       linker_section_placement_macros="FLASH_NAME=FLASHA;RAM_NAME=SRAM2"
       project_directory=""
       project_type="Executable"
@@ -68,6 +68,9 @@
         <file file_name="../app/protocol_msg.c" />
         <file file_name="../app/test_msgs.c" />
         <file file_name="../app/helpers.cpp" />
+        <file file_name="../app/CDC.c" />
+        <file file_name="../app/CDCDescriptors.c" />
+        <file file_name="../app/DualDevice.c" />
       </folder>
       <folder Name="dd">
         <file file_name="../dd/gpio_dd.cpp">
@@ -99,6 +102,7 @@
         <file file_name="../include/lpcapp.h" />
         <file file_name="../include/protocol_msg.h" />
         <file file_name="../include/helpers.hpp" />
+        <file file_name="../include/dbgapi.h" />
       </folder>
       <folder Name="rtos">
         <file file_name="../rtos/croutine.c" />
@@ -139,6 +143,12 @@
         recurse="Yes">
         <configuration Name="Common" build_exclude_from_build="No" />
       </folder>
+      <folder
+        Name="usblib"
+        exclude=""
+        filter="*.c;*.h"
+        path="../LPCUSBLib"
+        recurse="Yes" />
     </folder>
     <folder Name="System Files">
       <file file_name="$(StudioDir)/source/thumb_crt0.s" />
@@ -153,6 +163,12 @@
       <file file_name="NGX_LPC1830_Xplorer_Target.js">
         <configuration Name="Common" file_type="Reset Script" />
         <configuration Name="THUMB Release" build_exclude_from_build="No" />
+      </file>
+      <file file_name="flash_placement.xml">
+        <configuration Name="Common" file_type="Section Placement" />
+      </file>
+      <file file_name="LPC1833_MemoryMap.xml">
+        <configuration Name="Common" file_type="Memory Map" />
       </file>
     </folder>
     <configuration

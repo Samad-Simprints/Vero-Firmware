@@ -132,6 +132,7 @@ static const tLineCoding sALMportConfig = {
 //******************************************************************************
 
 extern "C" void bt_main(void);
+extern "C" void usb_main(void);
 extern "C" void check_failed(uint8_t *file, uint32_t line);
 
 extern "C" void vHalTest(void);
@@ -265,7 +266,7 @@ void tMain::vInit()
   vPowerInit();
   vUiInit();
 
-  poDebugPort = poSERDDgetPort( DEBUG_UART );
+  poDebugPort = poSERDDgetPort( CONSOLE_UART );
   poDebugPort->vConfigurePort( &sALMportConfig, 64, 300 );
 
   // set to blocking mode for transmit but not receive
@@ -309,15 +310,16 @@ int main( void )
   }
 #endif
 
+  // initialise the Bluetooth stack
   //bt_main();
+
+  // initialise the USB stack
+  //usb_main();
 
   //SystemCoreClockUpdate();
 
   // Initialise device drivers
   //vGPIODDinit();
-
-  /* Create the Bluetooth App task. */
-  //xTaskCreate( vBluetoothTask, ( signed char * ) "BT", BTAPP_TASK_STACK_SIZE, ( void * ) NULL, BTAPP_TASK_PRIORITY, NULL );
 
   /* Create the LPC App task. */
   xTaskCreate( vLpcAppTask, ( signed char * ) "LPC", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );

@@ -57,7 +57,7 @@
 //******************************************************************************
 
 // Scanner connections
-#define DEBUG_UART                    USART0_IRQn
+#define CONSOLE_UART                  USART0_IRQn
 #define BT_UART                       UART1_IRQn
 #define UN20_UART                     USART2_IRQn
 
@@ -72,6 +72,9 @@
 
 #define LED_TASK_STACK_SIZE           ( 512 + TASK_DEBUG_OVERHEAD )
 #define LED_TASK_PRIORITY             ( 1 )
+
+#define USB_TASK_STACK_SIZE           ( 512 + TASK_DEBUG_OVERHEAD )
+#define USB_TASK_PRIORITY             ( 1 )
 
 // - interrupt priorities - max 7 on LPC18xx
 #if 0

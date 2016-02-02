@@ -39,6 +39,7 @@ typedef unsigned long long            uint64;
 
 #ifndef WIN32
 #ifndef __cplusplus
+#ifndef LPC_TYPES_H
 typedef unsigned char                 bool;
 #undef FALSE
 #define FALSE                         ( 0 )
@@ -46,6 +47,7 @@ typedef unsigned char                 bool;
 #undef TRUE
 #define TRUE                          ( !FALSE )
 #define true                          TRUE
+#endif
 #endif
 #endif
 

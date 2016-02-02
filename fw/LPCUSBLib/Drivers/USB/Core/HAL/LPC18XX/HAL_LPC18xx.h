@@ -43,11 +43,12 @@
 #include "../../USBMode.h"
 
 #define USBRAM_SECTION  RAM2
-
 #if defined(__ICCARM__)
 	#define __BSS(x)       @ ".ahb_sram1"
 #elif defined(__CC_ARM)
 	#define __BSS(x)
+#else
+	#define __BSS(x)   __attribute__ ((section("usbram")))
 #endif
 /* bit defines for DEVICEADDR register. */
 #define USBDEV_ADDR_AD  (1 << 24)
