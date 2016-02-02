@@ -57,7 +57,17 @@ public class Scanner
   public Scanner(Connection connection, ScannerCallback callback)
   {
     this.connection = connection;
+    connection.open();
     this.callback = callback;
+  }
+
+  public void close()
+  {
+    if (this.connection!=null)
+    {
+      connection.close();
+      this.connection = null;
+    }
   }
 
   public int getImage()

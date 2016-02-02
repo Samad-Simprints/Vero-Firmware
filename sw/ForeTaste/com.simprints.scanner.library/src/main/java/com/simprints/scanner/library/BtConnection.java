@@ -3,10 +3,16 @@ package com.simprints.scanner.library;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.util.Log;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
@@ -15,6 +21,14 @@ import static android.support.v4.app.ActivityCompat.startActivityForResult;
  */
 public class BtConnection extends Connection
 {
+  private static final String TAG = "BtConnection";
+  private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+  private BluetoothAdapter mBluetoothAdapter = null;
+  private BluetoothDevice btScanner = null;
+  private BluetoothSocket btSocket = null;
+  private OutputStream outStream = null;
+  private InputStream inStream = null;
+
   public BtConnection()
   {
     super("Bluetooth Classic");
@@ -28,56 +42,155 @@ public class BtConnection extends Connection
   }
 
   public boolean init() {
-    boolean result = false;
+    isSetup = false;
 
-    BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     if (mBluetoothAdapter == null)
     {
-      errorMessage = "No Bluetooth found";
-      isSetup = false;
+      errorMessage = "Bluetooth unavailable";
     }
     else if (!mBluetoothAdapter.isEnabled())
     {
+      // ask user to enable BT, then try again later ..
+      int REQUEST_ENABLE_BT = 1;
+      Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+
       errorMessage = "Bluetooth disabled";
-      isSetup = false;
     }
     else
     {
       Set<BluetoothDevice> bluetoothDevices;
+
       // look for device
       bluetoothDevices = mBluetoothAdapter.getBondedDevices();
       if (bluetoothDevices.size()>0)
       {
-        Log.v("BtConnection","BT devices found");
-        result = true;
+        Log.v(TAG,"BT devices found");
+        for (BluetoothDevice device: bluetoothDevices)
+        {
+          Log.v(TAG,device.getName() + " " + device.getAddress());
+          if (device.getName().equals("Adafruit EZ-Link 048b"))
+          {
+            btScanner = device;
+          }
+        }
+        if (btScanner!=null)
+        {
+          Log.v(TAG, "Scanner found");
+          isSetup = true;
+        }
+      }
+      else
+      {
+        //@TODO: discovery goes here
       }
     }
 
-    return result;
+    return isSetup;
   }
 
   public String deviceName()
   {
-    return "BT Dev";
+    return btScanner.getName();
   }
 
   public String deviceDetail() {
-    return "BT Dev Details";
+    return btScanner.getAddress();
   }
 
   public void open() {
+    Boolean created = false;
+    Boolean connected = false;
 
+    // discovery will slow down connection if on. Call is harmless if already off.
+    mBluetoothAdapter.cancelDiscovery();
+
+    if (isSetup)
+    {
+      try
+      {
+        btSocket = btScanner.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
+        created = true;
+        Log.v(TAG, "Socket created");
+      } catch (IOException e)
+      {
+        created = false;
+        Log.v(TAG, "Error " + e.getMessage());
+      }
+
+      if (created)
+      {
+        try
+        {
+          btSocket.connect();
+          connected = true;
+          Log.v(TAG, "Socket connected");
+        } catch (IOException e)
+        {
+          connected = false;
+          Log.v(TAG, "Connect error " + e.getMessage());
+          try
+          {
+            btSocket.close();
+          } catch (IOException e2)
+          {
+            Log.v(TAG, "Close error " + e2.getMessage());
+          }
+        }
+
+        if (connected)
+        {
+          try
+          {
+            outStream = btSocket.getOutputStream();
+            inStream = btSocket.getInputStream();
+            Log.v(TAG, "Streams obtained");
+          } catch (IOException e)
+          {
+            Log.v(TAG, "Stream error " + e.getMessage());
+          }
+        }
+      }
+    }
   }
 
   public void close() {
-
+    try
+    {
+      btSocket.close();
+      Log.v(TAG,"Socket closed");
+    } catch (IOException e)
+    {
+      Log.v(TAG,"Close error " + e.getMessage());
+    }
   }
 
   public void readResponse(int length, byte[] data)
   {
+    int bytesRead = 0;
+    try
+    {
+      bytesRead = inStream.read(data, 0, length);
+      Log.v(TAG,"Bytes read: " + bytesRead);
+    } catch (IOException e)
+    {
+      Log.v(TAG,"Read error " + e.getMessage());
+    }
   }
 
   public void writeCommand(byte cmd, int length, byte[] data)
   {
+    try
+    {
+      outStream.write(cmd);
+      if (length>0)
+      {
+        outStream.write(data, 0, length);
+      }
+      Log.v(TAG,"Bytes written");
+    } catch (IOException e)
+    {
+      Log.v(TAG,"Write error " + e.getMessage());
+    }
   }
 }
