@@ -38,12 +38,12 @@ extern "C" {
 #define MAX_STORED_IMAGES     5
 #define MAX_STORED_TEMPLATES  5
 
-#define MAX_SMILE_STAGES      4 // how many "stages" the smile LED's are grouped into
+#define MAX_SMILE_STAGES      4 // how many "stages" the smile LEDs are grouped into
 
 #define MSG_PACKET_HEADER_SYNC_WORD 0xFAFAFAFA
 #define MSG_PACKET_FOOTER_SYNC_WORD 0xF5F5F5F5
 
-// Maximum size (inc. syncwords, headers, fotters etc.) of a protocol message.
+// Maximum size (inc. syncwords, headers, footers etc.) of a protocol message.
 #define MSG_PACKET_MAX_SIZE   1024
 
 //******************************************************************************
@@ -87,10 +87,11 @@ enum
   MSG_RECOVER_IMAGE,        // Processed by UN20 App
   MSG_IMAGE_FRAGMENT,       // Processed by UN20 App
   MSG_STORE_IMAGE,          // Processed by UN20 App
+  MSG_IMAGE_QUALITY,        // Processed by UN20 App
   MSG_GENERATE_TEMPLATE,    // Processed by UN20 App
   MSG_RECOVER_TEMPLATE,     // Processed by UN20 App
   MSG_COMPARE_TEMPLATE,     // Processed by UN20 App
-  
+
   MSG_UN20_SHUTDOWN,        // Tell UN20 to shutdown
   MSG_UN20_WAKEUP,          // Wakeup the UN20 (noted by LPC App)
   MSG_UN20_WAKINGUP,        // UN20 is waking up (sent by LPC App if UN20 asleep)
@@ -150,6 +151,7 @@ MsgSensorConfig;
 //
 typedef struct tagUN20Info
 {
+  bool boPowerOn;       // true if UN20 is powered on, false if not
   int16 iVersion;	// UN20 client firmware version
   int16 iStoreCount;    // Number of stored images and templates
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
@@ -216,7 +218,7 @@ PACK( typedef struct tagScanRecover
 MsgScanRecover;
 
 //
-// Scanned image data are preceded with a header...
+// Scanned image data are preceded by a header...
 //
 PACK( typedef struct tagScanResponse
 {
@@ -233,7 +235,7 @@ PACK( typedef struct tagScanResponse
 MsgScanResponse;
 
 //
-// Followed my multiple fragments
+// Followed by multiple fragments
 //
 PACK( typedef struct tagScanFragment
 {
