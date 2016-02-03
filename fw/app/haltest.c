@@ -135,10 +135,6 @@ int iDelay, iSec;
 
   vUiInit();
 
-for (;;)
-{
-}
-
   vUiLedSet(LED_RING_0, OFF);
   vUiLedSet(LED_RING_0, RED);
   vUiLedSet(LED_RING_0, GREEN);

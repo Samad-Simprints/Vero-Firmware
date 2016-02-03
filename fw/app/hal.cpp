@@ -564,9 +564,9 @@ void vUiInit()
   BUTTON_1_SCAN->vConfigure();
 
   // register callbacks for the buttons
-#if 0
-  vGPIODDsetPinInterruptHandler( BUTTON_0_POWER,  PIN_INT1_IRQn, ieBoth /*ieFalling*/, ::vUIIsr );
-  vGPIODDsetPinInterruptHandler( BUTTON_1_SCAN, PIN_INT2_IRQn, ieBoth /*ieRising*/,  ::vUIIsr );
+#if 1
+  vGPIODDsetPinInterruptHandler( BUTTON_0_POWER,  PIN_INT1_IRQn, /*ieBoth*/ ieFalling, ::vUIIsr );
+  vGPIODDsetPinInterruptHandler( BUTTON_1_SCAN, PIN_INT2_IRQn, /*ieBoth*/ ieFalling,  ::vUIIsr );
 #endif
 #endif
 }
@@ -711,6 +711,8 @@ void vPowerInit()
   UN20B_POWER->vConfigure();
   UN20B_POWER->vSet( true );
 
+//for (volatile int i = 0; i < 18000000; i++);
+
 #endif
   DEBUGMSG(ZONE_COMMANDS,("vPowerInit()\n"));
 }
@@ -772,8 +774,8 @@ void vPowerSelfOff()	// turn the LPC1800 off (Power button wakes)
 {
   DEBUGMSG(ZONE_COMMANDS,("vPowerSelfOff()\n"));
 #if !defined(EVAL_BOARD)
-  //nPWR_DOWN->vSet( true );
-  CLI_PRINT(("NOTE: Hardware power off disabled\n"));
+  nPWR_DOWN->vSet( true );
+  //CLI_PRINT(("NOTE: Hardware power off disabled\n"));
 #endif
   for (;;);
 }

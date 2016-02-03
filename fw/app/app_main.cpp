@@ -293,7 +293,7 @@ int main( void )
   vPowerInit();
   vPowerSelfOn();	// latch the power on
 
- // vHalTest();
+  //vHalTest();
 
   oMain.vInit();
 
