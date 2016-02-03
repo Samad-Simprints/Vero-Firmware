@@ -125,6 +125,7 @@ PACK( typedef struct tagSensorInfo
   int16 iBatteryLevel1;	// Analog input 1
   int16 iBatteryLevel2;	// Analog Input 2
   int16 iStoreCount;    // Number of stored images and templates
+  bool boPowerOn;       // true if UN20 is powered on, false if not
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgSensorInfo;
@@ -151,7 +152,6 @@ MsgSensorConfig;
 //
 typedef struct tagUN20Info
 {
-  bool boPowerOn;       // true if UN20 is powered on, false if not
   int16 iVersion;	// UN20 client firmware version
   int16 iStoreCount;    // Number of stored images and templates
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
