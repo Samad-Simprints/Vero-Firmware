@@ -148,7 +148,7 @@ static bool boEnableTrigger = false;       // True if the trigger button is enab
 static bool boSetLeds = false;             // LED setting
 static bool boTriggerVibrate = false;      // True if vibrate requested
 static uint8 bLedState[LED_MAX_LED_COUNT]; // off, red, green, orange, on, <flash choice>
-static int16 iVibrateMs = 1000;            // 0 = off, > 0 trigger vibrate for Ms (then stop)
+static int16 iVibrateMs = 100;             // 0 = off, > 0 trigger vibrate for Ms (then stop)
 
 static bool boFlashConnectionLed = true;   // True if we are flashing the blue Connection LED
 static bool boFlashConnLedIsOn = true;     // True if the flashing Connection LED is currently ON.
@@ -386,14 +386,17 @@ static void vVibrateTask( void *pvParameters )
       xSemaphoreTake( hVibrateSemaphore, portMAX_DELAY );
     }
 
-    // Set the new period.
-    xTimerChangePeriod( hTimer,( iVibrateMs / portTICK_RATE_MS ), 0 );
+    if( iVibrateMs > 0 )
+    {
+      // Set the new period.
+      xTimerChangePeriod( hTimer,( iVibrateMs / portTICK_RATE_MS ), 0 );
      
-    // Start the timer.
-    xTimerStart( hTimer, 0 );
+      // Start the timer.
+      xTimerStart( hTimer, 0 );
     
-    // Start the vibrate motor.
-    vUiVibrateControl ( VIBRATE_ON );
+      // Start the vibrate motor.
+      vUiVibrateControl ( VIBRATE_ON );
+    }
 
   } // End while
 }
