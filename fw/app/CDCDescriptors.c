@@ -67,9 +67,9 @@ const USB_Descriptor_Device_t const CDCDeviceDescriptor = {
 	//.Class                  = USB_CSCP_NoDeviceClass,
 	//.SubClass               = USB_CSCP_NoDeviceSubclass,
 	//.Protocol               = USB_CSCP_NoDeviceProtocol,
-	.Class                  = CDC_CSCP_CDCClass,
+	.Class                  = 0xEF, // CDC_CSCP_CDCClass,
 	.SubClass               = CDC_CSCP_ACMSubclass,
-	.Protocol               = CDC_CSCP_NoDataProtocol, // CDC_CSCP_ATCommandProtocol, // CDC_CSCP_NoSpecificProtocol, // CDC_CSCP_VendorSpecificProtocol, // CDC_CSCP_ATCommandProtocol,
+	.Protocol               = CDC_CSCP_ATCommandProtocol, // CDC_CSCP_NoSpecificProtocol, // CDC_CSCP_VendorSpecificProtocol, // CDC_CSCP_ATCommandProtocol,
 
 	.Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
 
