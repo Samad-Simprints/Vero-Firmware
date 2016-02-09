@@ -66,7 +66,7 @@ public class Scanner implements ConnectionCallback
 
   private void writeMessage(Message msg)
   {
-    connection.writeMessage(msg.buffer.getShort(4),msg.buffer.array());
+    connection.writeMessage(msg.buffer.getShort(4), msg.buffer.array());
   }
 
   // returns a message read in two passes
@@ -168,6 +168,7 @@ public class Scanner implements ConnectionCallback
 
   public int getBatteryPercent()
   {
+    short BatteryLevel1 = 0;
     Message msg = new Message(4);
     msg.setTxHeader(MSG_GET_SENSOR_INFO);
     writeMessage(msg);
@@ -177,14 +178,18 @@ public class Scanner implements ConnectionCallback
 
     byte bMsgId = rply.buffer.get();
     byte bStatus = rply.buffer.get();
-    byte[] bdaddr = new byte[6];
-    rply.buffer.get(bdaddr);
-    short UCVersion = rply.buffer.getShort();
-    short UNVersion = rply.buffer.getShort();
-    short BatteryLevel1 = rply.buffer.getShort();
-    short BatteryLevel2 = rply.buffer.getShort();
-    short StoreCount = rply.buffer.getShort();
-    boolean boPowerOn = rply.buffer.get()!=0;
+
+    if (bMsgId==(MSG_GET_SENSOR_INFO + MSG_REPLY))
+    {
+      byte[] bdaddr = new byte[6];
+      rply.buffer.get(bdaddr);
+      short UCVersion = rply.buffer.getShort();
+      short UNVersion = rply.buffer.getShort();
+      BatteryLevel1 = rply.buffer.getShort();
+      short BatteryLevel2 = rply.buffer.getShort();
+      short StoreCount = rply.buffer.getShort();
+      boolean boPowerOn = rply.buffer.get() != 0;
+    }
 
     return BatteryLevel1;
   }
