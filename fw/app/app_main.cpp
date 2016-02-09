@@ -314,7 +314,7 @@ int main( void )
   //bt_main();
 
   // initialise the USB stack
-  //usb_main();
+  usb_main();
 
   //SystemCoreClockUpdate();
 
