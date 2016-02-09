@@ -90,7 +90,7 @@ void FenSerial_Send_Data ( USB_ClassInfo_CDC_Device_t* CDCInterfaceInfo, USB_Cla
       //for ( iRepeat = 0; iRepeat < 100; iRepeat++ )
       //{
       acBytes[ 0 ] = cTxChar;
-#if 0 // set to 1 to generate data on port.
+#if 1 // set to 1 to generate data on port.
       CDCDeviceSendBytes( CDCInterfaceInfo, acBytes, 1 );
 #endif
       cTxChar++;
@@ -183,12 +183,14 @@ void FenSerial_Send_Data ( USB_ClassInfo_CDC_Device_t* CDCInterfaceInfo, USB_Cla
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect ( uint8_t corenum )
 {
+  DEBUGMSG(ZONE_DBG_ALWAYS, ("EVENT_USB_Device_Connect on port %d\r\n", corenum));
   return;
 }
 
 /** Event handler for the library USB Disconnection event. */
 void EVENT_USB_Device_Disconnect ( uint8_t corenum )
 {
+  DEBUGMSG(ZONE_DBG_ALWAYS, ("EVENT_USB_Device_Disconnect on port %d\r\n", corenum));
   return;
 }
 
@@ -250,6 +252,7 @@ void EVENT_USB_Host_DeviceUnattached ( const uint8_t corenum )
 {
   CDC_Host_DeviceEnumerated = 0;
   DEBUGMSG(ZONE_DBG_ALWAYS, ("\r\nDevice Unattached on port %d\r\n", corenum));
+  //USB_Host_ResetBus();
 }
 
 /** Event handler for the USB_DeviceEnumerationComplete event. This indicates that a device has been successfully
@@ -263,6 +266,8 @@ void EVENT_USB_Host_DeviceEnumerationComplete ( const uint8_t corenum )
   USB_StdDescriptor_Device_t *psDevDescr;
 
   DEBUGMSG(ZONE_DBG_ALWAYS, ("\r\nEVENT_USB_Host_DeviceEnumerationComplete, corenum %d\r\n", corenum));
+
+  bResponse = USB_Host_GetDeviceDescriptor( corenum,ConfigDescriptorData );
 
   if( USB_Host_GetDeviceConfigDescriptor( corenum, 1, &ConfigDescriptorSize, ConfigDescriptorData,
                                           sizeof ( ConfigDescriptorData ) ) != HOST_GETCONFIG_Successful )
@@ -441,8 +446,7 @@ static void USBTaskProc(void* params)
   }
 }
 
-/** Main program entry point. This routine contains the overall program flow, including initial
- *  setup of all components and the main program loop.
+/** USB task entry point.
  */
 void usb_main ( void )
 {
