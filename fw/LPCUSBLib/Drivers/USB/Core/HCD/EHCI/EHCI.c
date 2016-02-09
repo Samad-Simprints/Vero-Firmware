@@ -790,10 +790,10 @@ static HCD_STATUS QueueSITDs(uint8_t HostID, uint8_t HeadIdx, uint8_t *dataBuff,
 	return HCD_STATUS_OK;
 }
 
-static HCD_STATUS WaitForTransferComplete(uint8_t HostID, uint8_t EdIdx)/* TODO indentical to OHCI now */
+static HCD_STATUS WaitForTransferComplete(uint8_t HostID, uint8_t EdIdx)/* TODO identical to OHCI now */
 {
 
-#ifndef __TEST__
+#ifdef __TEST__
 	while ( HcdQHD(HostID, EdIdx)->status == HCD_STATUS_TRANSFER_QUEUED ) {
 		/* Should have time-out but left blank intentionally for bug catcher */
 	}
@@ -1149,7 +1149,7 @@ static __INLINE HCD_STATUS EHciHostInit(uint8_t HostID)
 	uint32_t idx;
 
 	/*---------- Host Data Structure Init ----------*/
-	//	memset(&ehci_data[HostID], 0, sizeof(EHCI_HOST_DATA_T) );
+	// memset(&ehci_data[HostID], 0, sizeof(EHCI_HOST_DATA_T) );
 
 	/*---------- USBINT ----------*/
 	USB_REG(HostID)->USBINTR_H &= ~EHC_USBINTR_ALL;	/* Disable All Interrupt */
@@ -1215,10 +1215,15 @@ static __INLINE void EnableSchedule(uint8_t HostID, uint8_t isPeriod)
 {
 	uint32_t statusMask = isPeriod ? EHC_USBSTS_PeriodScheduleStatus : EHC_USBSTS_AsyncScheduleStatus;
 	uint32_t cmdMask = isPeriod ? EHC_USBCMD_PeriodScheduleEnable : EHC_USBCMD_AsynScheduleEnable;
+        uint32_t counter = 0;
 
 	if (!(USB_REG(HostID)->USBSTS_H & statusMask)) {
 		USB_REG(HostID)->USBCMD_H |= cmdMask;
-		while (!(USB_REG(HostID)->USBSTS_H & statusMask)) {}/* TODO Should have time-out */
+		while (!(USB_REG(HostID)->USBSTS_H & statusMask))
+                {
+                  counter++;
+                  if( counter > 10000000 ) break;
+                }/* TODO Should have time-out */
 	}
 }
 

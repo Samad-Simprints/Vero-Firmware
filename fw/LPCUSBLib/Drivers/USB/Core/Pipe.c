@@ -83,9 +83,15 @@ bool Pipe_ConfigurePipe(const uint8_t corenum,
 void Pipe_ClosePipe(const uint8_t corenum, uint8_t pipenum)
 {
 	if (pipenum < PIPE_TOTAL_PIPES) {
-		HcdClosePipe(PipeInfo[corenum][pipenum].PipeHandle);
+		if( PipeInfo[corenum][pipenum].PipeHandle != 0 )
+                {
+                  HcdClosePipe(PipeInfo[corenum][pipenum].PipeHandle);
+                }
 		PipeInfo[corenum][pipenum].PipeHandle = 0;
-		USB_Memory_Free(PipeInfo[corenum][pipenum].Buffer);
+		if( PipeInfo[corenum][pipenum].Buffer != 0 )
+                {
+                  USB_Memory_Free(PipeInfo[corenum][pipenum].Buffer);
+                }
 		PipeInfo[corenum][pipenum].Buffer = NULL;
 		PipeInfo[corenum][pipenum].BufferSize = 0;
 	}
