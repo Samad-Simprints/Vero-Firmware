@@ -1,5 +1,7 @@
 package com.simprints.scanner.library;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created by derek on 18/08/2015.
  */
@@ -29,3 +31,4 @@ public class Template
     return data;
   }
 }
+

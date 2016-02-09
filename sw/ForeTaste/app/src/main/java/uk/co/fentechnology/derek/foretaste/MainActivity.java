@@ -142,15 +142,6 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
     viewHolder.update();
   }
 
-  private void closeScanner()
-  {
-    if (scanner!=null)
-    {
-      scanner.close();
-      scanner = null;
-    }
-  }
-
   // button handler - select/clear connection
   public void selectConnection(View view)
   {
@@ -160,13 +151,13 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
     }
     else
     {
-      closeScanner();
-
-      if (connection!=null)
+      if (scanner!=null)
       {
-        connection.close();
-        connection = null;
+        scanner.close();
+        scanner = null;
       }
+
+      connection = null;
     }
     viewHolder.update();
   }
@@ -179,7 +170,8 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
     }
     else
     {
-      closeScanner();
+      scanner.close();
+      scanner = null;
     }
     viewHolder.update();
   }

@@ -1,6 +1,8 @@
 package com.simprints.scanner.library;
 
 import android.app.Activity;
+import android.app.IntentService;
+import android.content.Intent;
 
 import java.util.ArrayList;
 
@@ -10,15 +12,17 @@ import java.util.ArrayList;
 public abstract class Connection
 {
   private String name;
-  private boolean isActive;
+  private ConnectionCallback callback;
+  private Intent mServiceIntent = null;
 
   protected boolean isSetup;
   protected String errorMessage = "No Error";
 
   public Connection(String name) {
     this.name = name;
-    this.isActive = false;
     this.isSetup = false;
+//    this.mServiceIntent = new Intent(this.getActivity(),ConnectionListener.class);
+//    this.mServiceIntent.setData()
   }
 
   public String name() { return this.name; }
@@ -29,11 +33,22 @@ public abstract class Connection
     return errorMessage;
   }
 
+  public void open(ConnectionCallback callback)
+  {
+    this.callback = callback;
+
+  };
+
+  public void readMessage(int length, byte[] data)
+  {
+    readMessage(length,data,0);
+  }
+
   abstract public boolean init();
   abstract public String deviceName();
   abstract public String deviceDetail();
-  abstract public void open();
   abstract public void close();
-  abstract public void writeCommand(byte cmd, int length, byte[] data);
-  abstract public void readResponse(int length, byte[] data);
+  abstract public void writeMessage(int length, byte[] data);
+  abstract public void readMessage(int length, byte[] data,int offset);
 }
+

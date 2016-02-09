@@ -1,6 +1,9 @@
 package com.simprints.scanner.library;
 
-public class Scanner
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+public class Scanner implements ConnectionCallback
 {
   private Connection connection;
   private ScannerCallback callback;
@@ -8,17 +11,19 @@ public class Scanner
   private static final int ERROR_BASE = 0;
   public static final int ERROR_NONE = ERROR_BASE;
 
-  private static final byte CMD_BASE = 0;
-  public static final byte CMD_IMAGE       = CMD_BASE;
-  public static final byte CMD_GET_IMAGE   = CMD_BASE + 1;
-  public static final byte CMD_TEMPLATE    = CMD_BASE + 2;
-  public static final byte CMD_GET_TEMPLATE = CMD_BASE + 3;
-  public static final byte CMD_QUALITY     = CMD_BASE + 4;
-  public static final byte CMD_POWER       = CMD_BASE + 5;
-  public static final byte CMD_BUTTON      = CMD_BASE + 6;
-  public static final byte CMD_BATTERY     = CMD_BASE + 7;
-  public static final byte CMD_SET_UI      = CMD_BASE + 8;
-  public static final byte CMD_GET_UI      = CMD_BASE + 9;
+  // values must match those in firmware msg_format.h
+  public static final byte MSG_GET_SENSOR_INFO   = 0;
+  public static final byte MSG_SET_UI            = 2;
+  public static final byte MSG_REPORT_UI         = 4;
+  public static final byte MSG_CAPTURE_IMAGE     = 5;
+  public static final byte MSG_RECOVER_IMAGE     = 8;
+  public static final byte MSG_GENERATE_TEMPLATE = 9;
+  public static final byte MSG_RECOVER_TEMPLATE  = 10;
+  public static final byte MSG_IMAGE_QUALITY     = 11;
+  public static final byte MSG_UN20_SHUTDOWN     = 14;
+  public static final byte MSG_UN20_WAKEUP       = 15;
+
+  public static final byte MSG_REPLY             = (byte)0x80;
 
   public class UIControl
   {
@@ -53,11 +58,42 @@ public class Scanner
     }
   }
 
+  @Override
+  public void onMessageReceived(Message msg)
+  {
+
+  }
+
+  private void writeMessage(Message msg)
+  {
+    connection.writeMessage(msg.buffer.getShort(4),msg.buffer.array());
+  }
+
+  // returns a message read in two passes
+  // the first reads the fixed part: header and length
+  // the second reads the rest based on the length field
+  private Message readMessage()
+  {
+    int iLenFixedPart = Message.MSG_ID_OFFSET;
+    ByteBuffer fixedPart = ByteBuffer.allocate(iLenFixedPart);
+    fixedPart.order(ByteOrder.LITTLE_ENDIAN);
+
+    connection.readMessage(iLenFixedPart,fixedPart.array());
+
+    short iLength = fixedPart.getShort(Message.INT_SIZE);
+    Message rply = new Message(iLength - Message.MSG_OVERHEAD);
+
+    rply.buffer.put(fixedPart.array());
+    connection.readMessage(iLength - iLenFixedPart, rply.buffer.array(),Message.MSG_ID_OFFSET);
+
+    return rply;
+  }
+
   // constructor
   public Scanner(Connection connection, ScannerCallback callback)
   {
     this.connection = connection;
-    connection.open();
+    connection.open(this);
     this.callback = callback;
   }
 
@@ -72,7 +108,16 @@ public class Scanner
 
   public int getImage()
   {
-    connection.writeCommand(CMD_GET_IMAGE, 0, null);
+    Message msg = new Message(9);
+    msg.setTxHeader(MSG_CAPTURE_IMAGE);
+
+    msg.buffer.put((byte) 0); // false
+    msg.buffer.putShort((short) 0); // timeout
+    msg.buffer.putShort((short) 0); // retry count
+    msg.buffer.putShort((short)50); // quality
+    msg.buffer.putShort((short) 50); // brightness
+
+    writeMessage(msg);
     callback.onStatusChange("image:scan complete");
 
     return ERROR_NONE;
@@ -80,14 +125,20 @@ public class Scanner
 
   public Image readImage()
   {
-    connection.writeCommand(CMD_IMAGE, 0, null);
+    Message msg = new Message(4);
+    msg.setTxHeader(MSG_RECOVER_IMAGE);
+
+    writeMessage(msg);
     callback.onStatusChange("image:transfer complete");
 
     return new Image();
   }
 
   public int getTemplate() {
-    connection.writeCommand(CMD_GET_TEMPLATE, 0, null);
+    Message msg = new Message(4);
+    msg.setTxHeader(MSG_GENERATE_TEMPLATE);
+
+    writeMessage(msg);
     callback.onStatusChange("template:conversion complete");
 
     return ERROR_NONE;
@@ -95,7 +146,10 @@ public class Scanner
 
   public Template readTemplate() {
     Template template = new Template();
-    connection.writeCommand(CMD_TEMPLATE, 0, null);
+    Message msg = new Message(4);
+    msg.setTxHeader(MSG_RECOVER_TEMPLATE);
+
+    writeMessage(msg);
     callback.onStatusChange("template:transfer complete");
 
     return template;
@@ -103,45 +157,74 @@ public class Scanner
 
   public int getImageQuality() {
     byte[] bImageQuality = new byte[1];
-    connection.writeCommand(CMD_QUALITY, 0, null);
-    connection.readResponse(1, bImageQuality);
+    Message msg = new Message(4);
+    msg.setTxHeader(MSG_IMAGE_QUALITY);
+
+    writeMessage(msg);
+    connection.readMessage(1, bImageQuality);
 
     return bImageQuality[0];
   }
 
   public int getBatteryPercent()
   {
-    byte[] bBatteryLevel = new byte[1];
-    connection.writeCommand(CMD_BATTERY,0,null);
-    connection.readResponse(1,bBatteryLevel);
+    Message msg = new Message(4);
+    msg.setTxHeader(MSG_GET_SENSOR_INFO);
+    writeMessage(msg);
 
-    return bBatteryLevel[0];
+    Message rply = readMessage();
+    rply.buffer.position(Message.MSG_ID_OFFSET);
+
+    byte bMsgId = rply.buffer.get();
+    byte bStatus = rply.buffer.get();
+    byte[] bdaddr = new byte[6];
+    rply.buffer.get(bdaddr);
+    short UCVersion = rply.buffer.getShort();
+    short UNVersion = rply.buffer.getShort();
+    short BatteryLevel1 = rply.buffer.getShort();
+    short BatteryLevel2 = rply.buffer.getShort();
+    short StoreCount = rply.buffer.getShort();
+    boolean boPowerOn = rply.buffer.get()!=0;
+
+    return BatteryLevel1;
   }
 
   public int setUI(UIControl uicontrol)
   {
-    connection.writeCommand(CMD_SET_UI,0,null);
+    Message msg = new Message(4);
+    msg.setTxHeader(MSG_SET_UI);
+
+    writeMessage(msg);
 
     return ERROR_NONE;
   }
 
   public UIControl getUI()
   {
-    connection.writeCommand(CMD_GET_UI,0,null);
+    Message msg = new Message(4);
+    msg.setTxHeader(MSG_REPORT_UI);
+
+    writeMessage(msg);
 
     return new UIControl();
   }
 
   public int setUn20bPower(boolean poweron)
   {
-    connection.writeCommand(CMD_POWER,0,null);
+    Message msg = new Message(4);
+    msg.setTxHeader(poweron? MSG_UN20_WAKEUP: MSG_UN20_SHUTDOWN);
+
+    writeMessage(msg);
 
     return ERROR_NONE;
   }
 
   public int setButton(boolean enabled)
   {
-    connection.writeCommand(CMD_BUTTON,0,null);
+    Message msg = new Message(4);
+    msg.setTxHeader(MSG_SET_UI);
+
+    writeMessage(msg);
 
     return ERROR_NONE;
   }

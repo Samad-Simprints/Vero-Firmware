@@ -65,19 +65,15 @@ public class BleConnection extends Connection
     return "BLE Dev Details";
   }
 
-  public void open() {
-
-  }
-
-  public void close() {
-
-  }
-
-  public void writeCommand(byte cmd, int length, byte[] data)
+  public void close()
   {
   }
 
-  public void readResponse(int length, byte[] data)
+  public void writeMessage(int length, byte[] data)
+  {
+  }
+
+  public void readMessage(int length, byte[] data, int offset)
   {
   }
 }

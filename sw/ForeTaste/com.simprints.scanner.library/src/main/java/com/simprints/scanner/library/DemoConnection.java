@@ -1,19 +1,21 @@
 package com.simprints.scanner.library;
 
-import android.app.Activity;
 import android.util.Log;
 
-import java.util.Random;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Created by derek on 24/08/2015.
  */
 public class DemoConnection extends Connection
 {
+  private static final String TAG = "DemoConnect";
   public DemoConnection()
   {
     super("Demonstration");
   }
+  private ByteBuffer reply = null;
 
   public boolean init() {
     isSetup = true;
@@ -29,61 +31,104 @@ public class DemoConnection extends Connection
     return "Demo Device Details";
   }
 
-  public void open() {
-
-  }
-
-  public void close() {
-
-  }
-
-  public void writeCommand(byte cmd, int length, byte[] data)
+  // override only used here to add Logging
+  // although it would be more extensive in an actual connection
+  @Override
+  public void open(ConnectionCallback callback)
   {
-    int i;
+    super.open(callback);
+    Log.v(TAG,"open");
+  }
 
-    switch(cmd)
+  public void close() 
+  {
+    Log.v(TAG,"close");
+  }
+
+  // set reply to provided length
+  // fill in known fields
+  private void setReply(int length,byte bCmd)
+  {
+    short iLength = (short)(length + Message.MSG_OVERHEAD);
+    reply = ByteBuffer.allocate(iLength);
+    reply.order(ByteOrder.LITTLE_ENDIAN);
+
+    reply.putInt(Message.MSG_HEADER);
+    reply.putShort(iLength);
+    reply.put((byte) (bCmd + Scanner.MSG_REPLY));
+    reply.put((byte)0); //status
+
+    reply.putInt(iLength - Message.INT_SIZE,Message.MSG_FOOTER);
+  }
+
+  public void writeMessage(int length, byte[] data)
+  {
+    byte bCmd = data[6];
+    Log.v(TAG,"writeMessage " + length + " bytes");
+
+    switch(bCmd)
     {
-      case Scanner.CMD_IMAGE:
+      case Scanner.MSG_GET_SENSOR_INFO:
+        Log.v(TAG, "writeMessage MSG_GET_SENSOR_INFO");
+
+        setReply(6 + (5*2) + 1,bCmd);
+        byte[] bdAddr = new byte[] {1,2,3,4,5,6};
+        reply.put(bdAddr);
+        reply.putShort((short) 1);
+        reply.putShort((short) 3);
+        reply.putShort((short)50);
+        reply.putShort((short)50);
+        reply.putShort((short)0);
+        reply.put((byte) 0);
+
+        reply.position(0);
         break;
 
-      case Scanner.CMD_TEMPLATE:
+      case Scanner.MSG_SET_UI:
+        Log.v(TAG, "writeMessage MSG_SET_UI");
         break;
 
-      case Scanner.CMD_BUTTON:
+      case Scanner.MSG_REPORT_UI:
+        Log.v(TAG,"writeMessage MSG_REPORT_UI");
         break;
 
-      case Scanner.CMD_GET_IMAGE:
+      case Scanner.MSG_CAPTURE_IMAGE:
+        Log.v(TAG,"writeMessage MSG_CAPTURE_IMAGE");
         break;
 
-      case Scanner.CMD_GET_TEMPLATE:
+      case Scanner.MSG_RECOVER_IMAGE:
+        Log.v(TAG,"writeMessage MSG_RECOVER_IMAGE");
         break;
 
-      case Scanner.CMD_GET_UI:
+      case Scanner.MSG_GENERATE_TEMPLATE:
+        Log.v(TAG,"writeMessage MSG_GENERATE_TEMPLATE");
+      break;
+
+      case Scanner.MSG_RECOVER_TEMPLATE:
+        Log.v(TAG,"writeMessage MSG_RECOVER_TEMPLATE");
         break;
 
-      case Scanner.CMD_BATTERY:
+      case Scanner.MSG_IMAGE_QUALITY:
+        Log.v(TAG,"writeMessage MSG_IMAGE_QUALITY");
         break;
 
-      case Scanner.CMD_SET_UI:
+      case Scanner.MSG_UN20_SHUTDOWN:
+        Log.v(TAG,"writeMessage MSG_UN20_SHUTDOWN");
         break;
 
-      case Scanner.CMD_POWER:
-        break;
-
-      case Scanner.CMD_QUALITY:
+      case Scanner.MSG_UN20_WAKEUP:
+        Log.v(TAG,"writeMessage MSG_UN20_WAKEUP");
         break;
     }
-
-    Log.v("demo","Write command " + cmd);
   }
 
-  public void readResponse(int length, byte[] data)
+  public void readMessage(int length, byte[] data, int offset)
   {
     int i;
 
-    for ( i = 0; i<length; ++i )
+    for ( i = offset; i<(length + offset); ++i )
     {
-      data[i] = 50;
+      data[i] = reply.get();
     }
   }
 

@@ -10,7 +10,6 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,7 +37,7 @@ public class BtConnection extends Connection
     // ask user to enable BT, then try again later ..
     int REQUEST_ENABLE_BT = 1;
     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-    startActivityForResult(activity,enableBtIntent,REQUEST_ENABLE_BT,null);
+    startActivityForResult(activity, enableBtIntent, REQUEST_ENABLE_BT, null);
   }
 
   public boolean init() {
@@ -98,9 +97,12 @@ public class BtConnection extends Connection
     return btScanner.getAddress();
   }
 
-  public void open() {
+  @Override
+  public void open(ConnectionCallback callback) {
     Boolean created = false;
     Boolean connected = false;
+
+    super.open(callback);
 
     // discovery will slow down connection if on. Call is harmless if already off.
     mBluetoothAdapter.cancelDiscovery();
@@ -165,32 +167,31 @@ public class BtConnection extends Connection
     }
   }
 
-  public void readResponse(int length, byte[] data)
+  public void writeMessage(int length, byte[] data)
+  {
+    if (length>0)
+    {
+      try
+      {
+        outStream.write(data,0,length);
+        Log.v(TAG,"Bytes written: " + length);
+      } catch (IOException e)
+      {
+        Log.v(TAG,"Write error " + e.getMessage());
+      }
+    }
+  }
+
+  public void readMessage(int length, byte[] data,int offset)
   {
     int bytesRead = 0;
     try
     {
-      bytesRead = inStream.read(data, 0, length);
+      bytesRead = inStream.read(data, offset, length);
       Log.v(TAG,"Bytes read: " + bytesRead);
     } catch (IOException e)
     {
       Log.v(TAG,"Read error " + e.getMessage());
-    }
-  }
-
-  public void writeCommand(byte cmd, int length, byte[] data)
-  {
-    try
-    {
-      outStream.write(cmd);
-      if (length>0)
-      {
-        outStream.write(data, 0, length);
-      }
-      Log.v(TAG,"Bytes written");
-    } catch (IOException e)
-    {
-      Log.v(TAG,"Write error " + e.getMessage());
     }
   }
 }
