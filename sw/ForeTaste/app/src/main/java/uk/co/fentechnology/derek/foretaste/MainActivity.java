@@ -167,6 +167,11 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
     if (scanner == null)
     {
       scanner = new Scanner(connection,this);
+      if (!scanner.open())
+      {
+        scanner = null;
+        Toast.makeText(this,"Scanner open failed",Toast.LENGTH_SHORT).show();
+      }
     }
     else
     {

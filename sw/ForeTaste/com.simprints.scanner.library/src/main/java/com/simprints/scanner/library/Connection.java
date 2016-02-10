@@ -33,10 +33,10 @@ public abstract class Connection
     return errorMessage;
   }
 
-  public void open(ConnectionCallback callback)
+  public boolean open(ConnectionCallback callback)
   {
     this.callback = callback;
-
+    return true;
   };
 
   public void readMessage(int length, byte[] data)

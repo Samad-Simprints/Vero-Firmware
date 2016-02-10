@@ -98,9 +98,10 @@ public class BtConnection extends Connection
   }
 
   @Override
-  public void open(ConnectionCallback callback) {
-    Boolean created = false;
-    Boolean connected = false;
+  public boolean open(ConnectionCallback callback) {
+    boolean opened = false;
+    boolean created = false;
+    boolean connected = false;
 
     super.open(callback);
 
@@ -131,13 +132,6 @@ public class BtConnection extends Connection
         {
           connected = false;
           Log.v(TAG, "Connect error " + e.getMessage());
-          try
-          {
-            btSocket.close();
-          } catch (IOException e2)
-          {
-            Log.v(TAG, "Close error " + e2.getMessage());
-          }
         }
 
         if (connected)
@@ -146,14 +140,30 @@ public class BtConnection extends Connection
           {
             outStream = btSocket.getOutputStream();
             inStream = btSocket.getInputStream();
+            opened = true;
             Log.v(TAG, "Streams obtained");
           } catch (IOException e)
           {
+            opened = false;
             Log.v(TAG, "Stream error " + e.getMessage());
           }
         }
+        else
+        {
+          try
+          {
+            btSocket.close();
+            Log.v(TAG, "Socket closed");
+          } catch (IOException e2)
+          {
+            Log.v(TAG, "Close error " + e2.getMessage());
+          }
+        }
+
       }
     }
+
+    return opened;
   }
 
   public void close() {
@@ -187,8 +197,11 @@ public class BtConnection extends Connection
     int bytesRead = 0;
     try
     {
-      bytesRead = inStream.read(data, offset, length);
-      Log.v(TAG,"Bytes read: " + bytesRead);
+      while (bytesRead<length)
+      {
+        bytesRead += inStream.read(data, offset + bytesRead, length - bytesRead);
+        Log.v(TAG, "Bytes read: " + bytesRead + ", requested: " + length);
+      }
     } catch (IOException e)
     {
       Log.v(TAG,"Read error " + e.getMessage());

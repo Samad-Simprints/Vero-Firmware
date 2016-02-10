@@ -93,8 +93,12 @@ public class Scanner implements ConnectionCallback
   public Scanner(Connection connection, ScannerCallback callback)
   {
     this.connection = connection;
-    connection.open(this);
     this.callback = callback;
+  }
+
+  public boolean open()
+  {
+    return this.connection.open(this);
   }
 
   public void close()
@@ -118,6 +122,7 @@ public class Scanner implements ConnectionCallback
     msg.buffer.putShort((short) 50); // brightness
 
     writeMessage(msg);
+    Message rply = readMessage();
     callback.onStatusChange("image:scan complete");
 
     return ERROR_NONE;
@@ -129,6 +134,7 @@ public class Scanner implements ConnectionCallback
     msg.setTxHeader(MSG_RECOVER_IMAGE);
 
     writeMessage(msg);
+    Message rply = readMessage();
     callback.onStatusChange("image:transfer complete");
 
     return new Image();
@@ -139,6 +145,7 @@ public class Scanner implements ConnectionCallback
     msg.setTxHeader(MSG_GENERATE_TEMPLATE);
 
     writeMessage(msg);
+    Message rply = readMessage();
     callback.onStatusChange("template:conversion complete");
 
     return ERROR_NONE;
@@ -150,20 +157,21 @@ public class Scanner implements ConnectionCallback
     msg.setTxHeader(MSG_RECOVER_TEMPLATE);
 
     writeMessage(msg);
+    Message rply = readMessage();
     callback.onStatusChange("template:transfer complete");
 
     return template;
   }
 
   public int getImageQuality() {
-    byte[] bImageQuality = new byte[1];
+    byte bImageQuality = 0;
     Message msg = new Message(4);
     msg.setTxHeader(MSG_IMAGE_QUALITY);
 
     writeMessage(msg);
-    connection.readMessage(1, bImageQuality);
+    Message rply = readMessage();
 
-    return bImageQuality[0];
+    return bImageQuality;
   }
 
   public int getBatteryPercent()
@@ -200,6 +208,7 @@ public class Scanner implements ConnectionCallback
     msg.setTxHeader(MSG_SET_UI);
 
     writeMessage(msg);
+    Message rply = readMessage();
 
     return ERROR_NONE;
   }
@@ -210,6 +219,7 @@ public class Scanner implements ConnectionCallback
     msg.setTxHeader(MSG_REPORT_UI);
 
     writeMessage(msg);
+    Message rply = readMessage();
 
     return new UIControl();
   }
@@ -220,6 +230,7 @@ public class Scanner implements ConnectionCallback
     msg.setTxHeader(poweron? MSG_UN20_WAKEUP: MSG_UN20_SHUTDOWN);
 
     writeMessage(msg);
+    Message rply = readMessage();
 
     return ERROR_NONE;
   }
@@ -230,6 +241,7 @@ public class Scanner implements ConnectionCallback
     msg.setTxHeader(MSG_SET_UI);
 
     writeMessage(msg);
+    Message rply = readMessage();
 
     return ERROR_NONE;
   }
