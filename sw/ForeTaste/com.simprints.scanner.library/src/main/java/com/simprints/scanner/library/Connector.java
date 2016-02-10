@@ -23,10 +23,10 @@ public class Connector
 
   // private constructor
   private Connector() {
+    connections.add(new DemoConnection());
+    connections.add(new BtConnection());
     connections.add(new UsbConnection());
     connections.add(new BleConnection());
-    connections.add(new BtConnection());
-    connections.add(new DemoConnection());
   }
 
   // public interface
@@ -47,7 +47,9 @@ public class Connector
   
   public Connection autoConnect() {
     // @TODO: returns first connection for now
-    return connections.get(0);
+    Connection auto = connections.get(0);
+    auto.init();
+    return auto;
   }
 
   public int size() {

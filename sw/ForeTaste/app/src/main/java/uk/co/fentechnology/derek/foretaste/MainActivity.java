@@ -231,6 +231,17 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
     viewHolder.showQuality(scanner.getImageQuality());
   }
 
+  // button handler - vibrate
+  public void vibrate(View view) {
+    Scanner.UIControl uiControl = scanner.new UIControl();
+
+    uiControl.boTriggerVibrate = true;
+    uiControl.iVibrateMs = 40;
+    scanner.setUI(uiControl);
+
+    viewHolder.showVibrate();
+  }
+
   // local class to handle view and updates
   class ViewHolder {
     // connection
@@ -248,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
     private Button qualityBtn;
     private Button powerBtn;
     private Button buttonBtn;
+    private Button vibrateBtn;
     //report
     private TextView templateTxt;
 
@@ -266,6 +278,7 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
       qualityBtn = (Button) activity.findViewById(R.id.qualityBtn);
       powerBtn = (Button) activity.findViewById(R.id.powerBtn);
       buttonBtn = (Button) activity.findViewById(R.id.buttonBtn);
+      vibrateBtn = (Button) activity.findViewById(R.id.vibrateBtn);
       templateTxt = (TextView) activity.findViewById(R.id.templateTxt);
     }
 
@@ -301,6 +314,7 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
         qualityBtn.setEnabled(false);
         powerBtn.setEnabled(false);
         buttonBtn.setEnabled(false);
+        vibrateBtn.setEnabled(false);
         boButtonEnabled = false;
         boPowerOn = false;
       }
@@ -313,6 +327,7 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
         qualityBtn.setEnabled(true);
         powerBtn.setEnabled(true);
         buttonBtn.setEnabled(true);
+        vibrateBtn.setEnabled(true);
       }
 
       setConnectName();
@@ -354,6 +369,11 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
 
     public void showQuality(int b) {
       String str = "Quality: " + b +"%";
+      templateTxt.setText(str);
+    }
+
+    public void showVibrate() {
+      String str = "Vibrate";
       templateTxt.setText(str);
     }
   }

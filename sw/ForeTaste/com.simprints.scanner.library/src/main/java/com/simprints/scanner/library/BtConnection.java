@@ -67,8 +67,10 @@ public class BtConnection extends Connection
         Log.v(TAG,"BT devices found");
         for (BluetoothDevice device: bluetoothDevices)
         {
-          Log.v(TAG,device.getName() + " " + device.getAddress());
-          if (device.getName().equals("Adafruit EZ-Link 048b"))
+          String devName = device.getName();
+          Log.v(TAG,devName + " " + device.getAddress());
+          if ((btScanner==null) &&
+            (devName.equals("Adafruit EZ-Link 048b") || devName.equals("Index Scanner")))
           {
             btScanner = device;
           }

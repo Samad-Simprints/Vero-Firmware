@@ -47,11 +47,13 @@ public class Scanner implements ConnectionCallback
     public static final byte LED_STATE_ORANGE = 3;
     public static final byte LED_STATE_ON = 4;
 
+    public boolean boEnableTrigger;
     public boolean boSetLeds;
     public boolean boTriggerVibrate;
-    byte[] bLedState; // size is fixed at LED_MAX_COUNT by constructor
-    int iVibrateMs;
+    public byte[] bLedState; // size is fixed at LED_MAX_COUNT by constructor
+    public short iVibrateMs;
 
+    // constructor
     public UIControl()
     {
       bLedState = new byte[LED_MAX_COUNT];
@@ -84,7 +86,7 @@ public class Scanner implements ConnectionCallback
     Message rply = new Message(iLength - Message.MSG_OVERHEAD);
 
     rply.buffer.put(fixedPart.array());
-    connection.readMessage(iLength - iLenFixedPart, rply.buffer.array(),Message.MSG_ID_OFFSET);
+    connection.readMessage(iLength - iLenFixedPart, rply.buffer.array(), Message.MSG_ID_OFFSET);
 
     return rply;
   }
@@ -165,7 +167,7 @@ public class Scanner implements ConnectionCallback
 
   public int getImageQuality() {
     byte bImageQuality = 0;
-    Message msg = new Message(4);
+    Message msg = new Message(0);
     msg.setTxHeader(MSG_IMAGE_QUALITY);
 
     writeMessage(msg);
@@ -177,7 +179,7 @@ public class Scanner implements ConnectionCallback
   public int getBatteryPercent()
   {
     short BatteryLevel1 = 0;
-    Message msg = new Message(4);
+    Message msg = new Message(0);
     msg.setTxHeader(MSG_GET_SENSOR_INFO);
     writeMessage(msg);
 
@@ -204,8 +206,14 @@ public class Scanner implements ConnectionCallback
 
   public int setUI(UIControl uicontrol)
   {
-    Message msg = new Message(4);
+    Message msg = new Message(1 + 1 + 1 + UIControl.LED_MAX_COUNT + 2);
     msg.setTxHeader(MSG_SET_UI);
+
+    msg.buffer.put((byte) (uicontrol.boEnableTrigger ? 1 : 0));
+    msg.buffer.put((byte) (uicontrol.boSetLeds? 1: 0));
+    msg.buffer.put((byte) (uicontrol.boTriggerVibrate ? 1 : 0));
+    msg.buffer.put(uicontrol.bLedState);
+    msg.buffer.putShort(uicontrol.iVibrateMs);
 
     writeMessage(msg);
     Message rply = readMessage();
