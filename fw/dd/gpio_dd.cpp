@@ -21,13 +21,13 @@ REG32 tGPIOpin::pdwGetConfigRegister()
   // have to convert the GPIO X[Y] to an offset into the SCU pin function registers
   // which can only be done through a lookup like this...
   // - each register is 32 bits wide, so we calculate the index of the register rather than the address of it.
-  #define P(a,b)    ( 0x##a * 32 + b )
+  #define P(n,a,b)    ( 0x##a * 32 + b )
   #define NO_GPIO   ( 0xffff )
   switch ((dwReg - LPC_GPIO0_BASE) / 4)
   {
   case 0:   // GPIO0[n]
     {
-      const word awOrder[] = {  P(0,0), P(0,1), P(1,15), P(1,16), P(1,0), P(6,6), P(3,6), P(2,7), P(1,1), P(1,2), P(1,3), P(1,4), P(1,17), P(1,18), P(2,10), P(1,20) };
+      const word awOrder[] = {  P(0,0,0), P(1,0,1), P(2,1,15), P(3,1,16), P(4,1,0), P(5,6,6), P(6,3,6), P(7,2,7), P(8,1,1), P(9,1,2), P(10,1,3), P(11,1,4), P(12,1,17), P(13,1,18), P(14,2,10), P(15,1,20) };
       if ( ( iBit < sizeof( awOrder ) / sizeof( awOrder[ 0 ] ) ) && ( awOrder[ iBit ] != NO_GPIO ) )
       {
         pdwResult = &pdwPinSel[ awOrder[ iBit ] ];
@@ -36,7 +36,7 @@ REG32 tGPIOpin::pdwGetConfigRegister()
     break;
   case 1:   // GPIO1[n]
     {
-      const word awOrder[] = { P(1,7), P(1,8), P(1,9), P(1,10), P(1,11), P(1,12), P(1,13), P(1,14), P(1,5), P(1,6), P(2,9), P(2,11), P(2,12), P(2,13), P(3,4), P(3,5) };
+      const word awOrder[] = { P(0,1,7), P(1,1,8), P(2,1,9), P(3,1,10), P(4,1,11), P(5,1,12), P(6,1,13), P(7,1,14), P(8,1,5), P(9,1,6), P(10,2,9), P(11,2,11), P(12,2,12), P(13,2,13), P(14,3,4), P(15,3,5) };
       if ( ( iBit < sizeof( awOrder ) / sizeof( awOrder[ 0 ] ) ) && ( awOrder[ iBit ] != NO_GPIO ) )
       {
         pdwResult = &pdwPinSel[ awOrder[ iBit ] ];
@@ -45,7 +45,7 @@ REG32 tGPIOpin::pdwGetConfigRegister()
     break;
   case 2:   // GPIO2[n]
     {
-      const word awOrder[] = { P(4,0), P(4,1), P(4,2), P(4,3), P(4,4), P(4,5), P(4,6), P(5,7), P(6,12), P(5,0), P(5,1), P(5,2), P(5,3), P(5,4), P(5,5), P(5,6) };
+      const word awOrder[] = { P(0,4,0), P(1,4,1), P(2,4,2), P(3,4,3), P(4,4,4), P(5,4,5), P(6,4,6), P(7,5,7), P(8,6,12), P(9,5,0), P(10,5,1), P(11,5,2), P(12,5,3), P(13,5,4), P(14,5,5), P(15,5,6) };
       if ( ( iBit < sizeof( awOrder ) / sizeof( awOrder[ 0 ] ) ) && ( awOrder[ iBit ] != NO_GPIO ) )
       {
         pdwResult = &pdwPinSel[ awOrder[ iBit ] ];
@@ -54,7 +54,7 @@ REG32 tGPIOpin::pdwGetConfigRegister()
     break;
   case 3:   // GPIO3[n]
     {
-      const word awOrder[] = { P(6,1), P(6,2), P(6,3), P(6,4), P(6,5), P(6,9), P(6,10), P(6,11), P(7,0), P(7,1), P(7,2), P(7,3), P(7,4), P(7,5), P(7,6), P(7,7) };
+      const word awOrder[] = { P(0,6,1), P(1,6,2), P(2,6,3), P(3,6,4), P(4,6,5), P(5,6,9), P(6,6,10), P(7,6,11), P(8,7,0), P(9,7,1), P(10,7,2), P(11,7,3), P(12,7,4), P(13,7,5), P(14,7,6), P(15,7,7) };
       if ( ( iBit < sizeof( awOrder ) / sizeof( awOrder[ 0 ] ) ) && ( awOrder[ iBit ] != NO_GPIO ) )
       {
         pdwResult = &pdwPinSel[ awOrder[ iBit ] ];
@@ -63,7 +63,7 @@ REG32 tGPIOpin::pdwGetConfigRegister()
     break;
   case 4:   // GPIO4[n]
     {
-      const word awOrder[] = { P(8,0), P(8,1), P(8,2), P(8,3), P(8,4), P(8,5), P(8,6), P(8,7), NO_GPIO, P(A,1), P(A,2), P(A,3), P(9,6), P(9,0), P(9,1), P(9,2), P(9,3) };
+      const word awOrder[] = { P(0,8,0), P(1,8,1), P(2,8,2), P(3,8,3), P(4,8,4), P(5,8,5), P(6,8,6), P(7,8,7), P(8,A,1), P(9,A,2), P(10,A,3), P(11,9,6), P(12,9,0), P(13,9,1), P(14,9,2), P(15,9,3) };
       if ( ( iBit < sizeof( awOrder ) / sizeof( awOrder[ 0 ] ) ) && ( awOrder[ iBit ] != NO_GPIO ) )
       {
         pdwResult = &pdwPinSel[ awOrder[ iBit ] ];
@@ -72,7 +72,7 @@ REG32 tGPIOpin::pdwGetConfigRegister()
     break;
   case 5:   // GPIO5[n]
     {
-      const word awOrder[] = { P(2,0), P(2,1), P(2,2), P(2,3), P(2,4), P(2,5), P(2,6), P(2,8), P(3,1), P(3,2), P(3,7), P(3,8), P(4,8), P(4,9), P(4,10), P(6,7), P(6,8), P(9,4), P(9,5), P(A,4), P(B,0), P(B,1), P(B,2), P(B,3), P(B,4), P(B,5), P(B,6) };
+      const word awOrder[] = { P(0,2,0), P(1,2,1), P(2,2,2), P(3,2,3), P(4,2,4), P(5,2,5), P(6,2,6), P(7,2,8), P(8,3,1), P(9,3,2), P(10,3,7), P(11,3,8), P(12,4,8), P(13,4,9), P(14,4,10), P(15,6,7), P(16,6,8), P(17,9,4), P(18,9,5), P(19,A,4), P(20,B,0), P(21,B,1), P(22,B,2), P(23,B,3), P(24,B,4), P(25,B,5), P(26,B,6) };
       if ( ( iBit < sizeof( awOrder ) / sizeof( awOrder[ 0 ] ) ) && ( awOrder[ iBit ] != NO_GPIO ) )
       {
         pdwResult = &pdwPinSel[ awOrder[ iBit ] ];
@@ -81,7 +81,7 @@ REG32 tGPIOpin::pdwGetConfigRegister()
     break;
   case 6:   // GPIO6[n]
     {
-      const word awOrder[] = { P(C,1), P(C,2), P(C,3), P(C,4), P(C,5), P(C,6), P(C,7), P(C,8), P(C,9), P(C,10), P(C,11), P(C,12), P(C,13), P(C,14), P(D,0), P(D,1), P(D,2), P(D,3), P(D,4), P(D,5), P(D,6), P(D,7), P(D,8), P(D,9), P(D,10), P(D,11), P(D,12), P(D,13), P(D,14), P(D,15), P(D,16) };
+      const word awOrder[] = { P(0,C,1), P(1,C,2), P(2,C,3), P(3,C,4), P(4,C,5), P(5,C,6), P(6,C,7), P(7,C,8), P(8,C,9), P(9,C,10), P(10,C,11), P(11,C,12), P(12,C,13), P(13,C,14), P(14,D,0), P(15,D,1), P(16,D,2), P(17,D,3), P(18,D,4), P(19,D,5), P(20,D,6), P(21,D,7), P(22,D,8), P(23,D,9), P(24,D,10), P(25,D,11), P(26,D,12), P(27,D,13), P(28,D,14), P(29,D,15), P(30,D,16) };
       if ( ( iBit < sizeof( awOrder ) / sizeof( awOrder[ 0 ] ) ) && ( awOrder[ iBit ] != NO_GPIO ) )
       {
         pdwResult = &pdwPinSel[ awOrder[ iBit ] ];
@@ -90,7 +90,7 @@ REG32 tGPIOpin::pdwGetConfigRegister()
     break;
   case 7:   // GPIO7[n]
     {
-      const word awOrder[] = { P(E,0), P(E,1), P(E,2), P(E,3), P(E,4), P(E,5), P(E,6), P(E,7), P(E,8), P(E,9), P(E,10), P(E,11), P(E,12), P(E,13), P(E,14), P(E,15), P(F,1), P(F,2), P(F,3), P(F,5), P(F,6), P(F,7), P(F,8), P(F,9), P(F,10), P(F,11) };
+      const word awOrder[] = { P(0,E,0), P(1,E,1), P(2,E,2), P(3,E,3), P(4,E,4), P(5,E,5), P(6,E,6), P(7,E,7), P(8,E,8), P(9,E,9), P(10,E,10), P(11,E,11), P(12,E,12), P(13,E,13), P(14,E,14), P(15,E,15), P(16,F,1), P(17,F,2), P(18,F,3), P(19,F,5), P(20,F,6), P(21,F,7), P(22,F,8), P(23,F,9), P(24,F,10), P(25,F,11) };
       if ( ( iBit < sizeof( awOrder ) / sizeof( awOrder[ 0 ] ) ) && ( awOrder[ iBit ] != NO_GPIO ) )
       {
         pdwResult = &pdwPinSel[ awOrder[ iBit ] ];

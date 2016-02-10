@@ -1,13 +1,7 @@
 <!DOCTYPE CrossStudio_Session_File>
 <session>
  <Bookmarks/>
- <Breakpoints>
-  <BreakpointListItem line="317" action="" hardwareBreakpoint="" trigger="" useHWbreakpoint="false" group="Breakpoints" type="Breakpoint" state="2" counter="0" isFunctionBreakpoint="false" filename="../app/app_main.cpp" expression="" />
-  <BreakpointListItem line="379" action="" hardwareBreakpoint="" trigger="" useHWbreakpoint="false" group="Breakpoints" type="Breakpoint" state="2" counter="0" isFunctionBreakpoint="false" filename="../app/DualDevice.c" expression="" />
-  <BreakpointListItem line="393" action="" hardwareBreakpoint="" trigger="" useHWbreakpoint="false" group="Breakpoints" type="Breakpoint" state="2" counter="0" isFunctionBreakpoint="false" filename="../app/DualDevice.c" expression="" />
-  <BreakpointListItem line="721" action="" hardwareBreakpoint="" trigger="" useHWbreakpoint="false" group="Breakpoints" type="Breakpoint" state="4" counter="0" isFunctionBreakpoint="false" filename="../app/hal.cpp" expression="" />
-  <BreakpointListItem line="229" action="" hardwareBreakpoint="" trigger="" useHWbreakpoint="false" group="Breakpoints" type="Breakpoint" state="2" counter="0" isFunctionBreakpoint="false" filename="../LPCUSBLib/Drivers/USB/Core/HAL/LPC18XX/HAL_LPC18xx.c" expression="" />
- </Breakpoints>
+ <Breakpoints/>
  <ExecutionProfileWindow/>
  <FrameBufferWindow>
   <FrameBufferWindow addressText="" bufferWidth="-1" bufferHeight="-1" addressSpace="" />
@@ -29,45 +23,23 @@
   <ProjectSessionItem path="index;index" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;app" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;dd" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;dotstack" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;dotstack;samples" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;dotstack;samples;common" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;dotstack;samples;common-freertos" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;dotstack;samples;lpc18xx" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;dotstack;samples;lpc18xx;common" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;dotstack;samples;lpc18xx;common;lpc1800cmsis" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;dotstack;samples;lpc18xx;common;lpc1800cmsis;Drivers" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;dotstack;samples;lpc18xx;common;lpc1800cmsis;Drivers;include" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;dotstack;samples;lpc18xx;common;lpc1800cmsis;Drivers;source" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;dotstack;samples;lpc18xx;freertos" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;dotstack;samples;lpc18xx;freertos;common" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;include" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;rtos" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;rtos;include" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;rtos;portable" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;rtos;portable;GCC" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;rtos;portable;GCC;ARM_CM3" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;rtos;portable;MemMang" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;usblib" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;usblib;Chips_Support" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;usblib;Common" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;usblib;doc" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;usblib;Drivers" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB;Class" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB;Class;Device" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB;Core" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB;Core;DCD" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB;Core;DCD;LPC18XX" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB;Core;HAL" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB;Core;HAL;LPC17XX" name="unnamed" />
   <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB;Core;HAL;LPC18XX" name="unnamed" />
-  <ProjectSessionItem path="index;index;Source Files;usblib;Drivers;USB;Core;HCD" name="unnamed" />
   <ProjectSessionItem path="index;index;System Files" name="unnamed" />
  </Project>
  <Register1>
-  <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" unsignedNodes="" decimalNodes="" octalNodes="" asciiNodes="" visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/msp;CPU/psp;CPU/cfbp" name="index" />
+  <RegisterWindow openNodes="CPU - Current Context;CGU;CGU/IDIVA_CTRL;CGU/IDIVB_CTRL;CGU/IDIVC_CTRL;CGU/IDIVD_CTRL;CGU/IDIVE_CTRL;CGU/BASE_USB0_CLK;CGU/BASE_USB1_CLK" binaryNodes="" unsignedNodes="" decimalNodes="" octalNodes="" asciiNodes="" visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/msp;CPU/psp;CPU/cfbp;CGU/FREQ_MON;CGU/XTAL_OSC_CTRL;CGU/PLL0USB_STAT;CGU/PLL0USB_CTRL;CGU/PLL0USB_MDIV;CGU/PLL0USB_NP_DIV;CGU/PLL0AUDIO_STAT;CGU/PLL0AUDIO_CTRL;CGU/PLL0AUDIO_MDIV;CGU/PLL0AUDIO_NP_DIV;CGU/PLL0AUDIO_FRAC;CGU/PLL1_STAT;CGU/PLL1_CTRL;CGU/IDIVA_CTRL;CGU/IDIVB_CTRL;CGU/IDIVC_CTRL;CGU/IDIVD_CTRL;CGU/IDIVE_CTRL;CGU/BASE_SAFE_CLK;CGU/BASE_USB0_CLK;CGU/BASE_USB1_CLK;CGU/BASE_M3_CLK;CGU/BASE_SPIFI_CLK;CGU/BASE_PHY_RX_CLK;CGU/BASE_PHY_TX_CLK;CGU/BASE_APB1_CLK;CGU/BASE_APB3_CLK;CGU/BASE_LCD_CLK;CGU/BASE_SDIO_CLK;CGU/BASE_SSP0_CLK;CGU/BASE_SSP1_CLK;CGU/BASE_UART0_CLK;CGU/BASE_UART1_CLK;CGU/BASE_UART2_CLK;CGU/BASE_UART3_CLK;CGU/BASE_OUT_CLK;CGU/BASE_APLL_CLK;CGU/BASE_CGU_OUT0_CLK;CGU/BASE_CGU_OUT1_CLK" name="index" />
  </Register1>
  <Register2>
   <RegisterWindow openNodes="CPU - Current Context" binaryNodes="" unsignedNodes="" decimalNodes="" octalNodes="" asciiNodes="" visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/msp;CPU/psp;CPU/cfbp" name="index" />
@@ -95,84 +67,38 @@
   <Watches active="0" update="Never" />
  </Watch4>
  <Files>
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="4" debugPath="../app/app_main.cpp" y="316" path="../app/app_main.cpp" left="0" selected="1" name="unnamed" top="360" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/helpers.cpp" y="503" path="../app/helpers.cpp" left="0" selected="0" name="unnamed" top="499" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/helpers.hpp" y="120" path="../include/helpers.hpp" left="0" selected="0" name="unnamed" top="101" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/FreeRTOSConfig.h" y="74" path="../include/FreeRTOSConfig.h" left="0" selected="0" name="unnamed" top="117" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../rtos/include/timers.h" y="233" path="../rtos/include/timers.h" left="0" selected="0" name="unnamed" top="196" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../rtos/include/list.h" y="0" path="../rtos/include/list.h" left="0" selected="0" name="unnamed" top="117" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dotstack/samples/lpc18xx/freertos/common/freertos_hooks.c" y="44" path="../dotstack/samples/lpc18xx/freertos/common/freertos_hooks.c" left="0" selected="0" name="unnamed" top="7" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="12" debugPath="../app/hal.cpp" y="290" path="../app/hal.cpp" left="0" selected="0" name="unnamed" top="269" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/lpcapp.c" y="1034" path="../app/lpcapp.c" left="0" selected="0" name="unnamed" top="1016" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/global.h" y="43" path="../include/global.h" left="0" selected="0" name="unnamed" top="59" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="25" debugPath="../include/proj_defs.h" y="76" path="../include/proj_defs.h" left="0" selected="0" name="unnamed" top="59" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="2" debugPath="../app/haltest.c" y="215" path="../app/haltest.c" left="0" selected="0" name="unnamed" top="188" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/test_msgs.c" y="32" path="../app/test_msgs.c" left="0" selected="0" name="unnamed" top="3" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dd/adc_dd.cpp" y="33" path="../dd/adc_dd.cpp" left="0" selected="0" name="unnamed" top="9" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="12" debugPath="../include/gpio_pindefs.hpp" y="7" path="../include/gpio_pindefs.hpp" left="0" selected="0" name="unnamed" top="3" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="" x="35" debugPath="../dd/gpio_dd.cpp" y="366" path="../dd/gpio_dd.cpp" left="0" selected="0" name="unnamed" top="366" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="" x="0" debugPath="../rtos/tasks.c" y="2174" path="../rtos/tasks.c" left="0" selected="0" name="unnamed" top="2156" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../rtos/portable/MemMang/heap_2.c" y="0" path="../rtos/portable/MemMang/heap_2.c" left="0" selected="0" name="unnamed" top="63" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="43" debugPath="flash_placement.xml" y="42" path="flash_placement.xml" left="0" selected="0" name="unnamed" top="12" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="7" debugPath="../dotstack/samples/lpc18xx/freertos/common/main.c" y="30" path="../dotstack/samples/lpc18xx/freertos/common/main.c" left="0" selected="0" name="unnamed" top="9" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="43" debugPath="../dotstack/samples/common-freertos/bttask.c" y="175" path="../dotstack/samples/common-freertos/bttask.c" left="0" selected="0" name="unnamed" top="162" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/core/hal/LPC18XX/HAL_LPC18xx.h" y="39" path="../lpcusblib/drivers/usb/core/hal/LPC18XX/HAL_LPC18xx.h" left="0" selected="0" name="unnamed" top="25" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="8" debugPath="../dotstack/samples/lpc18xx/common/lpc1800cmsis/core/device/nxp/lpc18xx/include/LPC18xx.h" y="32279" path="../dotstack/samples/lpc18xx/common/lpc1800cmsis/core/device/nxp/lpc18xx/include/LPC18xx.h" left="0" selected="0" name="unnamed" top="32264" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/chip.h" y="39" path="../lpcusblib/indexsupport/chip.h" left="0" selected="0" name="unnamed" top="21" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/chip_lpc18xx.h" y="211" path="../lpcusblib/indexsupport/chip_lpc18xx.h" left="0" selected="0" name="unnamed" top="199" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/adc_001.h" y="53" path="../lpcusblib/indexsupport/adc_001.h" left="0" selected="0" name="unnamed" top="28" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/cguccu_18xx_43xx.h" y="65" path="../lpcusblib/indexsupport/cguccu_18xx_43xx.h" left="0" selected="0" name="unnamed" top="43" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="83" debugPath="../LPCUSBLib/Drivers/USB/Core/Endpoint.c" y="42" path="../LPCUSBLib/Drivers/USB/Core/Endpoint.c" left="0" selected="0" name="unnamed" top="23" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="19" debugPath="../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include/lpc_types.h" y="40" path="../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include/lpc_types.h" left="0" selected="0" name="unnamed" top="34" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="5" debugPath="../lpcusblib/drivers/usb/core/hal/HAL.h" y="72" path="../lpcusblib/drivers/usb/core/hal/HAL.h" left="0" selected="0" name="unnamed" top="52" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/usart_001.h" y="37" path="../lpcusblib/indexsupport/usart_001.h" left="0" selected="0" name="unnamed" top="26" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="45" debugPath="../LPCUSBLib/Drivers/USB/Core/HAL/LPC18XX/HAL_LPC18xx.c" y="245" path="../LPCUSBLib/Drivers/USB/Core/HAL/LPC18XX/HAL_LPC18xx.c" left="0" selected="0" name="unnamed" top="245" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="20" debugPath="../dotstack/samples/lpc18xx/common/lpc1800cmsis/Drivers/source/lpc18xx_cgu.c" y="943" path="../dotstack/samples/lpc18xx/common/lpc1800cmsis/Drivers/source/lpc18xx_cgu.c" left="0" selected="0" name="unnamed" top="940" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include/lpc18xx_scu.h" y="120" path="../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include/lpc18xx_scu.h" left="0" selected="0" name="unnamed" top="87" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="21" debugPath="../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include/lpc18xx_cgu.h" y="119" path="../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include/lpc18xx_cgu.h" left="0" selected="0" name="unnamed" top="114" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include/lpc18xx_uart.h" y="630" path="../dotstack/samples/lpc18xx/common/lpc1800cmsis/drivers/include/lpc18xx_uart.h" left="0" selected="0" name="unnamed" top="597" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/enet_001.h" y="523" path="../lpcusblib/indexsupport/enet_001.h" left="0" selected="0" name="unnamed" top="490" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Common/Common.h" y="57" path="../LPCUSBLib/Common/Common.h" left="0" selected="0" name="unnamed" top="33" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="C:/Program Files (x86)/Rowley Associates Limited/CrossWorks for ARM 3.6/include/stdbool.h" y="0" path="C:/Program Files (x86)/Rowley Associates Limited/CrossWorks for ARM 3.6/include/stdbool.h" left="0" selected="0" name="unnamed" top="0" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/gpio_001.h" y="109" path="../lpcusblib/indexsupport/gpio_001.h" left="0" selected="0" name="unnamed" top="79" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/gpiogrpint_001.h" y="76" path="../lpcusblib/indexsupport/gpiogrpint_001.h" left="0" selected="0" name="unnamed" top="46" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/gpiopinint_001.h" y="88" path="../lpcusblib/indexsupport/gpiopinint_001.h" left="0" selected="0" name="unnamed" top="57" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/i2c_001.h" y="405" path="../lpcusblib/indexsupport/i2c_001.h" left="0" selected="0" name="unnamed" top="374" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/timer_001.h" y="103" path="../lpcusblib/indexsupport/timer_001.h" left="0" selected="0" name="unnamed" top="72" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/rgu_18xx_43xx.h" y="128" path="../lpcusblib/indexsupport/rgu_18xx_43xx.h" left="0" selected="0" name="unnamed" top="106" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/HAL/LPC17XX/HAL_LPC17xx.h" y="49" path="../LPCUSBLib/Drivers/USB/Core/HAL/LPC17XX/HAL_LPC17xx.h" left="0" selected="0" name="unnamed" top="26" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/IndexSupport/cr_section_macros.h" y="0" path="../LPCUSBLib/IndexSupport/cr_section_macros.h" left="0" selected="0" name="unnamed" top="36" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/cmsis.h" y="35" path="../lpcusblib/indexsupport/cmsis.h" left="0" selected="0" name="unnamed" top="35" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/sct_001.h" y="35" path="../lpcusblib/indexsupport/sct_001.h" left="0" selected="0" name="unnamed" top="5" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/Core/HCD/HCD.h" y="40" path="../lpcusblib/drivers/usb/Core/HCD/HCD.h" left="0" selected="0" name="unnamed" top="10" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/Core/Pipe.h" y="115" path="../lpcusblib/drivers/usb/Core/Pipe.h" left="0" selected="0" name="unnamed" top="86" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/Core/USBController.h" y="114" path="../lpcusblib/drivers/usb/Core/USBController.h" left="0" selected="0" name="unnamed" top="85" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/Core/USBTask.h" y="39" path="../lpcusblib/drivers/usb/Core/USBTask.h" left="0" selected="0" name="unnamed" top="13" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/USB.h" y="359" path="../lpcusblib/drivers/usb/USB.h" left="0" selected="0" name="unnamed" top="342" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/class/device/AudioClassDevice.h" y="49" path="../lpcusblib/drivers/usb/class/device/AudioClassDevice.h" left="0" selected="0" name="unnamed" top="32" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Class/Device/AudioClassDevice.c" y="40" path="../LPCUSBLib/Drivers/USB/Class/Device/AudioClassDevice.c" left="0" selected="0" name="unnamed" top="17" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="5" debugPath="../app/CDC.c" y="210" path="../app/CDC.c" left="0" selected="0" name="unnamed" top="199" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="40" debugPath="../app/CDCDescriptors.c" y="215" path="../app/CDCDescriptors.c" left="0" selected="0" name="unnamed" top="174" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/DualDevice.c" y="423" path="../app/DualDevice.c" left="0" selected="0" name="unnamed" top="405" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="2" debugPath="../app/CDC.h" y="40" path="../app/CDC.h" left="0" selected="0" name="unnamed" top="19" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/dbgapi.h" y="0" path="../include/dbgapi.h" left="0" selected="0" name="unnamed" top="39" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/indexsupport/sys_config.h" y="50" path="../lpcusblib/indexsupport/sys_config.h" left="0" selected="0" name="unnamed" top="38" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dotstack/samples/lpc18xx/common/lpc1800cmsis/Drivers/source/debug_frmwrk.c" y="258" path="../dotstack/samples/lpc18xx/common/lpc1800cmsis/Drivers/source/debug_frmwrk.c" left="0" selected="0" name="unnamed" top="244" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dotstack/samples/lpc18xx/common/lpc1800cmsis/Drivers/include/debug_frmwrk.h" y="51" path="../dotstack/samples/lpc18xx/common/lpc1800cmsis/Drivers/include/debug_frmwrk.h" left="0" selected="0" name="unnamed" top="45" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dd/ser_dd.cpp" y="862" path="../dd/ser_dd.cpp" left="0" selected="0" name="unnamed" top="832" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/cli.c" y="450" path="../app/cli.c" left="0" selected="0" name="unnamed" top="423" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dotstack/samples/lpc18xx/freertos/common/btport_csr881x.c" y="734" path="../dotstack/samples/lpc18xx/freertos/common/btport_csr881x.c" left="0" selected="0" name="unnamed" top="707" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dotstack/samples/lpc18xx/common/board.h" y="14" path="../dotstack/samples/lpc18xx/common/board.h" left="0" selected="0" name="unnamed" top="0" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/msg_format.h" y="336" path="../include/msg_format.h" left="0" selected="0" name="unnamed" top="333" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="1" debugPath="../LPCUSBLib/Drivers/USB/Core/USBController.c" y="53" path="../LPCUSBLib/Drivers/USB/Core/USBController.c" left="0" selected="0" name="unnamed" top="35" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="" x="0" debugPath="../lpcusblib/drivers/usb/Core/DCD/LPC18XX/Endpoint_LPC18xx.h" y="482" path="../lpcusblib/drivers/usb/Core/DCD/LPC18XX/Endpoint_LPC18xx.h" left="0" selected="0" name="unnamed" top="465" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="" x="28" debugPath="../LPCUSBLib/Drivers/USB/Core/DeviceStandardReq.c" y="131" path="../LPCUSBLib/Drivers/USB/Core/DeviceStandardReq.c" left="0" selected="0" name="unnamed" top="111" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/USBTask.c" y="75" path="../LPCUSBLib/Drivers/USB/Core/USBTask.c" left="0" selected="0" name="unnamed" top="48" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="" x="0" debugPath="../rtos/portable/GCC/ARM_CM3/port.c" y="214" path="../rtos/portable/GCC/ARM_CM3/port.c" left="0" selected="0" name="unnamed" top="196" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/DCD/LPC18XX/Endpoint_LPC18xx.c" y="80" path="../LPCUSBLib/Drivers/USB/Core/DCD/LPC18XX/Endpoint_LPC18xx.c" left="0" selected="0" name="unnamed" top="54" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Common/Attributes.h" y="136" path="../LPCUSBLib/Common/Attributes.h" left="0" selected="0" name="unnamed" top="114" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/USBMemory.c" y="83" path="../LPCUSBLib/Drivers/USB/Core/USBMemory.c" left="0" selected="0" name="unnamed" top="52" />
-  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/LPCUSBlibConfig.h" y="53" path="../LPCUSBLib/LPCUSBlibConfig.h" left="0" selected="0" name="unnamed" top="30" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="33" debugPath="../app/app_main.cpp" y="410" path="../app/app_main.cpp" left="0" selected="0" name="unnamed" top="125" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="5" debugPath="../app/lpcapp.c" y="609" path="../app/lpcapp.c" left="0" selected="0" name="unnamed" top="592" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/proj_defs.h" y="61" path="../include/proj_defs.h" left="0" selected="0" name="unnamed" top="57" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/msg_format.h" y="159" path="../include/msg_format.h" left="0" selected="0" name="unnamed" top="116" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/lpcapp.h" y="50" path="../include/lpcapp.h" left="0" selected="0" name="unnamed" top="12" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="17" debugPath="../app/hal.cpp" y="697" path="../app/hal.cpp" left="0" selected="0" name="unnamed" top="575" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/gpio_pindefs.hpp" y="17" path="../include/gpio_pindefs.hpp" left="0" selected="0" name="unnamed" top="9" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="17" debugPath="../LPCUSBLib/Drivers/USB/Core/HAL/LPC18XX/HAL_LPC18xx.c" y="225" path="../LPCUSBLib/Drivers/USB/Core/HAL/LPC18XX/HAL_LPC18xx.c" left="0" selected="0" name="unnamed" top="248" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/DualDevice.c" y="403" path="../app/DualDevice.c" left="0" selected="0" name="unnamed" top="383" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dd/gpio_dd.cpp" y="429" path="../dd/gpio_dd.cpp" left="0" selected="0" name="unnamed" top="387" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../rtos/tasks.c" y="2174" path="../rtos/tasks.c" left="0" selected="0" name="unnamed" top="2151" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/cli.c" y="31" path="../app/cli.c" left="0" selected="0" name="unnamed" top="20" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/protocol_msg.c" y="0" path="../app/protocol_msg.c" left="0" selected="0" name="unnamed" top="147" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/CDC.c" y="207" path="../app/CDC.c" left="0" selected="0" name="unnamed" top="191" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/USBTask.c" y="90" path="../LPCUSBLib/Drivers/USB/Core/USBTask.c" left="0" selected="0" name="unnamed" top="86" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dd/ser_dd.cpp" y="551" path="../dd/ser_dd.cpp" left="0" selected="0" name="unnamed" top="547" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../rtos/queue.c" y="554" path="../rtos/queue.c" left="0" selected="0" name="unnamed" top="531" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../app/helpers.cpp" y="449" path="../app/helpers.cpp" left="0" selected="0" name="unnamed" top="437" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../dotstack/samples/lpc18xx/common/lpc1800cmsis/Drivers/source/lpc18xx_cgu.c" y="747" path="../dotstack/samples/lpc18xx/common/lpc1800cmsis/Drivers/source/lpc18xx_cgu.c" left="0" selected="1" name="unnamed" top="582" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Class/Host/CDCClassHost.c" y="236" path="../LPCUSBLib/Drivers/USB/Class/Host/CDCClassHost.c" left="0" selected="0" name="unnamed" top="214" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/USBController.c" y="39" path="../LPCUSBLib/Drivers/USB/Core/USBController.c" left="0" selected="0" name="unnamed" top="6" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Class/Device/CDCClassDevice.c" y="248" path="../LPCUSBLib/Drivers/USB/Class/Device/CDCClassDevice.c" left="0" selected="0" name="unnamed" top="224" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/Host.c" y="135" path="../LPCUSBLib/Drivers/USB/Core/Host.c" left="0" selected="0" name="unnamed" top="116" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/HCD/OHCI/OHCI.c" y="406" path="../LPCUSBLib/Drivers/USB/Core/HCD/OHCI/OHCI.c" left="0" selected="0" name="unnamed" top="371" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/HCD/EHCI/EHCI.c" y="1100" path="../LPCUSBLib/Drivers/USB/Core/HCD/EHCI/EHCI.c" left="0" selected="0" name="unnamed" top="1071" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/Core/Pipe.h" y="283" path="../lpcusblib/drivers/usb/Core/Pipe.h" left="0" selected="0" name="unnamed" top="279" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../include/gpio_dd.hpp" y="181" path="../include/gpio_dd.hpp" left="0" selected="0" name="unnamed" top="154" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="LPC1800_Startup.s" y="75" path="LPC1800_Startup.s" left="0" selected="0" name="unnamed" top="52" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/Core/Endpoint.h" y="203" path="../lpcusblib/drivers/usb/Core/Endpoint.h" left="0" selected="0" name="unnamed" top="180" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../lpcusblib/drivers/usb/Core/DCD/LPC18XX/Endpoint_LPC18xx.h" y="515" path="../lpcusblib/drivers/usb/Core/DCD/LPC18XX/Endpoint_LPC18xx.h" left="0" selected="0" name="unnamed" top="492" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/Host.h" y="185" path="../LPCUSBLib/Drivers/USB/Core/Host.h" left="0" selected="0" name="unnamed" top="181" />
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" codecName="Default" x="0" debugPath="../LPCUSBLib/Drivers/USB/Core/HostStandardReq.c" y="247" path="../LPCUSBLib/Drivers/USB/Core/HostStandardReq.c" left="0" selected="0" name="unnamed" top="244" />
  </Files>
- <ARMCrossStudioWindow activeProject="index" autoConnectTarget="SEGGER J-Link" debugSearchFileMap="" fileDialogInitialDirectory="C:/Users/Nick/Projects/INDEX/trunk/fw/include" fileDialogDefaultFilter="" autoConnectCapabilities="1663" debugSearchPath="" buildConfiguration="THUMB Debug" />
+ <ARMCrossStudioWindow activeProject="index" autoConnectTarget="SEGGER J-Link" debugSearchFileMap="" fileDialogInitialDirectory="C:/Users/Nick/Projects/INDEX/trunk/fw/include" fileDialogDefaultFilter="*.c" autoConnectCapabilities="1663" debugSearchPath="" buildConfiguration="THUMB Debug" />
 </session>

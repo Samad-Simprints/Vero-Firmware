@@ -225,6 +225,8 @@ void HAL_USBInit(uint8_t corenum)
  *********************************************************************/
  void HAL_USBInit(uint8_t corenum)
  {
+ uint32_t iFreq;
+
    /* Just exit if already enabled */
   if (!coreEnabled[corenum])
   {
@@ -239,23 +241,42 @@ void HAL_USBInit(uint8_t corenum)
              while(1);
 
       CGU_EntityConnect(CGU_CLKSRC_XTAL_OSC, CGU_CLKSRC_PLL0);
-    }
-
-    if(corenum == 0)
-    {
-      /* connect CLK_USB0 to CPU 180MHz clock */
-      CGU_EntityConnect(CGU_CLKSRC_PLL0, CGU_BASE_USB0);
 
       /* Enable PLL after all setting is done */
       CGU_EnableEntity(CGU_CLKSRC_PLL0, ENABLE);
 
+    }
+
+    if(corenum == 0)
+    {
+      /* connect CLK_USB0 to 480MHz clock */
+      CGU_EntityConnect(CGU_CLKSRC_PLL0, CGU_BASE_USB0);
+      CGU_EnableEntity(CGU_BASE_USB0, ENABLE);
+
       /* Turn on the phy */
       LPC_CREG->CREG0 &= ~(1<<5);
+
+      iFreq = CGU_GetPCLKFrequency(CGU_PERIPHERAL_USB0);
     }
     else
     {
+#if 1
+      // generate 60MHz clock from 480MHz USB0 PLL (via divide by 8 prescaler (/2 /4))
+      CGU_EntityConnect(CGU_CLKSRC_PLL0, CGU_CLKSRC_IDIVA);
+      CGU_SetDIV(CGU_CLKSRC_IDIVA, 2);
+      CGU_EntityConnect(CGU_CLKSRC_IDIVA, CGU_CLKSRC_IDIVB);
+      CGU_SetDIV(CGU_CLKSRC_IDIVB, 4);
+      CGU_EntityConnect(CGU_CLKSRC_IDIVB, CGU_BASE_USB1);
+      CGU_EnableEntity(CGU_CLKSRC_IDIVA, ENABLE);
+      CGU_EnableEntity(CGU_CLKSRC_IDIVB, ENABLE);
+      CGU_EnableEntity(CGU_BASE_USB1, ENABLE);
+
+      iFreq = CGU_GetPCLKFrequency(CGU_PERIPHERAL_USB1);
+
+#else
       /* connect CLK_USB1 to CPU 180MHz clock */
       CGU_EntityConnect(CGU_CLKSRC_PLL1, CGU_BASE_USB1);
+#endif
 
       /* Turn on the phy */
       LPC_CREG->CREG0 &= ~(1<<5);
@@ -282,7 +303,7 @@ void HAL_USBInit(uint8_t corenum)
 
   /* Program the controller to be the USB device controller */
   USB_REG(corenum)->USBMODE_D =   (0x2<<0)/*| (1<<4)*//*| (1<<3)*/ ;
-  if(corenum==0)
+  if(corenum == 0)
   {
     /* set OTG transcever in proper state, device is present
     on the port(CCS=1), port enable/disable status change(PES=1). */

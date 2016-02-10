@@ -33,6 +33,7 @@
 #include "lpc18xx_scu.h"
 #include "lpc18xx_cgu.h"
 #include "task.h"
+#include "gpio_dd.hpp"
 
 void FenSerial_Send_Data ( USB_ClassInfo_CDC_Device_t* CDCInterfaceInfo, USB_ClassInfo_CDC_Host_t* CDCHostInterfaceInfo );
 void FenSerial_Debug( char *format, ... );
@@ -341,7 +342,7 @@ void EVENT_USB_Host_DeviceEnumerationFailed ( const uint8_t corenum, const uint8
                   corenum, ErrorCode, SubErrorCode, USB_HostState[corenum]));
 }
 
-void Board_Init(void)
+void xBoard_Init(void)
 {
   scu_pinmux(0x9, 5, (MD_PDN | MD_EZI), FUNC4);           /* P9_5 GPIO5[18] USB1_PWR_EN, USB1 VBus function */
   scu_pinmux(0x2, 5, (MD_PDN | MD_EZI | MD_ZI), FUNC2);   /* P2_5 USB1_VBUS, MUST CONFIGURE THIS SIGNAL FOR USB1 NORMAL OPERATION */
@@ -357,7 +358,7 @@ void Board_Init(void)
   scu_pinmux(0x8, 4, (MD_PDN | MD_EZI), FUNC0);           /* P8_4, 4[4] USBILIM1 */
 
   GPIO_SetDir( 3, (1UL << 2),true);                       /* GPIO3[2] */
-  GPIO_ClearValue(3, 1UL << (2));                         /* GPIO3[2] output low */
+  GPIO_SetValue(3, 1UL << (2));                           /* GPIO3[2] output high */
 
   GPIO_SetDir( 4, (1L << 2),true);                        /* GPIO4[2] */
   GPIO_SetValue( 4, 1L << 2);                             /* GPIO4[2] output high */
@@ -368,6 +369,32 @@ void Board_Init(void)
   GPIO_SetDir( 4, 4, true);                               /* GPIO4[4] */
   GPIO_SetValue( 4, (1L << 4));                           /* GPIO4[4] output high */
 }
+
+/* Pin initialization using gpio_pindefs where possible
+ */
+void Board_Init(void)
+{
+ // scu_pinmux(0x2, 5, (MD_PDN | MD_EZI | MD_ZI), FUNC2);   /* P2_5 USB1_VBUS, MUST CONFIGURE THIS SIGNAL FOR USB1 NORMAL OPERATION */
+  scu_pinmux(0x6, 3, (MD_PDN | MD_EZI), FUNC1);           /* P6_3 USB0_PWR_EN, USB0 VBus function Xplorer */
+
+  // Configure USB1 Pins
+  vGPIODDconfigurePin( USB_VBUS_PWR_EN );               // pin 9_5 GPIO5[18]
+
+  // Configure USB0 Pins
+  vGPIODDconfigurePin( USB_HOST_PWR_EN );               // pin 6_3 GPIO3[2]
+  vGPIODDconfigurePin( USB_HOST_nCON );                 // pin 8_2 GPIO4[2]
+  vGPIODDconfigurePin( USB_HOST_ILIM0 );                // pin 8_3 GPIO4[3]
+  vGPIODDconfigurePin( USB_HOST_ILIM1 );                // pin 8_4 GPIO4[4]
+
+  // set to required state
+  vGPIODDsetInactive(USB_VBUS_PWR_EN);  // set low (USB 1)
+
+  vGPIODDsetInactive(USB_HOST_PWR_EN);  // set low (USB 0)
+  vGPIODDsetInactive(USB_HOST_nCON);    // set high  "
+  vGPIODDsetActive(USB_HOST_ILIM0);     // set high  "
+  vGPIODDsetActive(USB_HOST_ILIM1);     // set high  "
+}
+
 
 static void USBTaskProc(void* params)
 {
@@ -431,6 +458,10 @@ static void USBTaskProc(void* params)
       FenSerial_Send_Data( &CDC_Device_Interface, &CDC_Host_Interface );
 
       // Switch over to DEVICE mode
+
+
+
+
       if( Button1State == BUTTON_PENDING )
       {
         Button1State = BUTTON_COMPLETE;

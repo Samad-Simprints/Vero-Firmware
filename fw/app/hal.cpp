@@ -64,6 +64,9 @@ enum {
 //******************************************************************************
 // Definitions
 //******************************************************************************
+
+#define UN20_POWERON_DELAY_MS         100
+
 #define _QUOTEME(x)                              #x
 #define QUOTEME(x)                               _QUOTEME(x)
 
@@ -167,6 +170,7 @@ static bool boBattery( char **papzArgs, int iInstance, int iNumArgs );
 static bool boOff( char **papzArgs, int iInstance, int iNumArgs );
 static bool boVibrate( char **papzArgs, int iInstance, int iNumArgs );
 
+static bool boVbus( char **papzArgs, int iInstance, int iNumArgs );
 
 static const tParserEntry asHalCLI[] =
 {
@@ -182,6 +186,7 @@ static const tParserEntry asHalCLI[] =
   CLICMD("battery",               "Battery state", 2, "", boBattery, 0),
   CLICMD("off",                   "Power off", 1, "", boOff, 0),
   CLICMD("vibrate",               "Vibrate state", 2, "", boVibrate, 0),
+  CLICMD("vbus",                  "Vbus state", 2, "", boVbus, 0),
 
 };
 
@@ -291,6 +296,17 @@ static bool boUn20Reset( char **papzArgs, int iInstance, int iNumArgs )
   int iReset = atoi(papzArgs[1]);
 
   vUn20Reset(iReset);
+
+  return true;
+}
+
+static bool boVbus( char **papzArgs, int iInstance, int iNumArgs )
+{
+  int iOn = atoi(papzArgs[1]);
+
+  CLI_PRINT(("vBus: %d\n", iOn));
+
+  USB_VBUS_PWR_EN->vSet( iOn );
 
   return true;
 }
@@ -471,9 +487,31 @@ static bool boBt( char **papzArgs, int iInstance, int iNumArgs )
   return true;
 }
 
+//
+//
+//
 void vHalInit(void)
 {
   DEBUG_MODULE_INIT( HAL_FD );
+
+#if !defined(EVAL_BOARD)
+  // Latch the power on to the CPU
+  nPWR_DOWN->vConfigure();
+  nPWR_DOWN->vSet( false );
+
+  // Make sure the UN20 is reset
+  UN20B_nRESET->vConfigure();
+  UN20B_nRESET->vSet( true );
+
+  // Make sure the UN20 is powered off
+  UN20B_POWER->vConfigure();
+  UN20B_POWER->vSet( false );
+
+  //USB_VBUS_PWR_EN->vConfigure();
+#endif
+
+  // Initialise the UI elements
+  vUiInit();
 
   boCLIregisterEntry( &asHalMainCLI );
   
@@ -495,30 +533,6 @@ static void vNullUsbCallback(void *context, tInterfaceEvent event, void *event_d
 }
 
 //
-void vEmcInit()
-{
-  DEBUGMSG(ZONE_COMMANDS,("vEmcInit()\n"));
-}
-
-void vAnalogInit()
-{
-  DEBUGMSG(ZONE_COMMANDS,("vAnalogInit()\n"));
-}
-
-void vGpioInit()
-{
-  DEBUGMSG(ZONE_COMMANDS,("vGpioInit()\n"));
-}
-
-void vSpiInit()
-{
-  DEBUGMSG(ZONE_COMMANDS,("vSpiInit()\n"));
-}
-
-void vDebugInit()
-{
-  DEBUGMSG(ZONE_COMMANDS,("vDebugInit()\n"));
-}
 
 // route an interrupt to the correct handler
 static void vUIIsr( const IRQn_Type eNVICchannel )
@@ -564,13 +578,14 @@ void vUiInit()
   BUTTON_1_SCAN->vConfigure();
 
   // register callbacks for the buttons
-#if 1
   vGPIODDsetPinInterruptHandler( BUTTON_0_POWER,  PIN_INT1_IRQn, /*ieBoth*/ ieFalling, ::vUIIsr );
   vGPIODDsetPinInterruptHandler( BUTTON_1_SCAN, PIN_INT2_IRQn, /*ieBoth*/ ieFalling,  ::vUIIsr );
 #endif
-#endif
 }
 
+//
+//
+//
 void vUiLedSet(tLeds eLed, tColorOptions eColor)
 {
   SIMPLEASSERT(eLed < LED_MAX_LED_COUNT);
@@ -625,7 +640,133 @@ void vUiButtonCapture(vCallback pvCallback, void *pvData)
   pvCaptureCallback = pvCallback;
 }
 
-  
+void vUn20Reset( bool boReset )	// reset the UN20
+{
+#if !defined(EVAL_BOARD)
+  UN20B_nRESET->vSet( boReset );
+#endif
+  DEBUGMSG(ZONE_COMMANDS,("vUn20OReset: %s\n", (boReset ? "On" : "Off")));
+}
+
+void vPowerUsbOff()
+{
+#if !defined(EVAL_BOARD)
+#endif
+  DEBUGMSG(ZONE_COMMANDS,("vPowerUsbOff()\n"));
+}
+
+void vPowerUsbOn()
+{
+#if !defined(EVAL_BOARD)
+#endif
+  DEBUGMSG(ZONE_COMMANDS,("vPowerUsbOn()\n"));
+}
+
+void vPowerBtOff()
+{
+  DEBUGMSG(ZONE_COMMANDS,("vPowerBtOff()\n"));
+}
+
+void vPowerBtOn()
+{
+  DEBUGMSG(ZONE_COMMANDS,("vPowerBtOn()\n"));
+}
+
+void vPowerUn20Off()	// turn off the UN20 (takes 2 seconds){
+{
+  tEventConnDisconn sEventData;
+
+  DEBUGMSG(ZONE_COMMANDS,("vPowerUn20Off()\n"));
+
+  if ( pvUsbPhoneCallback != NULL )
+  {
+    sEventData.eInterface = USB_UN20;
+    pvUsbUn20Callback( pvUsbUn20Context, INTERFACE_EVENT_DISCONNECTED, &sEventData );
+  }
+#if !defined(EVAL_BOARD)
+  UN20B_nRESET->vSet( true );
+
+  USB_VBUS_PWR_EN->vSet( false );
+
+  UN20B_POWER->vSet( false );
+#endif
+}
+
+//
+// turn on power to the UN20 (takes 5 seconds to become ready)
+//
+void vPowerUn20On()
+{
+  SIMPLEASSERT( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING );
+
+  DEBUGMSG(ZONE_COMMANDS,("vPowerUn20On()\n"));
+
+#if !defined(EVAL_BOARD)
+  UN20B_nRESET->vSet( true );
+  UN20B_POWER->vSet( true );
+  vTaskDelay(MS_TO_TICKS(UN20_POWERON_DELAY_MS));
+
+  USB_VBUS_PWR_EN->vSet( true );
+
+  UN20B_nRESET->vSet( false );
+
+#endif
+}
+
+/* Not expected to return from this call
+ */
+void vPowerSelfOff()	// turn the LPC1800 off (Power button wakes)
+{
+  DEBUGMSG(ZONE_COMMANDS,("vPowerSelfOff()\n"));
+#if !defined(EVAL_BOARD)
+  nPWR_DOWN->vSet( true );
+  //CLI_PRINT(("NOTE: Hardware power off disabled\n"));
+#endif
+  for (;;);
+}
+
+void vPowerSelfOn()	// called early to latch power on
+{
+  DEBUGMSG(ZONE_COMMANDS,("vPowerSelfOn()\n"));
+#if !defined(EVAL_BOARD)
+  nPWR_DOWN->vSet( false );
+#endif
+}
+
+//
+// register for notification of power button press
+//
+void vPowerSelfNotify(vCallback pvCallback)
+{
+  DEBUGMSG(ZONE_COMMANDS,("vPowerSelfNotify()\n"));
+  pvPoweroffCallback = pvCallback;
+}
+//
+// read the battery voltages (2 channels available)
+//
+int iBatteryVoltage(int iChannel)
+{
+  int iChannelValue = (iChannel + 1) * 100;
+
+  SIMPLEASSERT( (iChannel >= 0) && (iChannel <= 1) );
+
+#if !defined(EVAL_BOARD)
+  poADC0 = poADCDDgetUnit( 0 );
+  // read raw value from SDC
+  iChannelValue = poADC0->iReadChannel( iChannel );
+
+  // calculate result in mV taking into account VREF and conditioning logic
+  iChannelValue = (((( (3300 * 100) / 1023 ) * iChannelValue) / 100) * 2);
+#endif
+
+  DEBUGMSG(ZONE_COMMANDS,("iBatteryVoltage(%d):%d\n", iChannel, iChannelValue));
+  return iChannelValue;
+
+}
+
+//
+//
+//
 int iBtInit(vBtCallback pvCallback, void *pvData)
 {
 #if !defined(EVAL_BOARD)
@@ -682,135 +823,5 @@ int iUsbSend(tInterface eWhich, void *pvData, int iCount)
   MsgPacketheader *psHeader = (MsgPacketheader *) pvData;
 
   DEBUGMSG(ZONE_COMMANDS,("iUsbSend(): Dest %s, Length %d, MsgId 0x%02X, Status %d\n", ( eWhich == USB_UN20 ) ? "UN20" : "HOST", iCount, psHeader->bMsgId, psHeader->bStatus ));
-
-}
-  
-void vUn20Init()
-{
-#if !defined(EVAL_BOARD)
-  UN20B_nRESET->vConfigure();
-#endif
-  DEBUGMSG(ZONE_COMMANDS,("vUn20Init()\n"));
-}
-
-void vUn20Reset( bool boReset )	// reset the UN20
-{
-#if !defined(EVAL_BOARD)
-  UN20B_nRESET->vSet( boReset );
-#endif
-  DEBUGMSG(ZONE_COMMANDS,("vUn20OReset: %s\n", (boReset ? "On" : "Off")));
-}
-
-void vPowerInit()
-{
-#if !defined(EVAL_BOARD)
-  // latch the power to the CPU on
-  nPWR_DOWN->vConfigure();
-  nPWR_DOWN->vSet( false );
-
-  UN20B_POWER->vConfigure();
-  UN20B_POWER->vSet( true );
-
-//for (volatile int i = 0; i < 18000000; i++);
-
-#endif
-  DEBUGMSG(ZONE_COMMANDS,("vPowerInit()\n"));
-}
-
-void vPowerUsbOff()
-{
-#if !defined(EVAL_BOARD)
-  UN20B_POWER->vSet( false );
-#endif
-  DEBUGMSG(ZONE_COMMANDS,("vPowerUsbOff()\n"));
-}
-
-void vPowerUsbOn()
-{
-#if !defined(EVAL_BOARD)
-  UN20B_POWER->vSet( true );
-#endif
-  DEBUGMSG(ZONE_COMMANDS,("vPowerUsbOn()\n"));
-}
-
-void vPowerBtOff()
-{
-  DEBUGMSG(ZONE_COMMANDS,("vPowerBtOff()\n"));
-}
-
-void vPowerBtOn()
-{
-  DEBUGMSG(ZONE_COMMANDS,("vPowerBtOn()\n"));
-}
-
-void vPowerUn20Off()	// turn off the UN20 (takes 2 seconds){
-{
-  tEventConnDisconn sEventData;
-
-  DEBUGMSG(ZONE_COMMANDS,("vPowerUn20Off()\n"));
-
-  if ( pvUsbPhoneCallback != NULL )
-  {
-    sEventData.eInterface = USB_UN20;
-    pvUsbUn20Callback( pvUsbUn20Context, INTERFACE_EVENT_DISCONNECTED, &sEventData );
-  }
-#if !defined(EVAL_BOARD)
-  UN20B_POWER->vSet( false );
-#endif
-}
-
-void vPowerUn20On()	// turn on the UN20 (takes 5 seconds)
-{
-  DEBUGMSG(ZONE_COMMANDS,("vPowerUn20On()\n"));
-
-#if !defined(EVAL_BOARD)
-  UN20B_POWER->vSet( true );
-#endif
-}
-
-/* Not expected to return from this call
- */
-void vPowerSelfOff()	// turn the LPC1800 off (Power button wakes)
-{
-  DEBUGMSG(ZONE_COMMANDS,("vPowerSelfOff()\n"));
-#if !defined(EVAL_BOARD)
-  nPWR_DOWN->vSet( true );
-  //CLI_PRINT(("NOTE: Hardware power off disabled\n"));
-#endif
-  for (;;);
-}
-
-void vPowerSelfOn()	// called early to latch power on
-{
-  DEBUGMSG(ZONE_COMMANDS,("vPowerSelfOn()\n"));
-#if !defined(EVAL_BOARD)
-  nPWR_DOWN->vSet( false );
-#endif
-}
-
-void vPowerSelfNotify(vCallback pvCallback) // register for notification of power button press
-{
-  DEBUGMSG(ZONE_COMMANDS,("vPowerSelfNotify()\n"));
-  pvPoweroffCallback = pvCallback;
-}
-
-// read the battery voltages (2 channels available)
-int iBatteryVoltage(int iChannel)
-{
-  int iChannelValue = (iChannel + 1) * 100;
-
-  SIMPLEASSERT( (iChannel >= 0) && (iChannel <= 1) );
-
-#if !defined(EVAL_BOARD)
-  poADC0 = poADCDDgetUnit( 0 );
-  // read raw value from SDC
-  iChannelValue = poADC0->iReadChannel( iChannel );
-
-  // calculate result in mV taking into account VREF and conditioning logic
-  iChannelValue = (((( (3300 * 100) / 1023 ) * iChannelValue) / 100) * 2);
-#endif
-
-  DEBUGMSG(ZONE_COMMANDS,("iBatteryVoltage(%d):%d\n", iChannel, iChannelValue));
-  return iChannelValue;
 
 }

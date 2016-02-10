@@ -11,16 +11,17 @@ extern "C" {
 // UN20B control
 //
 // UN20 USB pins not defined here
-PINFUNC_DEF( UN20B_TXD,               4,  8, H, ALT3, PIN_OUT )               // pin A_1
-PINFUNC_DEF( UN20B_RXD,               4,  9, H, ALT3, PIN_IN | PIN_PULL_UP )  // pin A_2
+PINFUNC_DEF( UN20B_TXD,               4,  8, L, ALT3, PIN_OUT )               // pin A_1
+PINFUNC_DEF( UN20B_RXD,               4,  9, L, ALT3, PIN_IN )                // pin A_2
 PINFUNC_DEF( UN20B_nRESET,            2,  1, L, GPIO, PIN_OUT )               // pin 4_1
 PINFUNC_DEF( UN20B_POWER,             2,  0, H, GPIO, PIN_OUT )               // pin 4_0
+PINFUNC_DEF( USB_VBUS_PWR_EN,         5, 18, H, ALT4, PIN_OUT )               // pin 9_5
 //
 // Phone USB pins not defined here
-PINFUNC_DEF(USB_HOST_PWR_EN,          3,  2, H, GPIO, PIN_OUT )               // pin 6_3
-PINFUNC_DEF(USB_HOST_nCON,            4,  2, L, GPIO, PIN_OUT )               // pin 8_2
-PINFUNC_DEF(USB_HOST_ILIM0,           4,  3, H, GPIO, PIN_OUT )               // pin 8_3
-PINFUNC_DEF(USB_HOST_ILIM1,           4,  4, H, GPIO, PIN_OUT )               // pin 8_4
+PINFUNC_DEF( USB_HOST_PWR_EN,         3,  2, H, GPIO, PIN_OUT )               // pin 6_3
+PINFUNC_DEF( USB_HOST_nCON,           4,  2, L, GPIO, PIN_OUT )               // pin 8_2
+PINFUNC_DEF( USB_HOST_ILIM0,          4,  3, H, GPIO, PIN_OUT )               // pin 8_3
+PINFUNC_DEF( USB_HOST_ILIM1,          4,  4, H, GPIO, PIN_OUT )               // pin 8_4
 
 //
 // BT Uart

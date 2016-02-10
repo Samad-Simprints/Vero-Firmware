@@ -105,6 +105,24 @@ static tMain oMain;
 //******************************************************************************
 
 //******************************************************************************
+// CLI
+//******************************************************************************
+
+static bool boShowVersion( char **papzArgs, int iInstance, int iNumArgs );
+#if defined(CM_HOSTED)
+static bool boQuit(char **papzArgs, int iInstance, int iNumArgs);
+#endif
+static bool boUN20Echo(char **papzArgs, int iInstance, int iNumArgs);
+
+const tParserEntry asMainCLI[] =
+{
+#if defined(CM_HOSTED)
+  CLICMD("quit", "Quit CM", 1, "", boQuit, 0),
+#endif
+  CLICMD( "un20ser", "Send to UN20 Uart", 2, "", boUN20Echo, 0 )
+};
+
+//******************************************************************************
 // Terminal IO
 //******************************************************************************
 
@@ -119,6 +137,35 @@ static const tLineCoding sALMportConfig = {
   /*.bDataBits =*/ 8                                // Number of data bits
 };
 
+static const tLineCoding sUN20portConfig = {
+  /*.dwDTERate =*/ 9600,                            // Data terminal rate in bits per second
+  /*.bCharFormat =*/ 0,                             // Number of stop bits
+  /*.bParityType =*/ 0,                             // Parity bit type
+  /*.bDataBits =*/ 8                                // Number of data bits
+};
+
+static bool boUN20Echo(char **papzArgs, int iInstance, int iNumArgs)
+{
+  ISerialPort              *poUN20Port;
+  int iRes;
+
+  poUN20Port = poSERDDgetPort( UN20_UART );
+  poUN20Port->vConfigurePort( &sUN20portConfig, 64, 300 );
+
+  // set to blocking mode for transmit but not receive
+  poUN20Port->vSetBlockingMode( ISerialPort::bmTransmitOnly );
+
+  // flush buffers before we start
+  poUN20Port->vFlush();
+
+  while ( iRes = poUN20Port->iPutBuf( papzArgs[1], strlen(papzArgs[1]) ) == EOF )
+  {
+    vTaskDelay( 1 );
+  }
+  poUN20Port->iPutchar( '\n' );
+
+  return true;
+}
 
 //******************************************************************************
 // main
@@ -248,6 +295,19 @@ uint32_t	xCGU_Init(void)
   return 0;
 }
 
+static void vTestAppTask(void* params)
+{
+  vTaskDelay(SECS_TO_TICKS(1));
+  DEBUGMSG(ZONE_DBG_ALWAYS,("\n== Poweringup UN20 ==\n"));
+
+  vPowerUn20On();
+
+  for(;;)
+  {
+    vTaskDelay(1);
+  }
+}
+
 tMain::tMain()
   : oPrintfLock(),
     poDebugPort( 0 )
@@ -261,10 +321,6 @@ tMain::~tMain()
 void tMain::vInit()
 {
   oPrintfLock.vInit();
-
-  vHalInit();
-  vPowerInit();
-  vUiInit();
 
   poDebugPort = poSERDDgetPort( CONSOLE_UART );
   poDebugPort->vConfigurePort( &sALMportConfig, 64, 300 );
@@ -290,8 +346,11 @@ int main( void )
   xCGU_Init();
   SystemCoreClock = CGU_GetPCLKFrequency(CGU_PERIPHERAL_M3CORE);
 
-  vPowerInit();
-  vPowerSelfOn();	// latch the power on
+  // get the hardware under control
+  vHalInit();
+
+  // latch the power on
+  vPowerSelfOn();
 
   //vHalTest();
 
@@ -302,28 +361,26 @@ int main( void )
 
   // report build information on console
   CLI_PRINT(("\nINDEX - SW: " INDEX_VERSION "\n"));
-#if 0
+
   // register CLI commands
   for ( int i = 0; i < ( sizeof( asMainCLI ) / sizeof( asMainCLI[ 0 ] ) ); ++i )
   {
     boCLIregisterEntry( &asMainCLI[i] );
   }
-#endif
+
 
   // initialise the Bluetooth stack
-  //bt_main();
+  bt_main();
 
   // initialise the USB stack
   usb_main();
 
-  //SystemCoreClockUpdate();
-
-  // Initialise device drivers
-  //vGPIODDinit();
-
   /* Create the LPC App task. */
-  xTaskCreate( vLpcAppTask, ( signed char * ) "LPC", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );
-
+  //xTaskCreate( vLpcAppTask, ( signed char * ) "LPC", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );
+#if 0
+  /* Create the test App task. */
+  xTaskCreate( vTestAppTask, ( signed char * ) "TEST", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );
+#endif
   /* Start the scheduler. */
   vTaskStartScheduler();
 
@@ -335,7 +392,7 @@ int main( void )
   return 0;
 }
 
-void vGetRegistersFromStack( dword *pdwFaultStackAddress )
+static void vGetRegistersFromStack( dword *pdwFaultStackAddress )
 {
   /* These are volatile to try and prevent the compiler/linker optimising them
   away as the variables never actually get used.  If the debugger won't show the

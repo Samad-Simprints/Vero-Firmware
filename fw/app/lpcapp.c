@@ -295,7 +295,7 @@ static void vFlashTask( void *pvParameters )
   CLI_PRINT(("vFlashTask: Starting\n"));
 
   hFlashTimer = xTimerCreate( acTimerName,
-                         ( FLASH_TICK_MS / portTICK_RATE_MS ),
+                         MS_TO_TICKS(FLASH_TICK_MS),
                          pdTRUE,    // Continuous timeouts
                          NULL,
                          vFlashTimerCallback );
@@ -371,7 +371,7 @@ static void vVibrateTask( void *pvParameters )
   CLI_PRINT(("vVibrateTask: Starting\n"));
 
   hTimer = xTimerCreate( acTimerName,
-                         ( iVibrateMs / portTICK_RATE_MS ),
+                         MS_TO_TICKS( iVibrateMs ),
                          pdFALSE, // One-shot timeout
                          NULL,
                          vVibTimerCallback );
@@ -776,7 +776,7 @@ static void vMessageCompleteCallback( MsgInternalPacket *psMsg )
     
     if (( bSource == MSG_SOURCE_PHONE_BT ) || ( bSource == MSG_SOURCE_PHONE_USB ))
     {
-      // The only possible detination is the UN20 USB (if it's connected).
+      // The only possible destination is the UN20 USB (if it's connected).
       if ( boUn20UsbConnected == true )
       {
         (void) iUsbSend( USB_UN20, (void *) &(psMsg->oMsg), iMsglength );
@@ -1026,7 +1026,7 @@ static void vCallbackPowerOffHandler(void)
   }
 
   // Pause here for a short while to allow the UN20 to cleanly shut down.
-  vTaskDelay( UN20_SHUTDOWN_DELAY_MS / portTICK_RATE_MS );
+  vTaskDelay( MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ));
   
   // Power down the UN20.
   vPowerUn20Off();
@@ -1098,25 +1098,13 @@ void vLpcAppTask( void *pvParameters )
   const char acInactivityTimerName[] = "System idle timer";
 
   CLI_PRINT(("vLpcAppTask: Starting\n"));
-
+#if 0
   // Initialise HAL items.
-  vPowerInit();
-  vGpioInit();
-  vEmcInit();
-  vAnalogInit();
-  vSpiInit();
-  vDebugInit();
-
-  vUiInit();
-
-  vUn20Init();
-
-  vPowerInit();
-
-  vProtocolInit();
-
+  vHalInit();
   // Called early to latch power on.
   vPowerSelfOn();
+#endif
+  vProtocolInit();
 
   // Perform a start-up dance on the LEDs.
   vUiLedSet(LED_RING_0, OFF);
@@ -1157,14 +1145,14 @@ void vLpcAppTask( void *pvParameters )
 
   // Create a timer for timing UN20 shutdown.
   hUn20ShutdownTimer = xTimerCreate( acShutdownTimerName,
-                                     ( UN20_SHUTDOWN_DELAY_MS / portTICK_RATE_MS ),
+                                     MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ),
                                      pdFALSE,    // One-shot timeout
                                      NULL,
                                      vUn20ShutdownTimerCallback );
 
   // Create a timer for timing idle seconds before UN20 power off.
   hUn20IdleTimer = xTimerCreate( acUn20IdleTimerName,
-                                 ( UN20_IDLE_TIMEOUT_MS / portTICK_RATE_MS ),
+                                 MS_TO_TICKS( UN20_IDLE_TIMEOUT_MS ),
                                  pdFALSE,    // One-shot timeout
                                  NULL,
                                  vUn20IdleTimerCallback );
@@ -1174,7 +1162,7 @@ void vLpcAppTask( void *pvParameters )
 
   // Create a timer for timing idle seconds before total power off.
   hInactivityTimer = xTimerCreate( acInactivityTimerName,
-                                   ( SYSTEM_IDLE_TIMEOUT_MS / portTICK_RATE_MS ),
+                                   MS_TO_TICKS( SYSTEM_IDLE_TIMEOUT_MS ),
                                    pdFALSE,    // One-shot timeout
                                    NULL,
                                    vSystemIdleTimerCallback );
