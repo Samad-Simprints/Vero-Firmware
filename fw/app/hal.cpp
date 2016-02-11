@@ -42,10 +42,13 @@
 
 #include "cli.h"
 #include "gpio_dd.hpp"
+#include "ser_dd.hpp"
 #include "adc_dd.hpp"
 
 #include "freertos.h"
 #include "task.h"
+#include "semphr.h"
+
 
 //******************************************************************************
 // Private Function Prototypes
@@ -141,6 +144,8 @@ static vUsbCallback pvUsbUn20Callback = vNullUsbCallback;
 static void *pvBtContext = NULL;
 static void *pvUsbUn20Context = NULL;
 static void *pvUsbPhoneContext = NULL;
+
+static xSemaphoreHandle hSendCompleteSemaphore = NULL;
 
 //******************************************************************************
 //******************************************************************************
@@ -522,6 +527,7 @@ void vHalInit(void)
 //
 static void vNullHandler(void)
 {
+  debug_break();
 }
 
 static void vNullBtCallback(void *context,  tInterfaceEvent event, void *event_data)
@@ -765,7 +771,7 @@ int iBatteryVoltage(int iChannel)
 }
 
 //
-//
+// Bluetooth
 //
 int iBtInit(vBtCallback pvCallback, void *pvData)
 {
@@ -774,13 +780,44 @@ int iBtInit(vBtCallback pvCallback, void *pvData)
 #endif
   DEBUGMSG(ZONE_COMMANDS,("iBtInit()\n"));
   pvBtCallback = pvCallback;
+
+  // Create the semaphore for unblocking the send operation
+  vSemaphoreCreateBinary( hSendCompleteSemaphore );
 }
+
+// used to pass data to the callback function without exposing it
+void vBtCallbackFunction(tInterfaceEvent event, void *event_data)
+{
+  pvBtCallback( pvBtContext, event, event_data );
+}
+
+// callback used to notify the outcome of the send operation call from BT stack thread)
+static void sendComplete(int result)
+{
+  // release the thread that was waiting for the send to complete
+  xSemaphoreGive( hSendCompleteSemaphore );
+}
+
+extern "C" int sppStartSendData(void *data, int count, void (*callback)(int result));
 
 int iBtSend(void *data, int count)
 {
+  int iStartedOk;
   MsgPacketheader *psHeader = (MsgPacketheader *) data;
 
   DEBUGMSG(ZONE_COMMANDS,("iBtSend(): Length %d, MsgId 0x%02X, Status %d\n", count, psHeader->bMsgId, psHeader->bStatus ));
+
+  iStartedOk = sppStartSendData(data, count, sendComplete);
+
+  if ( iStartedOk )
+  {
+    // suspend caller waiting for send completion notification
+    xSemaphoreTake( hSendCompleteSemaphore, portMAX_DELAY );
+  }
+
+  DEBUGMSG(ZONE_COMMANDS,("iBtSend(): Complete (%d)\n", iStartedOk));
+
+  return iStartedOk;
 }
 
 int iBtReset( bool boReset )
@@ -790,7 +827,45 @@ int iBtReset( bool boReset )
 #endif
   DEBUGMSG(ZONE_COMMANDS,("iBtReset: %s\n", (boReset ? "On" : "Off")));
 }
-  
+
+//
+// USB
+//  
+
+static const tLineCoding sUN20portConfig = {
+  /*.dwDTERate =*/ 9600,                            // Data terminal rate in bits per second
+  /*.bCharFormat =*/ 0,                             // Number of stop bits
+  /*.bParityType =*/ 0,                             // Parity bit type
+  /*.bDataBits =*/ 8                                // Number of data bits
+};
+
+ISerialPort              *poUN20Port;
+
+static void vUN20SerialInit(tLineCoding const *poConfig)
+{
+  int iRes;
+
+  poUN20Port = poSERDDgetPort( UN20_UART );
+  poUN20Port->vConfigurePort( poConfig, 64, 300 );
+
+  // set to blocking mode for transmit but not receive
+  poUN20Port->vSetBlockingMode( ISerialPort::bmTransmitOnly );
+
+  // flush buffers before we start
+  poUN20Port->vFlush();
+}
+
+static vUN20SerialSend(void *pvData, int iCount)
+{
+  uint8_t *pbData = (uint8_t*)pvData;
+
+  while ( iCount-- > 0 )
+  {
+    poUN20Port->iPutchar( *pbData++ );
+  }
+}
+
+
 // eWhich - Source for which we are registering a callback
 // pvCallback - Callback function for this source
 // pvContext - Opaque pointer returned in the callback for this source
@@ -803,6 +878,7 @@ int iUsbInit(tInterface eWhich, vUsbCallback pvCallback, void *pvContext)
   case USB_UN20:
     pvUsbUn20Callback = pvCallback;
     pvUsbUn20Context = pvContext;
+    vUN20SerialInit(&sUN20portConfig);
     break;
 
   case USB_HOST:
@@ -823,5 +899,20 @@ int iUsbSend(tInterface eWhich, void *pvData, int iCount)
   MsgPacketheader *psHeader = (MsgPacketheader *) pvData;
 
   DEBUGMSG(ZONE_COMMANDS,("iUsbSend(): Dest %s, Length %d, MsgId 0x%02X, Status %d\n", ( eWhich == USB_UN20 ) ? "UN20" : "HOST", iCount, psHeader->bMsgId, psHeader->bStatus ));
+
+  switch ( eWhich )
+  {
+  case USB_UN20:
+    vUN20SerialSend(pvData, iCount);
+    break;
+
+  case USB_HOST:
+    break;
+
+  default:
+    // No action
+    break;
+
+  } // End switch
 
 }

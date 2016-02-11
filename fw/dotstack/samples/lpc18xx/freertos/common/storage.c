@@ -43,6 +43,7 @@ void bttask_pal_initStorage(void)
 {
 	// Read data from Flash memory
 	memcpy(mRamCopy, (uint8_t*)FLASH_START_ADDR, sizeof(mRamCopy));
+        memset(mRamCopy, 0, sizeof(mRamCopy)); //NST
 }
 
 

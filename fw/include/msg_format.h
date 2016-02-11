@@ -25,7 +25,6 @@
 // Includes
 //******************************************************************************
 
-#include "global.h"
 #include "hal.h"
 
 #ifdef __cplusplus

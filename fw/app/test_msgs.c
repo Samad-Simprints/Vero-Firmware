@@ -29,8 +29,6 @@
 // Includes
 //******************************************************************************
 
-#include <ctl_api.h>
-#include <cross_studio_io.h>
 #include <stdlib.h>
 
 #include "global.h"

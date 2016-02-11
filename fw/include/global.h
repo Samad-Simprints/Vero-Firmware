@@ -24,7 +24,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
-#include <lpc18xx.h>
+//#include <lpc18xx.h>
 //#include <cross_studio_io.h>
 #include <string.h>
 
@@ -68,8 +68,12 @@ extern int _printf(const char *format, ...);
 #define NULL                          (0)
 #endif
 
+#if !defined( UN20_APP )
 #include <lpc18xx.h>
 #include "freertos.h"
+#else
+#define configSER_INTERRUPT_PRIORITY  0
+#endif
 
 // Include proj_defs here so it can make use of the above typedefs
 #include "proj_defs.h"

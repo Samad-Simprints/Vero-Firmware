@@ -111,6 +111,8 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 // Local Storage
 //******************************************************************************
 
+static xQueueHandle hMsgQueue = NULL;
+
 static xTaskHandle oVibrateTaskHandle = NULL;
 static xTaskHandle oFlashTaskHandle = NULL;
 
@@ -287,7 +289,7 @@ static void vFlashTimerCallback( xTimerHandle xTimer )
 
 // LED Flash task.
 // At the moment this only flashes the blue Connection LED but could be
-// generalised to flash any LED in the fuure.
+// generalised to flash any LED in the future.
 static void vFlashTask( void *pvParameters )
 {
   const char acTimerName[] = "Flash timer";
@@ -552,9 +554,14 @@ static void vSetUn20Info( MsgPacket *psMsg, int iMsglength )
   return;
 }
 
+// Queue the completed message for processing. NOTE: DOES NOT TAKE A COPY OF THE MESSAGE
+static void vQueueMessageCompleteCallback( MsgInternalPacket *psMsg )
+{
+  xQueueSendToBack( hMsgQueue, &psMsg, RTOS_FOREVER );
+}
 
-// Called when a complete protocol message has been received from the UN20 or phone.
-static void vMessageCompleteCallback( MsgInternalPacket *psMsg )
+// Called when a protocol message has been received from the UN20 or phone.
+static void vMessageProcess( MsgInternalPacket *psMsg )
 {
   uint8 bSource;
   MsgPacket *psPacket;
@@ -1126,7 +1133,7 @@ void vLpcAppTask( void *pvParameters )
 
   vPowerSelfNotify( vCallbackPowerOffHandler ); // notification of power button press
 
-  vProtocolMsgNotify( vMessageCompleteCallback );
+  vProtocolMsgNotify( vQueueMessageCompleteCallback );
   vProtocolMsgError( vMessageErrorCallback );
 
   iBtInit( vBtCallbackHandler, NULL );
@@ -1176,10 +1183,19 @@ void vLpcAppTask( void *pvParameters )
   // Create the flash task
   xTaskCreate( vFlashTask, ( signed char * ) "Flash", FLASH_TASK_STACK_SIZE, ( void * ) NULL, FLASH_TASK_PRIORITY, &oFlashTaskHandle );
 
+#define LPCAPP_MSG_QUEUE_SIZE 10
+  hMsgQueue = xQueueCreate( LPCAPP_MSG_QUEUE_SIZE, sizeof(MsgInternalPacket*) );
+
   // Main loop.
   while ( 1 )
   {
-    vTaskDelay( 500 );
+    MsgInternalPacket *psMsg;
+
+    // wait for a message to process
+    if ( xQueueReceive( hMsgQueue, &psMsg, MS_TO_TICKS(500) ) == pdTRUE )
+    {
+      vMessageProcess( psMsg );
+    }
 
     // See if we need to retrieve config info from the UN20.
     if ( boNeedUn20Info == true )

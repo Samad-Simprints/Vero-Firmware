@@ -137,6 +137,7 @@ void vIncomingBytes(tMsgSource eSource, uint8 *pcData, int iLength)
 
     // Check the header syncword.
     uiSyncword = ((MsgPacketheader *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 4 ])->uMsgHeaderSyncWord;
+printf("StartSync: %08X\n", uiSyncword);
     if( uiSyncword != MSG_PACKET_HEADER_SYNC_WORD )
     {
       // Badly-formatted message.
@@ -158,7 +159,7 @@ void vIncomingBytes(tMsgSource eSource, uint8 *pcData, int iLength)
 
     // Find the size of this message.
     uiLength = ((MsgPacketheader *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 4 ])->iLength;
-
+printf("Length: %d\n", uiLength);
     // Check whether we have received enough bytes.
     if (( iFreeSpaceIndex[ eSource ] - 1 ) < uiLength )
     {
@@ -174,7 +175,7 @@ void vIncomingBytes(tMsgSource eSource, uint8 *pcData, int iLength)
 
   // Check the message type.
   bMsgId = ((MsgPacketheader *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 4 ])->bMsgId;
-
+printf("MsgId: %d\n", bMsgId);
   // Ignore the Response/Reply bit.
   bMsgId &= ~MSG_REPLY;
 
@@ -199,6 +200,7 @@ void vIncomingBytes(tMsgSource eSource, uint8 *pcData, int iLength)
 
   // Check the footer.
   uiSyncword = *((uint32 *)( &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ uiLength ] ));
+printf("EndSync: %08X\n", uiSyncword);
   if( uiSyncword != MSG_PACKET_FOOTER_SYNC_WORD )
   {
     // Badly-formatted message.

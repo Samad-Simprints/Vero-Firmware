@@ -368,15 +368,15 @@ int main( void )
     boCLIregisterEntry( &asMainCLI[i] );
   }
 
+  /* Create the LPC App task. */
+  xTaskCreate( vLpcAppTask, ( signed char * ) "LPC", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );
 
   // initialise the Bluetooth stack
   bt_main();
 
   // initialise the USB stack
-  usb_main();
+  //usb_main();
 
-  /* Create the LPC App task. */
-  //xTaskCreate( vLpcAppTask, ( signed char * ) "LPC", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );
 #if 0
   /* Create the test App task. */
   xTaskCreate( vTestAppTask, ( signed char * ) "TEST", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );
@@ -423,7 +423,7 @@ static void vGetRegistersFromStack( dword *pdwFaultStackAddress )
 
 // The fault handler implementation calls a function called
 // vGetRegistersFromStack().
-extern __attribute__( ( naked ) ) void HardFault_Handler(void)
+ __attribute__( ( naked ) ) void HardFault_Handler(void)
 {
     __asm volatile
     (

@@ -110,6 +110,8 @@ typedef void (*vBtCallback)(void *context,  tInterfaceEvent event, void *event_d
 typedef void (*vUsbCallback)(void *context, tInterfaceEvent event, void *event_data);
 typedef void (*vCallback)(void);
 
+extern void vBtCallbackFunction(tInterfaceEvent event, void *event_data);
+extern void vUsbCallbackFunction(tInterface eWhich, tInterfaceEvent event, void *event_data);
 
 //******************************************************************************
 // Function Prototypes
