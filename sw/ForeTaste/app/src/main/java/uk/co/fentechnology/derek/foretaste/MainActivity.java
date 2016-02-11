@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
   private boolean boButtonEnabled = false;
   private boolean boScanReady = false;
   private boolean boTemplateReady = false;
+  private int iLED = 0;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -232,11 +233,92 @@ public class MainActivity extends AppCompatActivity implements ScannerCallback {
   }
 
   // button handler - vibrate
+  // also toggle the LEDs
   public void vibrate(View view) {
     Scanner.UIControl uiControl = scanner.new UIControl();
 
     uiControl.boTriggerVibrate = true;
-    uiControl.iVibrateMs = 40;
+    uiControl.iVibrateMs = 1000;
+    uiControl.boSetLeds = true;
+    switch (iLED)
+    {
+      case 0:
+        uiControl.bLedState[0] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[1] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[2] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[3] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[4] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[5] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[6] = Scanner.UIControl.LED_STATE_GREEN;
+        iLED = 1;
+        break;
+
+      case 1:
+        uiControl.bLedState[0] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[1] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[2] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[3] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[4] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[5] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[6] = Scanner.UIControl.LED_STATE_GREEN;
+        iLED = 2;
+        break;
+
+      case 2:
+        uiControl.bLedState[0] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[1] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[2] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[3] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[4] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[5] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[6] = Scanner.UIControl.LED_STATE_GREEN;
+        iLED = 3;
+        break;
+
+      case 3:
+        uiControl.bLedState[0] = Scanner.UIControl.LED_STATE_GREEN;
+        uiControl.bLedState[1] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[2] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[3] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[4] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[5] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[6] = Scanner.UIControl.LED_STATE_GREEN;
+        iLED = 4;
+        break;
+
+      case 4:
+        uiControl.bLedState[0] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[1] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[2] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[3] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[4] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[5] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[6] = Scanner.UIControl.LED_STATE_ORANGE;
+        iLED = 5;
+        break;
+
+      case 5:
+        uiControl.bLedState[0] = Scanner.UIControl.LED_STATE_ORANGE;
+        uiControl.bLedState[1] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[2] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[3] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[4] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[5] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[6] = Scanner.UIControl.LED_STATE_ORANGE;
+        iLED = 6;
+        break;
+
+      case 6:
+        uiControl.bLedState[0] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[1] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[2] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[3] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[4] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[5] = Scanner.UIControl.LED_STATE_RED;
+        uiControl.bLedState[6] = Scanner.UIControl.LED_STATE_RED;
+        iLED = 0;
+        break;
+    }
     scanner.setUI(uiControl);
 
     viewHolder.showVibrate();

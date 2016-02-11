@@ -216,7 +216,8 @@ public class Scanner implements ConnectionCallback
     msg.buffer.putShort(uicontrol.iVibrateMs);
 
     writeMessage(msg);
-    Message rply = readMessage();
+
+    // Message rply = readMessage();
 
     return ERROR_NONE;
   }

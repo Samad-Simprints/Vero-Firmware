@@ -69,8 +69,7 @@ public class BtConnection extends Connection
         {
           String devName = device.getName();
           Log.v(TAG,devName + " " + device.getAddress());
-          if ((btScanner==null) &&
-            (devName.equals("Adafruit EZ-Link 048b") || devName.equals("Index Scanner")))
+          if (devName.equals("Index Scanner"))
           {
             btScanner = device;
           }
@@ -114,7 +113,8 @@ public class BtConnection extends Connection
     {
       try
       {
-        btSocket = btScanner.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
+//        btSocket = btScanner.createInsecureRfcommSocketToServiceRecord(SPP_UUID);
+        btSocket = btScanner.createRfcommSocketToServiceRecord(SPP_UUID);
         created = true;
         Log.v(TAG, "Socket created");
       } catch (IOException e)
@@ -134,6 +134,16 @@ public class BtConnection extends Connection
         {
           connected = false;
           Log.v(TAG, "Connect error " + e.getMessage());
+
+          try
+          {
+            // btSocket = btScanner.createRfcommSocket(1);
+            btSocket.connect();
+          } catch (IOException e2)
+          {
+            connected = false;
+            Log.v(TAG, "Fallback Connect error " + e2.getMessage());
+          }
         }
 
         if (connected)
