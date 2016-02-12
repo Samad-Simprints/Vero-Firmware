@@ -38,6 +38,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "sgfplib.h"
+
 #include "msg_format.h"
 #include "protocol_msg.h"
 
@@ -71,6 +73,13 @@ DEBUG_MODULE_DEFINE( INDEX_DEFAULTS ) = {
     "Error","Hi","Medium","Low" },
     DEBUGZONE(ZONE_DBG_ERROR) | DEBUGZONE(ZONE_DBG_HI) | DEBUGZONE(ZONE_DBG_MED) | DEBUGZONE(ZONE_DBG_LO)
 };
+
+static LPSGFPM  sgfplib = NULL;
+static SGFingerInfo fingerInfo;
+static SGDeviceInfoParam deviceInfo;
+static BYTE *ImageBuffer;
+
+static int port_fd;
 
 static int serial_config(char *port, struct termios *oldtio)
 {
@@ -150,66 +159,106 @@ static int serial_config(char *port, struct termios *oldtio)
   return fd;
 }
 
-void sender(int fd)
+static int un20_sdk_config()
 {
-  int i;
-  int res;
-  unsigned char c;
+  long err;
 
-  printf("Sender\n");
+  printf("Configuring UN20 SDK\n");
 
-  for (i = 0; i < 256; i++)
+  err = CreateSGFPMObject(&sgfplib);
+  if (!sgfplib)
   {
-    c = (char)i;
-//    printf(" >%02X\n", c);
-    write(fd, &c, 1);
-    c = ~c;
-
-    res = read(fd,&c,1);
-    if (res)
-    {
-      if (c != i)
-      {
-        printf("Mismatch: %02X:%02X\n", i, c);
-      }
-      printf(" <%02X\n", (c & 0x0ff));
-    }
+    printf("ERROR - Unable to instantiate FPM object.\n\n");
+    return false;
   }
+
+  err = sgfplib->Init(SG_DEV_AUTO);
+  if (err != SGFDX_ERROR_NONE)
+  {
+     printf("ERROR - Unable to initialize device.\n\n");
+     return false;
+  }
+
+  err = sgfplib->OpenDevice(0);
+  if (err != SGFDX_ERROR_NONE)
+  {
+     printf("ERROR - Unable to open device.\n\n");
+     return false;
+  }
+
+  err = sgfplib->GetDeviceInfo(&deviceInfo);
+  if (err != SGFDX_ERROR_NONE)
+  {
+     printf("ERROR - Unable to get device information.\n\n");
+     return false;
+  }
+
+  // display information about the device we are using
+  printf("deviceInfo.DeviceID   : %ld\n", deviceInfo.DeviceID);
+  printf("deviceInfo.DeviceSN   : %s\n",  deviceInfo.DeviceSN);
+  printf("deviceInfo.ComPort    : %ld\n", deviceInfo.ComPort);
+  printf("deviceInfo.ComSpeed   : %ld\n", deviceInfo.ComSpeed);
+  printf("deviceInfo.ImageWidth : %ld\n", deviceInfo.ImageWidth);
+  printf("deviceInfo.ImageHeight: %ld\n", deviceInfo.ImageHeight);
+  printf("deviceInfo.Contrast   : %ld\n", deviceInfo.Contrast);
+  printf("deviceInfo.Brightness : %ld\n", deviceInfo.Brightness);
+  printf("deviceInfo.Gain       : %ld\n", deviceInfo.Gain);
+  printf("deviceInfo.ImageDPI   : %ld\n", deviceInfo.ImageDPI);
+  printf("deviceInfo.FWVersion  : %04X\n", (unsigned int) deviceInfo.FWVersion);
+
+  ImageBuffer = (BYTE*) malloc(deviceInfo.ImageHeight * deviceInfo.ImageWidth); 
+  if ( !ImageBuffer )
+  {
+     printf("ERROR - Unable to alocate image buffer.\n\n");
+     return false;
+  }
+
+  printf("UN20 SDK initialised\n");
+
+  return true;
 }
 
-void receiver(int fd)
+static int vUN20SerialSend(void *pvData, int iMsglength)
+{
+//  CLI_PRINT(( "vUN20SerialSend: length %d\n", iMsglength ));
+
+#if 0
+  {
+    uint8 *pbData = (uint8 *)pvData;
+    while ( iMsglength-- > 0 )
+    {
+      vIncomingBytes( MSG_SOURCE_UN20_USB, pbData, 1 );
+      pbData++;
+    }
+  }
+#else
+  return write(port_fd, pvData, iMsglength);
+#endif
+}
+
+static void receiver(int fd)
 {
   uint8 bData;
   int res;
 
   printf("Receiver started\n");
 
-#if 1
-  printf("Sizeof: %d\n", sShutdownUn20Packet.Msgheader.iLength );
-  for (int i = 0; i < sShutdownUn20Packet.Msgheader.iLength; i++)
-  {
-    uint8 *data = (uint8*)&sShutdownUn20Packet;
-    printf(" %02X\n", data[i]);
-  }
-  for (int i = 0; i < sShutdownUn20Packet.Msgheader.iLength; i++)
-  {
-    uint8 *data = (uint8*)&sShutdownUn20Packet;
-    getc(stdin);
-    printf(" %02X\n", data[i]);
-    // deliver bytes to message handler
-    vIncomingBytes( MSG_SOURCE_PHONE_BT, &data[i], 1 );
-  }
-#else
+  vUN20SerialSend(&sUn20ReadyPacket, sUn20ReadyPacket.Msgheader.iLength);
+
   while (1)
   {
     res = read(fd,&bData,1);
+#if 0
     // Todo: break out if we get an error
-
-    // deliver bytes to message handler
-    vIncomingBytes( MSG_SOURCE_PHONE_BT, &bData, 1 );
-  }
+    printf(" %02X\n", bData);
 #endif
+    // deliver bytes to message handler
+    vIncomingBytes( MSG_SOURCE_UN20_USB, &bData, 1 );
+  }
 }
+
+static DWORD templateSize;
+static BYTE *minutiaeBuffer1 = NULL; 
 
 // Called when a protocol message has been received from the UN20 or phone.
 static void vMessageProcess( MsgInternalPacket *psMsg )
@@ -218,6 +267,9 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   MsgPacket *psPacket;
   uint16 iMsglength;
   MsgPacketheader *psHeader;
+  DWORD quality;
+  DWORD templateSizeMax;
+  long err;
 
   // By the time this callback is called, we know that the message:
   // - has a valid source
@@ -233,6 +285,56 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   CLI_PRINT(( "vMessageCompleteCallback: From %s, length %d, MsgId 0x%02X\n",
               ( bSource == MSG_SOURCE_PHONE_BT ) ? "HostBT" : ( bSource == MSG_SOURCE_PHONE_USB ) ? "HostUSB" : "UN20USB",
               iMsglength, psMsg->oMsg.Msgheader.bMsgId ));
+
+  // Decode the message type (ignoring the Response bit).
+  switch ( psMsg->oMsg.Msgheader.bMsgId & ~MSG_REPLY )
+  {
+    // request for sensor information
+    case MSG_UN20_GET_INFO:
+      printf("UN20: GetInfo\n");
+      sUn20GetInfoPacket.oPayload.UN20Info.iStoreCount = 23;
+      sUn20GetInfoPacket.oPayload.UN20Info.iVersion = 0x4321;
+      vUN20SerialSend(&sUn20GetInfoPacket, sUn20GetInfoPacket.Msgheader.iLength);
+      break;
+
+    // capture an image
+    case MSG_CAPTURE_IMAGE:
+      err = sgfplib->GetImage(ImageBuffer);
+      printf("UN20: Capture Image:(%d)\n", err);
+      break;
+
+    // Get image quality of captured image
+    case MSG_IMAGE_QUALITY:
+      err = sgfplib->GetImageQuality(deviceInfo.ImageWidth, deviceInfo.ImageHeight, ImageBuffer, &quality);
+      printf("UN20: Get Image Quality:(%d, %d)\n", err, quality);
+      break;
+
+    // generate template for image
+    case MSG_GENERATE_TEMPLATE:
+      err = sgfplib->SetTemplateFormat(TEMPLATE_FORMAT_ANSI378);
+      err |= sgfplib->GetMaxTemplateSize(&templateSizeMax);
+
+      minutiaeBuffer1 = (BYTE*) realloc(minutiaeBuffer1, templateSizeMax); 
+      fingerInfo.FingerNumber = SG_FINGPOS_UK;
+      fingerInfo.ViewNumber = 1;
+      fingerInfo.ImpressionType = SG_IMPTYPE_LP;
+      fingerInfo.ImageQuality = quality; //0 to 100
+
+      templateSize = 0;
+      err |= sgfplib->CreateTemplate(&fingerInfo, ImageBuffer, minutiaeBuffer1);
+      err |= sgfplib->GetTemplateSize(minutiaeBuffer1, &templateSize);
+      printf("UN20: Generate Template:([0:%d],%d)\n", err, templateSize);
+      break;
+
+    // return template for image
+    case MSG_RECOVER_TEMPLATE:
+      // send minutiaeBuffer1, &templateSize
+      break;
+
+    default:
+      break;
+  }
+
 }
 
 static void vMessageErrorCallback( tMsgError eErrorCode )
@@ -245,22 +347,22 @@ static void vMessageErrorCallback( tMsgError eErrorCode )
 main(int argc, char *argv[])
 {
   struct termios oldtio;
-  int fd;
   int iExitStatus = EXIT_SUCCESS;
 
   DEBUG_MODULE_INIT( INDEX_DEFAULTS );
 
   if ( argc == 2 )
   {
-    fd = serial_config(argv[1], &oldtio);
+    un20_sdk_config();
+    port_fd = serial_config(argv[1], &oldtio);
     vProtocolInit();
     vProtocolMsgNotify( vMessageProcess );
     vProtocolMsgError( vMessageErrorCallback );
 
-    receiver(fd);
+    receiver(port_fd);
 
     /* restore the old port settings */
-    tcsetattr(fd,TCSANOW,&oldtio);
+    tcsetattr(port_fd,TCSANOW,&oldtio);
   }
   else
   {

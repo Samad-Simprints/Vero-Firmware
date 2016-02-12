@@ -73,6 +73,7 @@
         <file file_name="../app/CDC.c" />
         <file file_name="../app/CDCDescriptors.c" />
         <file file_name="../app/DualDevice.c" />
+        <file file_name="../app/printf-stdarg.cpp" />
       </folder>
       <folder Name="dd">
         <file file_name="../dd/gpio_dd.cpp">
@@ -157,6 +158,7 @@
         </file>
         <file file_name="../LinuxUN20/Makefile" />
         <file file_name="../LinuxUN20/push-files.sh" />
+        <file file_name="../LinuxUN20/inc/sgfplib.h" />
       </folder>
     </folder>
     <folder Name="System Files">

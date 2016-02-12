@@ -98,7 +98,7 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 #define UN20_SHUTDOWN_DELAY_MS           ( 3 * 1000 )
 
 // Default UN20 idle timer value: 10 minutes in ms.
-#define UN20_IDLE_TIMEOUT_MS             ( 10 * 60 * 1000 )
+#define UN20_IDLE_TIMEOUT_MS             ( 60 * 60 * 1000 )
 
 // Default system idle timer value: 60 minutes in ms.
 #define SYSTEM_IDLE_TIMEOUT_MS             ( 60 * 60 * 1000 )
@@ -725,6 +725,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   case MSG_RECOVER_IMAGE:
   case MSG_IMAGE_FRAGMENT:
   case MSG_STORE_IMAGE:
+  case MSG_IMAGE_QUALITY:
   case MSG_GENERATE_TEMPLATE:
   case MSG_RECOVER_TEMPLATE:
   case MSG_COMPARE_TEMPLATE:
@@ -811,6 +812,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   case MSG_REPORT_UI:
   case MSG_UN20_WAKINGUP:
   default:
+    CLI_PRINT(("*** Ignoring message\n"));
 
     // Invalid or unexpected message type - discard the message.
     break;
@@ -1136,12 +1138,6 @@ void vLpcAppTask( void *pvParameters )
   vProtocolMsgNotify( vQueueMessageCompleteCallback );
   vProtocolMsgError( vMessageErrorCallback );
 
-  iBtInit( vBtCallbackHandler, NULL );
-  
-  iUsbInit (USB_UN20, vUn20UsbCallbackHandler, NULL );
-  
-  iUsbInit( USB_HOST, vPhoneUsbCallbackHandler, NULL );
-  
   vUiVibrateControl( false );
 
   // Create the semaphore for unblocking the vibrate task.
@@ -1185,6 +1181,13 @@ void vLpcAppTask( void *pvParameters )
 
 #define LPCAPP_MSG_QUEUE_SIZE 10
   hMsgQueue = xQueueCreate( LPCAPP_MSG_QUEUE_SIZE, sizeof(MsgInternalPacket*) );
+
+  // Initialise the transport callbacks after everything is ready as we may get immediate callbacks.
+  iBtInit( vBtCallbackHandler, NULL );
+  
+  iUsbInit (USB_UN20, vUn20UsbCallbackHandler, NULL );
+  
+  iUsbInit( USB_HOST, vPhoneUsbCallbackHandler, NULL );
 
   // Main loop.
   while ( 1 )

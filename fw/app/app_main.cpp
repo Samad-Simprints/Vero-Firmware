@@ -392,6 +392,11 @@ int main( void )
   return 0;
 }
 
+tLock *poGetPrintfLock()
+{
+  return oMain.poGetPrintfLock();
+}
+
 static void vGetRegistersFromStack( dword *pdwFaultStackAddress )
 {
   /* These are volatile to try and prevent the compiler/linker optimising them

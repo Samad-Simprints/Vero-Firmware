@@ -54,11 +54,9 @@ typedef unsigned char                 bool;
 #ifdef __cplusplus
 extern "C" {
 #endif
-#if 0
-#if !defined( ALMSIM_STANDALONE )
+#if !defined( UN20_APP )
 extern int _printf(const char *format, ...);
 #define printf                        _printf
-#endif
 #endif
 #ifdef __cplusplus
 }

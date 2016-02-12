@@ -29,8 +29,8 @@
 // Includes
 //******************************************************************************
 
-#include <ctl_api.h>
-#include <cross_studio_io.h>
+//#include <ctl_api.h>
+//#include <cross_studio_io.h>
 #include <stdlib.h>
 
 #include "global.h"
@@ -67,6 +67,8 @@ enum {
 //******************************************************************************
 // Definitions
 //******************************************************************************
+#define UN20_TASK_STACK_SIZE           ( 300 /*configMINIMAL_STACK_SIZE*/ + TASK_DEBUG_OVERHEAD )
+#define UN20_TASK_PRIORITY             ( tskIDLE_PRIORITY + 1 )
 
 #define UN20_POWERON_DELAY_MS         100
 
@@ -232,7 +234,7 @@ static bool boConn( char **papzArgs, int iInstance, int iNumArgs )
   if ( pvUsbUn20Callback != NULL )
   {
     sEventData.eInterface = USB_UN20;
-    pvUsbUn20Callback( pvUsbPhoneContext, INTERFACE_EVENT_CONNECTED, &sEventData );
+    pvUsbUn20Callback( pvUsbUn20Context, INTERFACE_EVENT_CONNECTED, &sEventData );
   }
 
   if ( pvUsbPhoneCallback != NULL )
@@ -350,6 +352,8 @@ extern "C" {
   extern MsgPacket sUn20GetInfoPacket;
   extern MsgPacket sCaptureImagePacket;
   extern MsgPacket sCaptureProgressPacket;
+  extern MsgPacket sGetQualityPacket;
+  extern MsgPacket sGetGenerateTemplatePacket;
 }
 
 static bool boUsb( char **papzArgs, int iInstance, int iNumArgs )
@@ -466,6 +470,30 @@ static bool boUsb( char **papzArgs, int iInstance, int iNumArgs )
       if ( pvUsbUn20Callback != NULL )
       {
         pvUsbUn20Callback( pvUsbUn20Context, INTERFACE_EVENT_RX_DATA, &sEventData );
+      }
+    }
+    break;
+
+  case MSG_IMAGE_QUALITY:        // Processed by UN20 App
+    {
+      sEventData.iLength = sGetQualityPacket.Msgheader.iLength;
+      sEventData.pcData = (char *) &sGetQualityPacket;
+
+      if ( pvUsbPhoneCallback != NULL )
+      {
+        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
+      }
+    }
+    break;
+
+  case MSG_GENERATE_TEMPLATE:    // Processed by UN20 App
+    {
+      sEventData.iLength = sGetGenerateTemplatePacket.Msgheader.iLength;
+      sEventData.pcData = (char *) &sGetGenerateTemplatePacket;
+
+      if ( pvUsbPhoneCallback != NULL )
+      {
+        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
       }
     }
     break;
@@ -832,6 +860,12 @@ int iBtReset( bool boReset )
 // USB
 //  
 
+// used to pass data to the callback function without exposing it
+void vUN20CallbackFunction(tInterfaceEvent event, void *event_data)
+{
+  pvUsbUn20Callback( pvUsbUn20Context, event, event_data );
+}
+ 
 static const tLineCoding sUN20portConfig = {
   /*.dwDTERate =*/ 9600,                            // Data terminal rate in bits per second
   /*.bCharFormat =*/ 0,                             // Number of stop bits
@@ -841,21 +875,8 @@ static const tLineCoding sUN20portConfig = {
 
 ISerialPort              *poUN20Port;
 
-static void vUN20SerialInit(tLineCoding const *poConfig)
-{
-  int iRes;
 
-  poUN20Port = poSERDDgetPort( UN20_UART );
-  poUN20Port->vConfigurePort( poConfig, 64, 300 );
-
-  // set to blocking mode for transmit but not receive
-  poUN20Port->vSetBlockingMode( ISerialPort::bmTransmitOnly );
-
-  // flush buffers before we start
-  poUN20Port->vFlush();
-}
-
-static vUN20SerialSend(void *pvData, int iCount)
+static void vUN20SerialSend(void *pvData, int iCount)
 {
   uint8_t *pbData = (uint8_t*)pvData;
 
@@ -865,6 +886,49 @@ static vUN20SerialSend(void *pvData, int iCount)
   }
 }
 
+static void vUN20Task(void* params)
+{
+  tEventConnDisconn oInterface;
+  oInterface.eInterface = USB_UN20;
+
+  poUN20Port = poSERDDgetPort( UN20_UART );
+  poUN20Port->vConfigurePort( (tLineCoding const *)params, 64, 300 );
+
+  // set to blocking mode for transmit but not receive
+  poUN20Port->vSetBlockingMode( ISerialPort::bmTransmitOnly );
+
+  // flush buffers before we start
+  poUN20Port->vFlush();
+
+  // simulate the UN20 interface coming up
+  vUN20CallbackFunction( INTERFACE_EVENT_CONNECTED, &oInterface );
+
+  for(;;)
+  {
+    if ( poUN20Port->iHasChars() )
+    {
+      int iChar = poUN20Port->iGetchar();
+      if ( iChar != EOF )
+      {
+        tEventRxData oRxData;
+        char cChar = (char)iChar;
+
+        // deliver the data to the HAL
+        oRxData.iLength = 1;
+        oRxData.pcData = &cChar;
+        vUN20CallbackFunction( INTERFACE_EVENT_RX_DATA, &oRxData );
+      }
+    }
+    vTaskDelay(1);
+  }
+}
+
+
+static void vUN20SerialInit(tLineCoding const *poConfig)
+{
+  /* Create the UN20 serial task. */
+  xTaskCreate( vUN20Task, ( signed char * ) "UN20", UN20_TASK_STACK_SIZE, ( void * ) poConfig, UN20_TASK_PRIORITY, NULL );
+}
 
 // eWhich - Source for which we are registering a callback
 // pvCallback - Callback function for this source

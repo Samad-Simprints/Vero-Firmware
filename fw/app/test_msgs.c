@@ -127,3 +127,13 @@
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgScanProgress ), MSG_CAPTURE_PROGRESS, 0x00 },
   .oPayload.ScanProgress = { 2, 55, 0xF5F5F5F5 }
   };
+
+  MsgPacket sGetQualityPacket = {
+  .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_IMAGE_QUALITY, 0x00 },
+  .oPayload.DummyPayload = { 0x0, 0xF5F5F5F5 }
+ };
+
+  MsgPacket sGetGenerateTemplatePacket = {
+  .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_GENERATE_TEMPLATE, 0x00 },
+  .oPayload.DummyPayload = { 0x0, 0xF5F5F5F5 }
+  };
