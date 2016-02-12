@@ -689,8 +689,10 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       boUn20ShuttingDown = false;
       boUn20PoweredUp = true;
 
+#if 0
       // Now is a good time to request the UN20's current config info.
       boNeedUn20Info = true;
+#endif
 
       // We also pass the message on to the phone.
 
@@ -998,7 +1000,7 @@ static void vPhoneUsbCallbackHandler(void *context, tInterfaceEvent event, void 
     {
       tEventRxData *psEventData = event_data;
       vIncomingBytes( MSG_SOURCE_PHONE_USB, (char *) psEventData->pcData, psEventData->iLength );
-    }
+      }
     break;
 
   default:
@@ -1116,6 +1118,38 @@ void vLpcAppTask( void *pvParameters )
   vProtocolInit();
 
   // Perform a start-up dance on the LEDs.
+  vUiLedSet(LED_RING_0, OFF);
+  vUiLedSet(LED_RING_1, OFF);
+  vUiLedSet(LED_RING_2, OFF);
+  vUiLedSet(LED_RING_3, OFF);
+  vUiLedSet(LED_RING_4, OFF);
+  vUiLedSet(LED_RING_5, OFF);
+  vUiLedSet(LED_RING_6, OFF);
+  vUiLedSet(LED_SCAN_GOOD, OFF);
+  vUiLedSet(LED_SCAN_BAD, OFF);
+
+  vUiLedSet(LED_CONNECTED, OFF);
+  vUiLedSet(LED_BATTERY, OFF);
+
+  vTaskDelay( 1000 );
+
+    // Perform a start-up dance on the LEDs.
+  vUiLedSet(LED_RING_0, GREEN);
+  vUiLedSet(LED_RING_1, GREEN);
+  vUiLedSet(LED_RING_2, ORANGE);
+  vUiLedSet(LED_RING_3, RED);
+  vUiLedSet(LED_RING_4, ORANGE);
+  vUiLedSet(LED_RING_5, GREEN);
+  vUiLedSet(LED_RING_6, GREEN);
+  vUiLedSet(LED_SCAN_GOOD, GREEN);
+  vUiLedSet(LED_SCAN_BAD, RED);
+
+  vUiLedSet(LED_CONNECTED, ON);
+  vUiLedSet(LED_BATTERY, ON);
+
+  vTaskDelay( 1000 );
+
+    // Perform a start-up dance on the LEDs.
   vUiLedSet(LED_RING_0, OFF);
   vUiLedSet(LED_RING_1, OFF);
   vUiLedSet(LED_RING_2, OFF);
