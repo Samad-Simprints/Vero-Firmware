@@ -34,8 +34,11 @@
 // Definitions
 //******************************************************************************
 
+// How much of the buffer we reserve to hold the message source marker.
+#define MSG_BUFFER_RESERVED                       4
+
 // We can hold the maximum size protocol message plus the source as 32 bits.
-#define MSG_BUFFER_LEN    ( MSG_PACKET_MAX_SIZE + 4 )
+#define MSG_BUFFER_LEN    ( MSG_PACKET_MAX_SIZE + MSG_BUFFER_RESERVED )
 
 //******************************************************************************
 // Local Storage
@@ -86,7 +89,7 @@ void vProtocolInit ( void )
     sMsgBuffer.abProtocolMessageBuffer[ iLoop ][ 1 ] = 0;
     sMsgBuffer.abProtocolMessageBuffer[ iLoop ][ 2 ] = 0;
     sMsgBuffer.abProtocolMessageBuffer[ iLoop ][ 3 ] = 0;
-    iFreeSpaceIndex[ iLoop ] = 4;
+    iFreeSpaceIndex[ iLoop ] = MSG_BUFFER_RESERVED;
   }
 
   return;
@@ -115,7 +118,7 @@ void vIncomingBytes(tMsgSource eSource, uint8 *pcData, int iLength)
     }
 
     // Empty the buffer (apart from the source marker) ready for the next msg.
-    iFreeSpaceIndex[ eSource ] = 4;
+    iFreeSpaceIndex[ eSource ] = MSG_BUFFER_RESERVED;
 
     // We make no attempt to re-synchronise the incoming byte stream with protocol packets
     // if we have got out of step.
@@ -128,16 +131,22 @@ void vIncomingBytes(tMsgSource eSource, uint8 *pcData, int iLength)
           (void *) pcData,
           iLength );
 
+  // printf("Got 0x%02X\n", sMsgBuffer.abProtocolMessageBuffer[ eSource ][ iFreeSpaceIndex[ eSource ]]);
+
   iFreeSpaceIndex[ eSource ] += iLength;
 
+  // printf("Free index %d\n",iFreeSpaceIndex[ eSource ]);
+
   // See if we have enough message to cover the header.
-  if ( iFreeSpaceIndex[ eSource ] > sizeof( MsgPacketheader ))
+  if (( iFreeSpaceIndex[ eSource ] - MSG_BUFFER_RESERVED ) > sizeof( MsgPacketheader ))
   {
     // Yes.
 
     // Check the header syncword.
-    uiSyncword = ((MsgPacketheader *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 4 ])->uMsgHeaderSyncWord;
-printf("StartSync: %08X\n", uiSyncword);
+    uiSyncword = ((MsgPacketheader *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ MSG_BUFFER_RESERVED ])->uMsgHeaderSyncWord;
+
+    // printf("StartSync: %08X\n", uiSyncword);
+
     if( uiSyncword != MSG_PACKET_HEADER_SYNC_WORD )
     {
       // Badly-formatted message.
@@ -149,7 +158,7 @@ printf("StartSync: %08X\n", uiSyncword);
       }
 
       // Empty the buffer (apart from the source marker) ready for the next msg.
-      iFreeSpaceIndex[ eSource ] = 4;
+      iFreeSpaceIndex[ eSource ] = MSG_BUFFER_RESERVED;
 
       // We make no attempt to re-synchronise the incoming byte stream with protocol packets
       // if we have got out of step.
@@ -158,10 +167,12 @@ printf("StartSync: %08X\n", uiSyncword);
     }
 
     // Find the size of this message.
-    uiLength = ((MsgPacketheader *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 4 ])->iLength;
-printf("Length: %d\n", uiLength);
+    uiLength = ((MsgPacketheader *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ MSG_BUFFER_RESERVED ])->iLength;
+
+    // printf("Length: %d\n", uiLength);
+
     // Check whether we have received enough bytes.
-    if (( iFreeSpaceIndex[ eSource ] - 1 ) < uiLength )
+    if (( iFreeSpaceIndex[ eSource ] - MSG_BUFFER_RESERVED ) < uiLength )
     {
       // Not got enough message yet.
       return;
@@ -174,8 +185,10 @@ printf("Length: %d\n", uiLength);
   }
 
   // Check the message type.
-  bMsgId = ((MsgPacketheader *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 4 ])->bMsgId;
-printf("MsgId: %d\n", bMsgId);
+  bMsgId = ((MsgPacketheader *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ MSG_BUFFER_RESERVED ])->bMsgId;
+
+  // printf("MsgId: %d\n", bMsgId);
+
   // Ignore the Response/Reply bit.
   bMsgId &= ~MSG_REPLY;
 
@@ -190,7 +203,7 @@ printf("MsgId: %d\n", bMsgId);
     }
 
     // Empty the buffer (apart from the source marker) ready for the next msg.
-    iFreeSpaceIndex[ eSource ] = 4;
+    iFreeSpaceIndex[ eSource ] = MSG_BUFFER_RESERVED;
 
     // We make no attempt to re-synchronise the incoming byte stream with protocol packets
     // if we have got out of step.
@@ -199,8 +212,13 @@ printf("MsgId: %d\n", bMsgId);
   }
 
   // Check the footer.
-  uiSyncword = *((uint32 *)( &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ uiLength ] ));
-printf("EndSync: %08X\n", uiSyncword);
+  uiSyncword = ( sMsgBuffer.abProtocolMessageBuffer[ eSource ][ MSG_BUFFER_RESERVED + uiLength + 0 - MSG_HEADER_FOOTER_SIZE ] << 24 ) +
+               ( sMsgBuffer.abProtocolMessageBuffer[ eSource ][ MSG_BUFFER_RESERVED + uiLength + 1 - MSG_HEADER_FOOTER_SIZE ] << 16 ) +
+               ( sMsgBuffer.abProtocolMessageBuffer[ eSource ][ MSG_BUFFER_RESERVED + uiLength + 2 - MSG_HEADER_FOOTER_SIZE ] <<  8 ) +
+               ( sMsgBuffer.abProtocolMessageBuffer[ eSource ][ MSG_BUFFER_RESERVED + uiLength + 3 - MSG_HEADER_FOOTER_SIZE ] <<  0 );
+
+  //printf("EndSync: %08X\n", uiSyncword);
+
   if( uiSyncword != MSG_PACKET_FOOTER_SYNC_WORD )
   {
     // Badly-formatted message.
@@ -212,7 +230,7 @@ printf("EndSync: %08X\n", uiSyncword);
     }
 
     // Empty the buffer (apart from the source marker) ready for the next msg.
-    iFreeSpaceIndex[ eSource ] = 4;
+    iFreeSpaceIndex[ eSource ] = MSG_BUFFER_RESERVED;
 
     // We make no attempt to re-synchronise the incoming byte stream with protocol packets
     // if we have got out of step.
@@ -230,19 +248,19 @@ printf("EndSync: %08X\n", uiSyncword);
   }
 
   // See if this message ran up to the end of the received data.
-  if ( iFreeSpaceIndex[ eSource ] == ( 4 + uiLength ))
+  if ( iFreeSpaceIndex[ eSource ] == ( MSG_BUFFER_RESERVED + uiLength ))
   {
     // The buffer contained one message and no more.
     // Empty the buffer (apart from the source marker) ready for the next msg.
-    iFreeSpaceIndex[ eSource ] = 4;
+    iFreeSpaceIndex[ eSource ] = MSG_BUFFER_RESERVED;
   }
   else
   {
     // There are more bytes in the buffer. Shift them to the start of the
     // buffer as the beginning of the next message.
-    memcpy ((void *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 4 ],
-            (void *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 4 + uiLength ],
-            iFreeSpaceIndex[ eSource ] - ( 4 + uiLength ));
+    memcpy ((void *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ MSG_BUFFER_RESERVED ],
+            (void *) &sMsgBuffer.abProtocolMessageBuffer[ eSource ][ MSG_BUFFER_RESERVED + uiLength ],
+            iFreeSpaceIndex[ eSource ] - ( MSG_BUFFER_RESERVED + uiLength ));
     iFreeSpaceIndex[ eSource ] -= uiLength;
   }
 

@@ -68,13 +68,13 @@
 #endif
 
 #define CLI_TASK_STACK_SIZE           ( 512 + TASK_DEBUG_OVERHEAD )
-#define CLI_TASK_PRIORITY             ( 1 )
+#define CLI_TASK_PRIORITY             ( tskIDLE_PRIORITY + 1 )
 
 #define LED_TASK_STACK_SIZE           ( 512 + TASK_DEBUG_OVERHEAD )
-#define LED_TASK_PRIORITY             ( 1 )
+#define LED_TASK_PRIORITY             ( tskIDLE_PRIORITY + 1 )
 
 #define USB_TASK_STACK_SIZE           ( 512 + TASK_DEBUG_OVERHEAD )
-#define USB_TASK_PRIORITY             ( 1 )
+#define USB_TASK_PRIORITY             ( tskIDLE_PRIORITY + 1 )
 
 // - interrupt priorities - max 7 on LPC18xx
 #if 0

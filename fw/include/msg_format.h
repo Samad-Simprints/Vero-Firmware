@@ -42,6 +42,8 @@ extern "C" {
 #define MSG_PACKET_HEADER_SYNC_WORD 0xFAFAFAFA
 #define MSG_PACKET_FOOTER_SYNC_WORD 0xF5F5F5F5
 
+#define MSG_HEADER_FOOTER_SIZE      4
+
 // Maximum size (inc. syncwords, headers, footers etc.) of a protocol message.
 #define MSG_PACKET_MAX_SIZE   1024
 
