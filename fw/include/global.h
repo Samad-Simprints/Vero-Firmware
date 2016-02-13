@@ -151,4 +151,7 @@ enum {
 
 #define vFreeAndNull( obj )           { if ( obj != 0 ) { obj->vFree(); obj = 0; } }
 
+#define _QUOTEME(x)                              #x
+#define QUOTEME(x)                               _QUOTEME(x)
+
 #endif

@@ -95,7 +95,7 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 #define FLASH_TICK_MS                    ( 500 )
 
 // Delay after requesting the UN20 to shutdown before we power it off.
-#define UN20_SHUTDOWN_DELAY_MS           ( 3 * 1000 )
+#define UN20_SHUTDOWN_DELAY_MS           ( 10 * 1000 )
 
 // Default UN20 idle timer value: 10 minutes in ms.
 #define UN20_IDLE_TIMEOUT_MS             ( 60 * 60 * 1000 )
@@ -712,15 +712,6 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     break;
     
   case MSG_UN20_SHUTDOWN:
-
-    // Start the 3s UN20 shutdown timer.
-    xTimerStart( hUn20ShutdownTimer, 0 );
-
-    boUn20ShuttingDown = true;
-    
-    // This message needs to go to the UN20 to tell it to start shutting down,
-    // so fall through to ...
-
   case MSG_CAPTURE_IMAGE:
   case MSG_CAPTURE_PROGRESS:
   case MSG_CAPTURE_ABORT:
@@ -775,6 +766,15 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     }
 
     // The UN20 is powered up.
+
+    // Set shutdown flag to protect against further messages
+    if ( (psMsg->oMsg.Msgheader.bMsgId & ~MSG_REPLY) == MSG_UN20_SHUTDOWN )
+    {
+      // Start the 3s UN20 shutdown timer.
+      xTimerStart( hUn20ShutdownTimer, 0 );
+
+      boUn20ShuttingDown = true;
+    }
 
     // It's probably a good time to re-request the UN20's current config info.
     boNeedUn20Info = true;
@@ -953,7 +953,7 @@ static void vUn20UsbCallbackHandler(void *context, tInterfaceEvent event, void *
 {
   PRECOND( event_data != NULL );
   
-  CLI_PRINT(("vUn20UsbCallbackHandler: event %d\n", event));
+  //CLI_PRINT(("vUn20UsbCallbackHandler: event %d\n", event));
 
   // Reset the system inactivity timeout.
   xTimerReset( hInactivityTimer, 0 );
@@ -963,12 +963,17 @@ static void vUn20UsbCallbackHandler(void *context, tInterfaceEvent event, void *
   case INTERFACE_EVENT_CONNECTED:
   case INTERFACE_EVENT_DISCONNECTED:
 
+    CLI_PRINT(("vUn20UsbCallbackHandler: event %d\n", event));
     vInterfaceConnDisconn( event, (tEventConnDisconn *) event_data );
     break;
 
   case INTERFACE_EVENT_RX_DATA:
     {
       tEventRxData *psEventData = event_data;
+      if ( psEventData->iLength > 1 )
+      {
+        CLI_PRINT(("vUn20UsbCallbackHandler: event %d\n", event));
+      }
       vIncomingBytes( MSG_SOURCE_UN20_USB, (char *) psEventData->pcData, psEventData->iLength );
     }
     break;

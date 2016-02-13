@@ -159,6 +159,10 @@
         <file file_name="../LinuxUN20/Makefile" />
         <file file_name="../LinuxUN20/push-files.sh" />
         <file file_name="../LinuxUN20/inc/sgfplib.h" />
+        <file file_name="../LinuxUN20/InitScript" />
+        <file file_name="../LinuxUN20/install-index-un20" />
+        <file file_name="../LinuxUN20/start-index-un20" />
+        <file file_name="../LinuxUN20/build-setup.sh" />
       </folder>
     </folder>
     <folder Name="System Files">

@@ -72,9 +72,6 @@ enum {
 
 #define UN20_POWERON_DELAY_MS         100
 
-#define _QUOTEME(x)                              #x
-#define QUOTEME(x)                               _QUOTEME(x)
-
 #define INDEX_VERSION_MAJOR                     0
 #define INDEX_VERSION_MINOR                     6
 #define INDEX_VERSION_BUGFIX                    0

@@ -1,0 +1,16 @@
+#!/bin/sh
+echo "Configuring Linux runtime for Index app"
+#Setup the libraries
+cd /data
+cp /data/lib/* /usr/lib
+cp /data/runtimes/* /usr/lib
+# everything setup start the app
+/bin/sh /data/start-index-un20 &
+
+#echo 0       > /sys/class/android_usb/android0/enable
+#echo adb,acm > /sys/class/android_usb/android0/functions
+#echo 2       > /sys/class/android_usb/android0/f_acm/instances
+##echo 2d01    > /sys/class/android_usb/android0/idProduct
+#echo 1       > /sys/class/android_usb/android0/enable
+
+echo "boot complete.."

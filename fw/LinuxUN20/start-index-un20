@@ -1,0 +1,10 @@
+#!/bin/sh
+echo "Starting UN20 server application"
+/data/index-un20app /dev/ttyS1
+# when the app exits we need to halt
+if [ -e /data/no-shutdown ]; then
+echo "Shutdown inhibited by /data/no-shutdown"
+else
+echo "Requesting system to shutdown"
+/sbin/halt
+fi

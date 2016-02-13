@@ -12,7 +12,7 @@ FLAGS   = -DUN20_APP
 OBJS =	main.o protocol_msg.o test_msgs.o
 SRCS =	main.cpp 
 
-TARGET  = index_un20app
+TARGET  = index-un20app
 
 ADB_TARGET_FOLDER = /data
 RESULTS = results
@@ -28,8 +28,13 @@ $(TARGET) : $(OBJS)
 .cpp.o :
 	$(CPP) $(FLAGS) $(INCPATH) -c $<
 
-install:
+update:
 	adb push  $(TARGET)	/data
+
+install:
+	tar cvz -f index.tar.gz lib/* runtimes/* $(TARGET) InitScript start-index-un20
+	adb push index.tar.gz /data
+	adb push install-index-un20 /data
 
 get-results:
 		

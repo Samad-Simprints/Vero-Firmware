@@ -74,14 +74,20 @@ DEBUG_MODULE_DEFINE( INDEX_DEFAULTS ) = {
     DEBUGZONE(ZONE_DBG_ERROR) | DEBUGZONE(ZONE_DBG_HI) | DEBUGZONE(ZONE_DBG_MED) | DEBUGZONE(ZONE_DBG_LO)
 };
 
+#define INDEX_VERSION  QUOTEME(INDEX_REVISION_NUMBER) " : " \
+                        "Built: " __DATE__ " " __TIME__
+
 static LPSGFPM  sgfplib = NULL;
 static SGFingerInfo fingerInfo;
 static SGDeviceInfoParam deviceInfo;
 static BYTE *ImageBuffer;
+static DWORD templateSize;
+static BYTE *minutiaeBuffer1 = NULL;
 
+static bool boAppQuit = false;
 static int port_fd;
 
-static int serial_config(char *port, struct termios *oldtio)
+static int serial_startup(char *port, struct termios *oldtio)
 {
   int fd,c, res;
   struct termios newtio;
@@ -159,7 +165,14 @@ static int serial_config(char *port, struct termios *oldtio)
   return fd;
 }
 
-static int un20_sdk_config()
+int serial_shutdown(int fd, struct termios *oldtio)
+{
+  /* restore the old port settings */
+  tcsetattr(fd,TCSANOW,oldtio);
+  close(fd);
+}
+
+static int un20_sdk_startup()
 {
   long err;
 
@@ -218,6 +231,39 @@ static int un20_sdk_config()
   return true;
 }
 
+static int un20_sdk_shutdown()
+{
+  long err;
+
+  if ( ImageBuffer )
+  {
+    free( ImageBuffer );
+  }
+
+  if ( minutiaeBuffer1 )
+  {
+    free( minutiaeBuffer1 );
+  }
+
+  if ( sgfplib )
+  {
+    err = sgfplib->CloseDevice();
+    if (err != SGFDX_ERROR_NONE)
+    {
+       printf("ERROR - Unable to close device\n\n");
+       return false;
+    }
+
+    err = DestroySGFPMObject(sgfplib);
+    if (err != SGFDX_ERROR_NONE)
+    {
+       printf("ERROR - Unable to destroy FPM object.\n\n");
+       return false;
+    }
+  }
+  return true;
+}
+
 static int vUN20SerialSend(void *pvData, int iMsglength)
 {
 //  CLI_PRINT(( "vUN20SerialSend: length %d\n", iMsglength ));
@@ -245,7 +291,7 @@ static void receiver(int fd)
 
   vUN20SerialSend(&sUn20ReadyPacket, sUn20ReadyPacket.Msgheader.iLength);
 
-  while (1)
+  while ( !boAppQuit )
   {
     res = read(fd,&bData,1);
 #if 0
@@ -256,9 +302,6 @@ static void receiver(int fd)
     vIncomingBytes( MSG_SOURCE_UN20_USB, &bData, 1 );
   }
 }
-
-static DWORD templateSize;
-static BYTE *minutiaeBuffer1 = NULL;
 
 // Called when a protocol message has been received from the UN20 or phone.
 static void vMessageProcess( MsgInternalPacket *psMsg )
@@ -331,6 +374,12 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       // send minutiaeBuffer1, &templateSize
       break;
 
+    case MSG_UN20_SHUTDOWN:
+      // Quit the server app, causing the controlling shell to shutdown the system
+      printf("*** UN20 server shutdown requested ***\n");
+      boAppQuit = true;
+      break;
+
     default:
       break;
   }
@@ -351,18 +400,21 @@ main(int argc, char *argv[])
 
   DEBUG_MODULE_INIT( INDEX_DEFAULTS );
 
+  CLI_PRINT(("\nINDEX - SW: " INDEX_VERSION "\n"));
+
   if ( argc == 2 )
   {
-    un20_sdk_config();
-    port_fd = serial_config(argv[1], &oldtio);
+    un20_sdk_startup();
+    port_fd = serial_startup(argv[1], &oldtio);
+
     vProtocolInit();
     vProtocolMsgNotify( vMessageProcess );
     vProtocolMsgError( vMessageErrorCallback );
 
     receiver(port_fd);
 
-    /* restore the old port settings */
-    tcsetattr(port_fd,TCSANOW,&oldtio);
+    un20_sdk_shutdown();
+    serial_shutdown(port_fd, &oldtio);
   }
   else
   {

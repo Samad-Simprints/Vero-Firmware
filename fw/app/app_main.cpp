@@ -55,8 +55,6 @@
 //******************************************************************************
 // Constants
 //******************************************************************************
-#define _QUOTEME(x)                              #x
-#define QUOTEME(x)                               _QUOTEME(x)
 
 #define INDEX_VERSION  QUOTEME(INDEX_REVISION_NUMBER) " : " \
                         "Built: " __DATE__ " " __TIME__
