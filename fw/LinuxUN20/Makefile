@@ -41,4 +41,5 @@ get-results:
 clean :
 	-rm $(TARGET)
 	-rm $(OBJS)
+	-rm index.tar.gz
 
