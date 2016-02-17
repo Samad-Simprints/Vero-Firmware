@@ -108,6 +108,7 @@
         <file file_name="../include/protocol_msg.h" />
         <file file_name="../include/helpers.hpp" />
         <file file_name="../include/dbgapi.h" />
+        <file file_name="../include/test_msgs.h" />
       </folder>
       <folder Name="rtos">
         <file file_name="../rtos/croutine.c" />

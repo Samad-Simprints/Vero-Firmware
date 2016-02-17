@@ -45,24 +45,14 @@
 
 #include "msg_format.h"
 #include "protocol_msg.h"
+#include "test_msgs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-  extern MsgPacket sGetSensorInfoPacket;
-  extern MsgPacket sSetuiPacket;
-  extern MsgPacket sSensorConfigPacket;
-  extern MsgPacket sShutdownUn20Packet;
-  extern MsgPacket sWakeupUn20Packet;
-  extern MsgPacket sUn20ReadyPacket;
-  extern MsgPacket sUn20GetInfoPacket;
-  extern MsgPacket sCaptureImagePacket;
-  extern MsgPacket sCaptureProgressPacket;
-
-  extern int un20_wsq_encode_mem(unsigned char **odata, int *olen, const float r_bitrate,
+extern int un20_wsq_encode_mem(unsigned char **odata, int *olen, const float r_bitrate,
                    unsigned char *idata, const int w, const int h,
                    const int d, const int ppi, char *comment_text);
-
 #ifdef __cplusplus
 }
 #endif
@@ -91,12 +81,21 @@ static LPSGFPM  sgfplib = NULL;
 static HSGFPM   sgfplib = NULL;
 #endif
 
+// image accquisition data
 static SGFingerInfo fingerInfo;
 static SGDeviceInfoParam deviceInfo;
 static BYTE *ImageBuffer;
+static int iImageBufferSize;
+
+// template data
 static DWORD templateSize;
 static BYTE *minutiaeBuffer1 = NULL;
 
+// data recovery controls
+static bool boImageValid = false;
+static bool boTemplateValid = false;
+
+// compression parameters
 static float bitrate = 0.75;
 static unsigned char *wsq;
 static int size;
@@ -284,7 +283,8 @@ static int un20_sdk_startup()
   printf("deviceInfo.ImageDPI   : %ld\n", deviceInfo.ImageDPI);
   printf("deviceInfo.FWVersion  : %04X\n", (unsigned int) deviceInfo.FWVersion);
 
-  ImageBuffer = (BYTE*) malloc(deviceInfo.ImageHeight * deviceInfo.ImageWidth);
+  iImageBufferSize = ( deviceInfo.ImageHeight * deviceInfo.ImageWidth );
+  ImageBuffer = (BYTE*) malloc( iImageBufferSize );
   if ( !ImageBuffer )
   {
      printf("ERROR - Unable to alocate image buffer.\n\n");
@@ -353,14 +353,16 @@ static int vUN20SerialSend(void *pvData, int iMsglength)
 {
 //  CLI_PRINT(( "vUN20SerialSend: length %d\n", iMsglength ));
 
-#if 0
+#if 1
   {
     uint8 *pbData = (uint8 *)pvData;
     while ( iMsglength-- > 0 )
     {
-      vIncomingBytes( MSG_SOURCE_UN20_USB, pbData, 1 );
+      printf(" %02X", *pbData);
+      write(port_fd, pbData, 1);
       pbData++;
     }
+    printf("\n");
   }
 #else
   return write(port_fd, pvData, iMsglength);
@@ -388,6 +390,73 @@ static void receiver(int fd)
   }
 }
 
+// create a NACK packet for the supplied packet with the given error code
+static void vSetupNACK( MsgPacket *psPacket, int16 iStatusCode )
+{
+  psPacket->Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
+  psPacket->Msgheader.iLength = (sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ));
+  psPacket->Msgheader.bMsgId |= MSG_REPLY;
+  psPacket->Msgheader.bStatus = iStatusCode;
+  psPacket->oPayload.DummyPayload.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
+}
+
+// create an ACK packet for the supplied packet
+static void vSetupACK( MsgPacket *psPacket )
+{
+  vSetupNACK( psPacket, 0 );
+}
+
+static void vSetupReturnFragment( MsgPacket *psPacket, uint8 *pbData, int iSize)
+{
+  int iStartOffset;
+  int iRemaining;
+  int iFragmentLength;
+
+  printf("UN20: Fragment request: %d\n", psPacket->oPayload.FragmentRequest.iFragmentNo);
+
+  // use all the data in the input packet as we are about to overwrite them
+  iStartOffset = (psPacket->oPayload.DataFragment.iFragmentNo * sizeof(psPacket->oPayload.DataFragment.bFragmentData));
+
+  if ( iStartOffset < iSize )
+  {
+    iRemaining = ( iSize - iStartOffset );
+    iFragmentLength = min(iRemaining, sizeof(psPacket->oPayload.DataFragment.bFragmentData));
+
+    printf("UN20: iStartOffset: %d, iRemaining: %d, iFragmentLength: %d\n", iStartOffset, iRemaining, iFragmentLength);
+
+    psPacket->Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
+    psPacket->Msgheader.iLength = (sizeof( MsgPacketheader ) + sizeof( MsgFragment ));
+    psPacket->Msgheader.bMsgId |= MSG_REPLY;
+    psPacket->oPayload.DataFragment.iFragmentNo = psPacket->oPayload.FragmentRequest.iFragmentNo;
+    psPacket->oPayload.DataFragment.iFragmentSize = iFragmentLength;
+    psPacket->oPayload.DataFragment.iLastFragment = ((iStartOffset + iFragmentLength) >= iSize) ? 1 : 0;
+    memcpy(&psPacket->oPayload.DataFragment.bFragmentData, &pbData[iStartOffset], iFragmentLength);
+    psPacket->oPayload.DataFragment.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
+
+    printf("UN20: Fragment response: %d, Size: %d, Last: %d\n", 
+                          psPacket->oPayload.DataFragment.iFragmentNo,
+                          psPacket->oPayload.DataFragment.iFragmentSize,
+                          psPacket->oPayload.DataFragment.iLastFragment);
+  }
+  else
+  {
+    vSetupNACK( psPacket, 1 );
+  }
+
+}
+
+// create an Image Quality response packet for the supplied packet with the given error code
+static void vSetupImageQuality( MsgPacket *psPacket, int16 iScanQuality )
+{
+  psPacket->Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
+  psPacket->Msgheader.iLength = (sizeof( MsgPacketheader ) + sizeof( MsgImageQuality ));
+  psPacket->Msgheader.bMsgId |= MSG_REPLY;
+  psPacket->Msgheader.bStatus = 0;
+  psPacket->oPayload.ScanQuality.iQuality = iScanQuality;
+  psPacket->oPayload.ScanQuality.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
+}
+
+
 // Called when a protocol message has been received from the UN20 or phone.
 static void vMessageProcess( MsgInternalPacket *psMsg )
 {
@@ -398,6 +467,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   DWORD quality;
   DWORD templateSizeMax;
   long err, err1;
+
   TIME_INIT();
 
   // By the time this callback is called, we know that the message:
@@ -421,74 +491,145 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     // request for sensor information
     case MSG_UN20_GET_INFO:
       printf("UN20: GetInfo\n");
-      sUn20GetInfoPacket.oPayload.UN20Info.iStoreCount = 23;
+      sUn20GetInfoPacket.oPayload.UN20Info.iStoreCount = 0;
       sUn20GetInfoPacket.oPayload.UN20Info.iVersion = 0x4321;
       vUN20SerialSend(&sUn20GetInfoPacket, sUn20GetInfoPacket.Msgheader.iLength);
       break;
 
     // capture an image
     case MSG_CAPTURE_IMAGE:
+      // image and template no longer valid
+      boImageValid = false;
+      boTemplateValid = false;
+
+      vSetupNACK( psPacket, 1 );
+
 #ifdef __cplusplus
       err = TIME(err, sgfplib->GetImage(ImageBuffer));
 #else
       err = TIME(err, SGFPM_GetImage(sgfplib, ImageBuffer));
 #endif
-{
-  FILE *raw = fopen("/data/un20-raw", "wb");
-  if (fwrite(ImageBuffer, (deviceInfo.ImageWidth * deviceInfo.ImageHeight), 1, raw) != 1)
-  {
-    perror("fwrite");
-  }
-  fclose(raw);
-}
+      {
+        FILE *raw = fopen("/data/un20-raw", "wb");
+        if (fwrite(ImageBuffer, (deviceInfo.ImageWidth * deviceInfo.ImageHeight), 1, raw) != 1)
+        {
+          perror("fwrite");
+        }
+        fclose(raw);
+      }
 
+      if ( err == SGFDX_ERROR_NONE )
+      {
+        boImageValid = true;
+        vSetupACK( psPacket );
+      }
+#if 0
       //memset(ImageBuffer, 0xff, (deviceInfo.ImageWidth * deviceInfo.ImageHeight));
       err = TIME(err, un20_wsq_encode_mem(&wsq, &size, bitrate, ImageBuffer, deviceInfo.ImageWidth, deviceInfo.ImageHeight, 8, -1, NULL));
 
       printf("UN20: Raw: %d, Compressed: %d\n", (deviceInfo.ImageWidth * deviceInfo.ImageHeight), size);
+#endif
+
       printf("UN20: Capture Image:(%d)\n", err);
+
+      // send response
+      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
 
     // Get image quality of captured image
     case MSG_IMAGE_QUALITY:
+      vSetupNACK( psPacket, 1 );
+
+      if ( boImageValid )
+      {
 #ifdef __cplusplus
-      err = TIME(err, sgfplib->GetImageQuality(deviceInfo.ImageWidth, deviceInfo.ImageHeight, ImageBuffer, &quality));
+        err = TIME(err, sgfplib->GetImageQuality(deviceInfo.ImageWidth, deviceInfo.ImageHeight, ImageBuffer, &quality));
 #else
-      err = TIME(err, SGFPM_GetImageQuality(sgfplib,deviceInfo.ImageWidth, deviceInfo.ImageHeight, ImageBuffer, &quality));
+        err = TIME(err, SGFPM_GetImageQuality(sgfplib,deviceInfo.ImageWidth, deviceInfo.ImageHeight, ImageBuffer, &quality));
 #endif
-      printf("UN20: Get Image Quality:(%d, %d)\n", err, quality);
+
+        if ( err == SGFDX_ERROR_NONE )
+        {
+          vSetupImageQuality( psPacket, (int16)quality );
+        }
+        printf("UN20: Get Image Quality:(%d, %d)\n", err, quality);
+      }
+
+      // send response
+      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
 
     // generate template for image
     case MSG_GENERATE_TEMPLATE:
+      vSetupNACK( psPacket, 1 );
+
+      // cannot generate a template without an image
+      if ( boImageValid )
+      {
 #ifdef __cplusplus
-      err = sgfplib->SetTemplateFormat(TEMPLATE_FORMAT_ISO19794);
-      err |= sgfplib->GetMaxTemplateSize(&templateSizeMax);
+        err = sgfplib->SetTemplateFormat(TEMPLATE_FORMAT_ISO19794);
+        err |= sgfplib->GetMaxTemplateSize(&templateSizeMax);
 #else
-      err = SGFPM_SetTemplateFormat(sgfplib, TEMPLATE_FORMAT_ISO19794);
-      err |= SGFPM_GetMaxTemplateSize(sgfplib, &templateSizeMax);
+        err = SGFPM_SetTemplateFormat(sgfplib, TEMPLATE_FORMAT_ISO19794);
+        err |= SGFPM_GetMaxTemplateSize(sgfplib, &templateSizeMax);
 #endif
 
-      minutiaeBuffer1 = (BYTE*) realloc(minutiaeBuffer1, templateSizeMax);
-      fingerInfo.FingerNumber = SG_FINGPOS_UK;
-      fingerInfo.ViewNumber = 1;
-      fingerInfo.ImpressionType = SG_IMPTYPE_LP;
-      fingerInfo.ImageQuality = quality; //0 to 100
+        minutiaeBuffer1 = (BYTE*) realloc(minutiaeBuffer1, templateSizeMax);
+        fingerInfo.FingerNumber = SG_FINGPOS_UK;
+        fingerInfo.ViewNumber = 1;
+        fingerInfo.ImpressionType = SG_IMPTYPE_LP;
+        fingerInfo.ImageQuality = quality; //0 to 100
 
-      templateSize = 0;
+        templateSize = 0;
 #ifdef __cplusplus
-      err |= TIME(err1, sgfplib->CreateTemplate(&fingerInfo, ImageBuffer, minutiaeBuffer1));
-      err |= sgfplib->GetTemplateSize(minutiaeBuffer1, &templateSize);
+        err |= TIME(err1, sgfplib->CreateTemplate(&fingerInfo, ImageBuffer, minutiaeBuffer1));
+        err |= sgfplib->GetTemplateSize(minutiaeBuffer1, &templateSize);
 #else
-      err |= TIME(err1, SGFPM_CreateTemplate(sgfplib, &fingerInfo, ImageBuffer, minutiaeBuffer1));
-      err |= SGFPM_GetTemplateSize(sgfplib, minutiaeBuffer1, &templateSize);
+        err |= TIME(err1, SGFPM_CreateTemplate(sgfplib, &fingerInfo, ImageBuffer, minutiaeBuffer1));
+        err |= SGFPM_GetTemplateSize(sgfplib, minutiaeBuffer1, &templateSize);
 #endif
-      printf("UN20: Generate Template:([0:%d],%d)\n", err, templateSize);
+        if ( err == SGFDX_ERROR_NONE )
+        {
+          boTemplateValid = true;
+          vSetupACK( psPacket );
+        }
+        printf("UN20: Generate Template:([0:%d],%d)\n", err, templateSize);
+      }
+
+      // send response
+      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
 
-    // return template for image
-    case MSG_RECOVER_TEMPLATE:
-      // send minutiaeBuffer1, &templateSize
+  case MSG_GET_IMAGE_FRAGMENT:
+      printf("UN20: Get Image Fragment (%d):\n", psMsg->oMsg.oPayload.FragmentRequest.iFragmentNo);
+
+      if ( boImageValid )
+      {
+        vSetupReturnFragment( psPacket, ImageBuffer, iImageBufferSize );
+      }
+      else
+      {
+        vSetupNACK( psPacket, 1 );
+      }
+
+      // send response
+      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
+      break;
+
+  case MSG_GET_TEMPLATE_FRAGMENT:
+      printf("UN20: Get Template Fragment:(%d)\n", psMsg->oMsg.oPayload.FragmentRequest.iFragmentNo);
+
+      if ( boTemplateValid )
+      {
+        vSetupReturnFragment( psPacket, minutiaeBuffer1, templateSize );
+      }
+      else
+      {
+        vSetupNACK( psPacket, 1 );
+      }
+
+      // send response
+      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
 
     case MSG_UN20_SHUTDOWN:
@@ -498,6 +639,11 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       break;
 
     default:
+      printf( "*** Rejecting unknown message: %d\n", psMsg->oMsg.Msgheader.bMsgId & ~MSG_REPLY );
+      vSetupNACK( psPacket, 1 );
+
+      // send response
+      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
   }
 

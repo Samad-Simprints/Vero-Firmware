@@ -74,32 +74,34 @@ enum
 {
   // Messages sent from phone to LPC scanner app.
   MSG_GET_SENSOR_INFO = 0,  // Processed by LPC App: Request has no payload, Response carries a MsgSensorInfo payload
-  MSG_SET_SENSOR_CONFIG,    // Processed by LPC App: Request has a MsgSensorConfig payload, Response carries no payload
-  MSG_SET_UI,               // Processed by LPC App: Request has a MsgUIControl payload, Response carries no payload
-  MSG_PAIR,                 // Processed by LPC App: Request has a MsgPairRequest payload, Response carries no payload
+  MSG_SET_SENSOR_CONFIG = 1,// Processed by LPC App: Request has a MsgSensorConfig payload, Response carries no payload
+  MSG_SET_UI = 2,           // Processed by LPC App: Request has a MsgUIControl payload, Response carries no payload
+  MSG_PAIR = 3,             // Processed by LPC App: Request has a MsgPairRequest payload, Response carries no payload
 
   // Messages sent from LPC scanner app to phone app.
-  MSG_REPORT_UI,            // Originated by LPC App: Request has a MsgUINotification payload, Response carries no payload
+  MSG_REPORT_UI = 4,        // Originated by LPC App: Request has a MsgUINotification payload, Response carries no payload
 
   // Messages sent between phone and UN20 application.
-  MSG_CAPTURE_IMAGE,        // Capture an image (processed by UN20 App)
-  MSG_CAPTURE_PROGRESS,     // Capture progress (sent by UN20 App)
-  MSG_CAPTURE_ABORT,        // Processed by UN20 App
-  MSG_RECOVER_IMAGE,        // Processed by UN20 App
-  MSG_IMAGE_FRAGMENT,       // Processed by UN20 App
-  MSG_STORE_IMAGE,          // Processed by UN20 App
-  MSG_IMAGE_QUALITY,        // Processed by UN20 App
-  MSG_GENERATE_TEMPLATE,    // Processed by UN20 App
-  MSG_RECOVER_TEMPLATE,     // Processed by UN20 App
-  MSG_COMPARE_TEMPLATE,     // Processed by UN20 App
+  MSG_CAPTURE_IMAGE = 5,        // Capture an image (processed by UN20 App)
+  MSG_CAPTURE_PROGRESS = 6,     // Capture progress (sent by UN20 App)
+  MSG_CAPTURE_ABORT = 7,        // Processed by UN20 App
+  MSG_RECOVER_IMAGE = 8,        // Processed by UN20 App
+  MSG_IMAGE_FRAGMENT = 9,       // Processed by UN20 App
+  MSG_STORE_IMAGE = 10,          // Processed by UN20 App
+  MSG_IMAGE_QUALITY = 11,   // Processed by UN20 App
+  MSG_GENERATE_TEMPLATE = 12,    // Processed by UN20 App
+  MSG_RECOVER_TEMPLATE = 13,     // Processed by UN20 App
+  MSG_COMPARE_TEMPLATE = 14,     // Processed by UN20 App
 
-  MSG_UN20_SHUTDOWN,        // Tell UN20 to shutdown
-  MSG_UN20_WAKEUP,          // Wakeup the UN20 (noted by LPC App)
-  MSG_UN20_WAKINGUP,        // UN20 is waking up (sent by LPC App if UN20 asleep)
-  MSG_UN20_READY,           // UN20 is ready (sent by UN20 app)
-  MSG_UN20_ISSHUTDOWN,      // UN20 is shutting/shut down (sent by LPC app if UN20 idle times out)
-  MSG_UN20_GET_INFO,        // Requested and processed by LPC App: Request has no payload, Response carries a MsgUN20Info payload
+  MSG_UN20_SHUTDOWN = 15,        // Tell UN20 to shutdown
+  MSG_UN20_WAKEUP = 16,          // Wakeup the UN20 (noted by LPC App)
+  MSG_UN20_WAKINGUP = 17,        // UN20 is waking up (sent by LPC App if UN20 asleep)
+  MSG_UN20_READY = 18,           // UN20 is ready (sent by UN20 app)
+  MSG_UN20_ISSHUTDOWN = 19,      // UN20 is shutting/shut down (sent by LPC app if UN20 idle times out)
+  MSG_UN20_GET_INFO = 20,        // Requested and processed by LPC App: Request has no payload, Response carries a MsgUN20Info payload
 
+  MSG_GET_IMAGE_FRAGMENT    = 21,   // Processed by UN20 App
+  MSG_GET_TEMPLATE_FRAGMENT = 22,   // Processed by UN20 App
   MSG_NUM_MSGS,             // Number of valid message types
 
   MSG_REPLY = 0x80          // Top bit set indicates a reply
@@ -236,6 +238,29 @@ PACK( typedef struct tagScanResponse
 MsgScanResponse;
 
 //
+// Request a fragment of data (message type indicates what)
+//
+PACK( typedef struct tagRequestFragment
+{
+  int16 iFragmentNo;		// Identifier for this fragment
+  uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
+})
+MsgRequestFragment;
+
+//
+// Return a fragment of data. All fragments except the last will be the same size (iFragmentSize)
+//
+PACK( typedef struct tagFragment
+{
+  int16 iFragmentNo;		// Identifier for this fragment
+  int16 iFragmentSize;		// how much data in this fragment
+  uint8 iLastFragment;          // Set if this is the last fragment
+  uint8 bFragmentData[100];	// the fragment data
+  uint32 uMsgFooterSyncWord;    // Message footer sync word - used to detect unsynchronisation
+})
+MsgFragment;
+
+//
 // Followed by multiple fragments
 //
 PACK( typedef struct tagScanFragment
@@ -247,6 +272,16 @@ PACK( typedef struct tagScanFragment
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgScanFragment;
+
+//
+// Return the quality of the last scanned image
+//
+PACK( typedef struct tagImageQuality
+{
+  int16 iQuality;		// quality of the image
+  uint32 uMsgFooterSyncWord;    // Message footer sync word - used to detect unsynchronisation
+})
+MsgImageQuality;
 
 //
 // Store the last scan for later recovery
@@ -314,7 +349,7 @@ MsgTemplateCompareResponse;
 
 PACK( typedef struct tagDummyPayload
 {
-  uint8 boDummy;
+  //uint8 boDummy;
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgDummyPayload;
@@ -361,6 +396,9 @@ PACK( typedef struct tagMsgPacket
     MsgTemplateRequest  TemplateRequest;    // payload of ? message
     MsgTemplateResponse TemplateResponse;   // payload of ? message
     MsgTemplateCompare  TemplateCompare;    // payload of MSG_COMPARE_TEMPLATE message
+    MsgRequestFragment  FragmentRequest;    // payload of MSG_GET_IMAGE_FRAGMENT and MSG_GET_TEMPLATE_FRAGMENT request
+    MsgFragment         DataFragment;       // payload for MSG_GET_IMAGE_FRAGMENT and MSG_GET_TEMPLATE_FRAGMENT response
+    MsgImageQuality     ScanQuality;        // payload for MSG_IMAGE_QUALITY
     MsgDummyPayload     DummyPayload;       // Used for creating no-payload messages
   })
   oPayload;

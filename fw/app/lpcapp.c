@@ -722,6 +722,8 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   case MSG_GENERATE_TEMPLATE:
   case MSG_RECOVER_TEMPLATE:
   case MSG_COMPARE_TEMPLATE:
+  case MSG_GET_IMAGE_FRAGMENT:
+  case MSG_GET_TEMPLATE_FRAGMENT:
 
     // These are UN20 image activity messages.
 
@@ -775,11 +777,11 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
 
       boUn20ShuttingDown = true;
     }
-
-    // It's probably a good time to re-request the UN20's current config info.
+#if 0
+    // Now is a good time to re-request the UN20's current config info.
     boNeedUn20Info = true;
-
-    // We also restart the UN20 inactivity timout.
+#endif
+    // We also restart the UN20 inactivity timeout.
     xTimerReset( hUn20IdleTimer, 0 );
 
     // By default we just echo these message types to the other end.

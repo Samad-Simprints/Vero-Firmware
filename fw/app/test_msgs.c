@@ -70,7 +70,7 @@
   //  uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
   MsgPacket sGetSensorInfoPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_GET_SENSOR_INFO, 0x00 },
-  .oPayload.DummyPayload = { 0x00, 0xF5F5F5F5 }
+  .oPayload.DummyPayload = { 0xF5F5F5F5 }
   };
 
   //  MsgUIControl        UIControl;
@@ -100,17 +100,17 @@
 
   MsgPacket sShutdownUn20Packet = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_UN20_SHUTDOWN, 0x00 },
-  .oPayload.DummyPayload = { 0x0, 0xF5F5F5F5 }
+  .oPayload.DummyPayload = { 0xF5F5F5F5 }
   };
 
   MsgPacket sWakeupUn20Packet = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_UN20_WAKEUP, 0x00 },
-  .oPayload.DummyPayload = { 0x0, 0xF5F5F5F5 }
+  .oPayload.DummyPayload = { 0xF5F5F5F5 }
   };
 
   MsgPacket sUn20ReadyPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_UN20_READY, 0x00 },
-  .oPayload.DummyPayload = { 0x0, 0xF5F5F5F5 }
+  .oPayload.DummyPayload = { 0xF5F5F5F5 }
   };
 
   MsgPacket sUn20GetInfoPacket = {
@@ -130,10 +130,20 @@
 
   MsgPacket sGetQualityPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_IMAGE_QUALITY, 0x00 },
-  .oPayload.DummyPayload = { 0x0, 0xF5F5F5F5 }
+  .oPayload.DummyPayload = { 0xF5F5F5F5 }
  };
 
   MsgPacket sGetGenerateTemplatePacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_GENERATE_TEMPLATE, 0x00 },
-  .oPayload.DummyPayload = { 0x0, 0xF5F5F5F5 }
+  .oPayload.DummyPayload = { 0xF5F5F5F5 }
+  };
+
+  MsgPacket sGetImageFragment = {
+  .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgRequestFragment ), MSG_GET_IMAGE_FRAGMENT, 0x00 },
+  .oPayload.FragmentRequest = { 0x0, 0xF5F5F5F5 }
+  };
+
+  MsgPacket sGetTemplateFragment = {
+  .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgRequestFragment ), MSG_GET_TEMPLATE_FRAGMENT, 0x00 },
+  .oPayload.FragmentRequest = { 0x0, 0xF5F5F5F5 }
   };

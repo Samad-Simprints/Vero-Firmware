@@ -37,6 +37,7 @@
 #include "hal.h"
 #include "msg_format.h"
 #include "lpcapp.h"
+#include "test_msgs.h"
 
 #include <stdio.h>
 
@@ -182,7 +183,7 @@ static const tParserEntry asHalCLI[] =
   CLICMD("power",                 "Power button", 1, "", boPower, 0),
   CLICMD("capture",               "Capture button", 1, "", boCapture, 0),
   CLICMD("conn",                  "USB/BT connect", 1, "", boConn, 0),
-  CLICMD("usb",                   "USB callback", 2, "", boUsb, 0),
+  CLICMD("usb",                   "USB callback", -3, "", boUsb, 0),
   CLICMD("bt",                    "BT callback", 1, "", boBt, 0),
   CLICMD("disconn",               "Phone disconnect", 1, "", boDisconn, 0),
   CLICMD("un20",                  "Un20 power control", 2, "", boUn20Power, 0),
@@ -339,23 +340,17 @@ static bool boVibrate( char **papzArgs, int iInstance, int iNumArgs )
   vUiVibrateControl(boOnOff);
 }
 
-extern "C" {
-  extern MsgPacket sGetSensorInfoPacket;
-  extern MsgPacket sSetuiPacket;
-  extern MsgPacket sSensorConfigPacket;
-  extern MsgPacket sShutdownUn20Packet;
-  extern MsgPacket sWakeupUn20Packet;
-  extern MsgPacket sUn20ReadyPacket;
-  extern MsgPacket sUn20GetInfoPacket;
-  extern MsgPacket sCaptureImagePacket;
-  extern MsgPacket sCaptureProgressPacket;
-  extern MsgPacket sGetQualityPacket;
-  extern MsgPacket sGetGenerateTemplatePacket;
-}
+
 
 static bool boUsb( char **papzArgs, int iInstance, int iNumArgs )
 {
   int iParam = atoi(papzArgs[1]);
+  int iArg = 0;
+  
+  if ( iNumArgs > 2 )
+  {
+     iArg = atoi(papzArgs[2]);
+  }
 
   tEventRxData sEventData;
 
@@ -487,6 +482,32 @@ static bool boUsb( char **papzArgs, int iInstance, int iNumArgs )
     {
       sEventData.iLength = sGetGenerateTemplatePacket.Msgheader.iLength;
       sEventData.pcData = (char *) &sGetGenerateTemplatePacket;
+
+      if ( pvUsbPhoneCallback != NULL )
+      {
+        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
+      }
+    }
+    break;
+
+  case MSG_GET_IMAGE_FRAGMENT:    // Processed by UN20 App
+    {
+      sGetImageFragment.oPayload.FragmentRequest.iFragmentNo = iArg;
+      sEventData.iLength = sGetImageFragment.Msgheader.iLength;
+      sEventData.pcData = (char *) &sGetImageFragment;
+
+      if ( pvUsbPhoneCallback != NULL )
+      {
+        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
+      }
+    }
+    break;
+
+  case MSG_GET_TEMPLATE_FRAGMENT:    // Processed by UN20 App
+    {
+      sGetTemplateFragment.oPayload.FragmentRequest.iFragmentNo = iArg;
+      sEventData.iLength = sGetTemplateFragment.Msgheader.iLength;
+      sEventData.pcData = (char *) &sGetTemplateFragment;
 
       if ( pvUsbPhoneCallback != NULL )
       {
