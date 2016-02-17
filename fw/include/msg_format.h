@@ -126,7 +126,7 @@ PACK( typedef struct tagSensorInfo
   int16 iBatteryLevel1;	// Analog input 1
   int16 iBatteryLevel2;	// Analog Input 2
   int16 iStoreCount;    // Number of stored images and templates
-  bool boPowerOn;       // true if UN20 is powered on, false if not
+  uint8 boPowerOn;      // true if UN20 is powered on, false if not
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgSensorInfo;
@@ -164,9 +164,9 @@ MsgUN20Info;
 //
 PACK( typedef struct tagUIControl
 {
-  bool boEnableTrigger;               // Enable the trigger button
-  bool boSetLeds;                     // Set LED's according to bLedState
-  bool boTriggerVibrate;              // Set vibrate according to boVibrateState
+  uint8 boEnableTrigger;              // Enable the trigger button
+  uint8 boSetLeds;                    // Set LED's according to bLedState
+  uint8 boTriggerVibrate;             // Set vibrate according to boVibrateState
   uint8 bLedState[LED_MAX_LED_COUNT]; // Off, red, green, orange, on
   int16 iVibrateMs;                   // 0 = off, > 0 trigger vibrate for Ms (then stop)
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
@@ -178,7 +178,7 @@ MsgUIControl;
 //
 PACK( typedef struct tagUINotification
 {
-  bool boTriggerPressed;               // The trigger (capture) button has been pushed
+  uint8  boTriggerPressed;    // The trigger (capture) button has been pushed
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgUINotification;
@@ -188,7 +188,7 @@ MsgUINotification;
 //
 PACK( typedef struct tagScanRequest
 {
-  bool  boWaitForButton;// true if button is the trigger (immediate if not)
+  uint8 boWaitForButton;// true if button is the trigger (immediate if not)
   int16 iTimeout;	// how long to wait for a good image
   int16 iRetryCount;    // maximum number of retries to get a good image
   int16 iQuality;	// how good that image needs to be
@@ -230,7 +230,7 @@ PACK( typedef struct tagScanResponse
   int16 iHeight;	// height of the image in pixels
   int32 iDataLength;	// total length of the data
   int16 iFileTag;	// -1 means realtime scan data
-  bool  boCompressed;	// true of image is compressed
+  uint8 boCompressed;	// true of image is compressed
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgScanResponse;
@@ -254,7 +254,7 @@ MsgScanFragment;
 PACK( typedef struct tagStoreScan
 {
   int32 iFileTag;	// user supplied file tag
-  bool  boCompress;     // compress image when storing
+  uint8 boCompress;     // compress image when storing
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgStoreScan;
@@ -307,14 +307,14 @@ MsgTemplateCompare;
 
 PACK( typedef struct tagTemplateCompareResponse
 {
-  bool boMatched;       // True is: templates match
+  uint8 boMatched;       // True is: templates match
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgTemplateCompareResponse;
 
 PACK( typedef struct tagDummyPayload
 {
-  bool boDummy;
+  uint8 boDummy;
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgDummyPayload;

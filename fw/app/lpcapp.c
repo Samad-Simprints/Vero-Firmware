@@ -1135,7 +1135,7 @@ void vLpcAppTask( void *pvParameters )
 
   vUiLedSet(LED_CONNECTED, OFF);
   vUiLedSet(LED_BATTERY, OFF);
-
+#if 0
   vTaskDelay( 1000 );
 
     // Perform a start-up dance on the LEDs.
@@ -1167,7 +1167,7 @@ void vLpcAppTask( void *pvParameters )
 
   vUiLedSet(LED_CONNECTED, OFF);
   vUiLedSet(LED_BATTERY, OFF);
-
+#endif
   // Register callbacks.
   
   vUiButtonCapture( vCallbackCaptureHandler, NULL );

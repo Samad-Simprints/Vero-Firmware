@@ -73,7 +73,9 @@
         <file file_name="../app/CDC.c" />
         <file file_name="../app/CDCDescriptors.c" />
         <file file_name="../app/DualDevice.c" />
-        <file file_name="../app/printf-stdarg.cpp" />
+        <file file_name="../app/printf-stdarg.cpp">
+          <configuration Name="THUMB Debug" build_exclude_from_build="No" />
+        </file>
       </folder>
       <folder Name="dd">
         <file file_name="../dd/gpio_dd.cpp">
@@ -163,6 +165,9 @@
         <file file_name="../LinuxUN20/install-index-un20" />
         <file file_name="../LinuxUN20/start-index-un20" />
         <file file_name="../LinuxUN20/build-setup.sh" />
+        <file file_name="../LinuxUN20/compress.c">
+          <configuration Name="THUMB Debug" build_exclude_from_build="Yes" />
+        </file>
       </folder>
     </folder>
     <folder Name="System Files">

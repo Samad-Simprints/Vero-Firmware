@@ -37,13 +37,18 @@
 #include <strings.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
 
 #include "sgfplib.h"
+#include "wsq.h"
 
 #include "msg_format.h"
 #include "protocol_msg.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
   extern MsgPacket sGetSensorInfoPacket;
   extern MsgPacket sSetuiPacket;
   extern MsgPacket sSensorConfigPacket;
@@ -53,7 +58,14 @@ extern "C" {
   extern MsgPacket sUn20GetInfoPacket;
   extern MsgPacket sCaptureImagePacket;
   extern MsgPacket sCaptureProgressPacket;
+
+  extern int un20_wsq_encode_mem(unsigned char **odata, int *olen, const float r_bitrate,
+                   unsigned char *idata, const int w, const int h,
+                   const int d, const int ppi, char *comment_text);
+
+#ifdef __cplusplus
 }
+#endif
 
 /* baudrate settings are defined in <asm/termbits.h>, which is
 included by <termios.h> */
@@ -62,9 +74,6 @@ included by <termios.h> */
 //#define MODEMDEVICE "/dev/ttyGS0"
 #define MODEMDEVICE "/dev/ttyS1"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
-
-#define FALSE 0
-#define TRUE 1
 
 #define CLI_PRINT( str )              printf str
 
@@ -76,16 +85,43 @@ DEBUG_MODULE_DEFINE( INDEX_DEFAULTS ) = {
 
 #define INDEX_VERSION  QUOTEME(INDEX_REVISION_NUMBER) " : " \
                         "Built: " __DATE__ " " __TIME__
-
+#ifdef __cplusplus
 static LPSGFPM  sgfplib = NULL;
+#else
+static HSGFPM   sgfplib = NULL;
+#endif
+
 static SGFingerInfo fingerInfo;
 static SGDeviceInfoParam deviceInfo;
 static BYTE *ImageBuffer;
 static DWORD templateSize;
 static BYTE *minutiaeBuffer1 = NULL;
 
+static float bitrate = 0.75;
+static unsigned char *wsq;
+static int size;
+
 static bool boAppQuit = false;
 static int port_fd;
+
+#if 0
+#define TIME_INIT()
+#define TIME(res, expr)  (res = expr)
+#else
+#define TIME_INIT()      struct timeval tstart, tend;
+#define TIME(res, expr)  ( gettimeofday(&tstart, NULL), res = expr , gettimeofday(&tend, NULL), print_time((char*)QUOTEME(expr), &tstart, &tend), res )
+#endif
+
+static void print_time( char *expr, struct timeval *tstart, struct timeval *tend )
+{
+  long ms_start;
+  long ms_end;
+
+  ms_start = (long)((tstart->tv_sec*1000LL + tstart->tv_usec/1000));
+  ms_end   = (long)((tend->tv_sec*1000LL + tend->tv_usec/1000));
+
+  printf("ms: %06ld [%06ld] (%s)\n", ms_start, (ms_end - ms_start), expr);
+}
 
 static int serial_startup(char *port, struct termios *oldtio)
 {
@@ -177,7 +213,7 @@ static int un20_sdk_startup()
   long err;
 
   printf("Configuring UN20 SDK\n");
-
+#ifdef __cplusplus
   err = CreateSGFPMObject(&sgfplib);
   if (!sgfplib)
   {
@@ -205,6 +241,35 @@ static int un20_sdk_startup()
      printf("ERROR - Unable to get device information.\n\n");
      return false;
   }
+#else
+  err = SGFPM_Create(&sgfplib);
+  if (!sgfplib)
+  {
+    printf("ERROR - Unable to instantiate FPM object.\n\n");
+    return false;
+  }
+
+  err = SGFPM_Init(sgfplib, SG_DEV_AUTO);
+  if (err != SGFDX_ERROR_NONE)
+  {
+     printf("ERROR - Unable to initialize device.\n\n");
+     return false;
+  }
+
+  err = SGFPM_OpenDevice(sgfplib,0);
+  if (err != SGFDX_ERROR_NONE)
+  {
+     printf("ERROR - Unable to open device.\n\n");
+     return false;
+  }
+
+  err = SGFPM_GetDeviceInfo(sgfplib,&deviceInfo);
+  if (err != SGFDX_ERROR_NONE)
+  {
+     printf("ERROR - Unable to get device information.\n\n");
+     return false;
+  }
+#endif
 
   // display information about the device we are using
   printf("deviceInfo.DeviceID   : %ld\n", deviceInfo.DeviceID);
@@ -245,6 +310,7 @@ static int un20_sdk_shutdown()
     free( minutiaeBuffer1 );
   }
 
+#ifdef __cplusplus
   if ( sgfplib )
   {
     err = sgfplib->CloseDevice();
@@ -261,6 +327,25 @@ static int un20_sdk_shutdown()
        return false;
     }
   }
+#else
+  if ( sgfplib )
+  {
+    err = SGFPM_CloseDevice(sgfplib);
+    if (err != SGFDX_ERROR_NONE)
+    {
+       printf("ERROR - Unable to close device\n\n");
+       return false;
+    }
+
+    err = SGFPM_Terminate(sgfplib);
+    if (err != SGFDX_ERROR_NONE)
+    {
+       printf("ERROR - Unable to destroy FPM object.\n\n");
+       return false;
+    }
+  }
+#endif
+
   return true;
 }
 
@@ -312,7 +397,8 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   MsgPacketheader *psHeader;
   DWORD quality;
   DWORD templateSizeMax;
-  long err;
+  long err, err1;
+  TIME_INIT();
 
   // By the time this callback is called, we know that the message:
   // - has a valid source
@@ -342,20 +428,46 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
 
     // capture an image
     case MSG_CAPTURE_IMAGE:
-      err = sgfplib->GetImage(ImageBuffer);
+#ifdef __cplusplus
+      err = TIME(err, sgfplib->GetImage(ImageBuffer));
+#else
+      err = TIME(err, SGFPM_GetImage(sgfplib, ImageBuffer));
+#endif
+{
+  FILE *raw = fopen("/data/un20-raw", "wb");
+  if (fwrite(ImageBuffer, (deviceInfo.ImageWidth * deviceInfo.ImageHeight), 1, raw) != 1)
+  {
+    perror("fwrite");
+  }
+  fclose(raw);
+}
+
+      //memset(ImageBuffer, 0xff, (deviceInfo.ImageWidth * deviceInfo.ImageHeight));
+      err = TIME(err, un20_wsq_encode_mem(&wsq, &size, bitrate, ImageBuffer, deviceInfo.ImageWidth, deviceInfo.ImageHeight, 8, -1, NULL));
+
+      printf("UN20: Raw: %d, Compressed: %d\n", (deviceInfo.ImageWidth * deviceInfo.ImageHeight), size);
       printf("UN20: Capture Image:(%d)\n", err);
       break;
 
     // Get image quality of captured image
     case MSG_IMAGE_QUALITY:
-      err = sgfplib->GetImageQuality(deviceInfo.ImageWidth, deviceInfo.ImageHeight, ImageBuffer, &quality);
+#ifdef __cplusplus
+      err = TIME(err, sgfplib->GetImageQuality(deviceInfo.ImageWidth, deviceInfo.ImageHeight, ImageBuffer, &quality));
+#else
+      err = TIME(err, SGFPM_GetImageQuality(sgfplib,deviceInfo.ImageWidth, deviceInfo.ImageHeight, ImageBuffer, &quality));
+#endif
       printf("UN20: Get Image Quality:(%d, %d)\n", err, quality);
       break;
 
     // generate template for image
     case MSG_GENERATE_TEMPLATE:
+#ifdef __cplusplus
       err = sgfplib->SetTemplateFormat(TEMPLATE_FORMAT_ISO19794);
       err |= sgfplib->GetMaxTemplateSize(&templateSizeMax);
+#else
+      err = SGFPM_SetTemplateFormat(sgfplib, TEMPLATE_FORMAT_ISO19794);
+      err |= SGFPM_GetMaxTemplateSize(sgfplib, &templateSizeMax);
+#endif
 
       minutiaeBuffer1 = (BYTE*) realloc(minutiaeBuffer1, templateSizeMax);
       fingerInfo.FingerNumber = SG_FINGPOS_UK;
@@ -364,8 +476,13 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       fingerInfo.ImageQuality = quality; //0 to 100
 
       templateSize = 0;
-      err |= sgfplib->CreateTemplate(&fingerInfo, ImageBuffer, minutiaeBuffer1);
+#ifdef __cplusplus
+      err |= TIME(err1, sgfplib->CreateTemplate(&fingerInfo, ImageBuffer, minutiaeBuffer1));
       err |= sgfplib->GetTemplateSize(minutiaeBuffer1, &templateSize);
+#else
+      err |= TIME(err1, SGFPM_CreateTemplate(sgfplib, &fingerInfo, ImageBuffer, minutiaeBuffer1));
+      err |= SGFPM_GetTemplateSize(sgfplib, minutiaeBuffer1, &templateSize);
+#endif
       printf("UN20: Generate Template:([0:%d],%d)\n", err, templateSize);
       break;
 
@@ -411,8 +528,13 @@ main(int argc, char *argv[])
     vProtocolMsgNotify( vMessageProcess );
     vProtocolMsgError( vMessageErrorCallback );
 
+#if 0
+    printf("Please place finger on sensor and press <ENTER> ");
+    getc(stdin);
+    vIncomingBytes(MSG_SOURCE_UN20_USB, (uint8*)&sCaptureImagePacket, sCaptureImagePacket.Msgheader.iLength);
+#else
     receiver(port_fd);
-
+#endif
     un20_sdk_shutdown();
     serial_shutdown(port_fd, &oldtio);
   }
