@@ -78,24 +78,27 @@ vMsgErrorCallback pvRegisteredMsgErrorCallback = NULL;
 //******************************************************************************
 //******************************************************************************
 
+// Initialise a protocol channel
+void vProtocolReset( tMsgSource eSource )
+{
+  // Empty the incoming buffer and place a source marker at the base of each.
+  // This marker will remain there indefinitely and the rest of the buffer is used
+  // to hold incoming msg data.
+  sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 0 ] = (tMsgSource) eSource;
+  sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 1 ] = 0;
+  sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 2 ] = 0;
+  sMsgBuffer.abProtocolMessageBuffer[ eSource ][ 3 ] = 0;
+  iFreeSpaceIndex[ eSource ] = MSG_BUFFER_RESERVED;
+
+  return;
+}
+
 // Initialises the Protocol message block.
 void vProtocolInit ( void )
 {
-  int iLoop;
-
-  // Empty all incoming buffers and place a source marker at the base of each.
-  // This marker will remain there indefinitely and the rest of the buffer is used
-  // to hold incoming msg data.
-  for ( iLoop = 0; iLoop < MSG_SOURCE_NUM_SOURCES; iLoop++ )
-  {
-    sMsgBuffer.abProtocolMessageBuffer[ iLoop ][ 0 ] = (tMsgSource) iLoop;
-    sMsgBuffer.abProtocolMessageBuffer[ iLoop ][ 1 ] = 0;
-    sMsgBuffer.abProtocolMessageBuffer[ iLoop ][ 2 ] = 0;
-    sMsgBuffer.abProtocolMessageBuffer[ iLoop ][ 3 ] = 0;
-    iFreeSpaceIndex[ iLoop ] = MSG_BUFFER_RESERVED;
-  }
-
-  return;
+  vProtocolReset( MSG_SOURCE_UN20_USB );
+  vProtocolReset( MSG_SOURCE_PHONE_USB );
+  vProtocolReset( MSG_SOURCE_PHONE_BT );
 }
 
 // Stores received data bytes from a given source and builds up whole messages.
@@ -298,3 +301,18 @@ void vProtocolMsgError(vMsgErrorCallback pvCallback)
   return;
 };
 
+// create a NACK packet for the supplied packet with the given error code
+void vSetupNACK( MsgPacket *psPacket, int16 iStatusCode )
+{
+  psPacket->Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
+  psPacket->Msgheader.iLength = (sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ));
+  psPacket->Msgheader.bMsgId |= MSG_REPLY;
+  psPacket->Msgheader.bStatus = iStatusCode;
+  psPacket->oPayload.DummyPayload.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
+}
+
+// create an ACK packet for the supplied packet
+void vSetupACK( MsgPacket *psPacket )
+{
+  vSetupNACK( psPacket, MSG_STATUS_GOOD );
+}

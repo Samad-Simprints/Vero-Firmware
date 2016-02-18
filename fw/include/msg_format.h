@@ -51,7 +51,8 @@ extern "C" {
 // Definitions
 //******************************************************************************
 //
-// Note: Multibyte data items are communicated in network byte order
+// Note: Multibyte data items are communicated in little endian format
+// (which seems to suite all known parties natively)
 //
 typedef signed char     int8;
 typedef signed short    int16;

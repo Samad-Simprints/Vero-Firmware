@@ -65,6 +65,9 @@ typedef void (*vMsgErrorCallback)(tMsgError eErrorCode);
 // Initialises the Protocol message block.
 extern void vProtocolInit ( void );
 
+// Reset a specified channels packet assembler
+extern void vProtocolReset(tMsgSource eSource);
+
 extern void vIncomingBytes(tMsgSource eSource, uint8 *pcData, int iLength); // Stores received data bytes from a given source
 
 // Register for notification of a complete message.
@@ -74,6 +77,10 @@ extern void vProtocolMsgNotify(vMsgCallback pvCallback);
 // Register for notification of an incomplete or errored message.
 // This callback must not return until it is safe to discard the message contents.
 extern void vProtocolMsgError(vMsgErrorCallback pvCallback);
+
+// Utility functions to build messages
+extern void vSetupNACK( MsgPacket *psPacket, int16 iStatusCode );
+extern void vSetupACK( MsgPacket *psPacket );
 
 #ifdef __cplusplus
 }

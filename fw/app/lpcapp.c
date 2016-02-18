@@ -167,7 +167,7 @@ static int16 iUn20StoreCount = 0;          // Number of stored images and templa
 
 static bool boUn20ShuttingDown = false;    // True if we have told the UN20 to shutdown
                                            // and are timing 3s before pulling its power.
-static bool boUn20PoweredUp = true;        // True if the UN20 is powered.
+static bool boUn20PoweredUp = false;       // True if the UN20 is powered.
 
 //******************************************************************************
 //******************************************************************************
@@ -220,7 +220,7 @@ static void vUn20IdleTimerCallback( xTimerHandle xTimer )
   xTimerStart( hUn20ShutdownTimer, 0 );
 
   boUn20ShuttingDown = true;
-    
+#if 0    
   // We also send a MSG_UN20_ISSHUTDOWN message to the phone.
   //sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
   sResponseMsg.Msgheader.bMsgId = MSG_UN20_ISSHUTDOWN;
@@ -243,7 +243,7 @@ static void vUn20IdleTimerCallback( xTimerHandle xTimer )
     (void) iUsbSend( USB_HOST, (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength );
   }
   // Else no valid destination - don't send the message.
-
+#endif
   return;
 }
 
@@ -405,42 +405,37 @@ static void vVibrateTask( void *pvParameters )
 
 static void vReturnSensorInfo( MsgPacket *psMsg, int iMsglength )
 {
-  MsgPacket sResponseMsg;
-  MsgSensorInfo sSensorInfo;
-
   CLI_PRINT(("vReturnSensorInfo\n"));
 
-  sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
-  sResponseMsg.Msgheader.bMsgId = MSG_GET_SENSOR_INFO | MSG_REPLY;
-  sResponseMsg.Msgheader.bStatus = MSG_STATUS_GOOD;
+  psMsg->Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
+  psMsg->Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgSensorInfo );
+  psMsg->Msgheader.bMsgId = MSG_GET_SENSOR_INFO | MSG_REPLY;
+  psMsg->Msgheader.bStatus = MSG_STATUS_GOOD;
 
   // Build up the payload.
-  memcpy((void *) sSensorInfo.btAddr,
-         (void *) sScannerBtAddr,
-         sizeof( sScannerBtAddr ));
+  memcpy((void *) &psMsg->oPayload.SensorInfo.btAddr, (void *) sScannerBtAddr, sizeof( sScannerBtAddr ));
+  psMsg->oPayload.SensorInfo.iUCVersion = 0 /* TODO */;
+  psMsg->oPayload.SensorInfo.iUN20Version = iUn20Version;
+  psMsg->oPayload.SensorInfo.iBatteryLevel1 = iBatteryVoltage( 0 );
+  psMsg->oPayload.SensorInfo.iBatteryLevel2 = iBatteryVoltage( 1 );
+  psMsg->oPayload.SensorInfo.iStoreCount = iUn20StoreCount;
+  psMsg->oPayload.SensorInfo.boPowerOn = boUn20PoweredUp;
+  psMsg->oPayload.SensorInfo.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
 
-  // Fill in the payload from stored data.
-  sSensorInfo.iUCVersion = 0 /* TODO */;
-  sSensorInfo.iUN20Version = iUn20Version;
-  sSensorInfo.iBatteryLevel1 = iBatteryVoltage( 0 );
-  sSensorInfo.iBatteryLevel2 = iBatteryVoltage( 1 );
-  sSensorInfo.iStoreCount = iUn20StoreCount;
-
-  sSensorInfo.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
-
-  sResponseMsg.oPayload.SensorInfo = sSensorInfo;
-
-  sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgSensorInfo );
+  CLI_PRINT(("Status: UN20:%d, Bat1:%d, Bat2:%d\n",
+                  psMsg->oPayload.SensorInfo.boPowerOn,
+                  psMsg->oPayload.SensorInfo.iBatteryLevel1,
+                  psMsg->oPayload.SensorInfo.iBatteryLevel2));
 
   // We send the message to the phone Bluetooth if it's connected,
   // else we send it to the phone USB (if connected).
   if ( boPhoneBtConnected == true )
   {
-    (void) iBtSend( (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength );
+    (void) iBtSend( (void *) psMsg, psMsg->Msgheader.iLength );
   }
   else if ( boPhoneUsbConnected == true )
   {
-    (void) iUsbSend( USB_HOST, (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength );
+    (void) iUsbSend( USB_HOST, (void *) psMsg, psMsg->Msgheader.iLength );
   }
   // Else no valid destination - discard the message.
 
@@ -489,16 +484,15 @@ static void vSetUi( MsgPacket *psMsg, int iMsglength )
 
   psEventData = (MsgUIControl *) &(psMsg->oPayload);
 
-  boEnableTrigger = psEventData->boEnableTrigger;               // enable the trigger button
-  boSetLeds = psEventData->boSetLeds;                     // set LED's according to bLedState
-  boTriggerVibrate = psEventData->boTriggerVibrate;              // set vibrate according to boVibrateState
+  boEnableTrigger = psEventData->boEnableTrigger;           // enable the trigger button
+  boSetLeds = psEventData->boSetLeds;                       // set LED's according to bLedState
+  boTriggerVibrate = psEventData->boTriggerVibrate;         // set vibrate according to boVibrateState
+  iVibrateMs = psEventData->iVibrateMs;                     // 0 = off, > 0 trigger vibrate for Ms (then stop)
 
   for ( iLoop = 0; iLoop < LED_MAX_LED_COUNT; iLoop++ )
   {
     bLedState[ iLoop ] = psEventData->bLedState[ iLoop ];
   }
-
-  iVibrateMs = psEventData->iVibrateMs;                   // 0 = off, > 0 trigger vibrate for Ms (then stop)
 
   CLI_PRINT(( "vSetUi: EnTrig=%d, SetLeds=%d, TrigVib=%d, VibMs=%d\n",
               boEnableTrigger, boSetLeds, boTriggerVibrate, iVibrateMs ));
@@ -523,6 +517,21 @@ static void vSetUi( MsgPacket *psMsg, int iMsglength )
       xSemaphoreGive( hVibrateSemaphore );
     }
   }
+
+  // setup an ACK message and send it
+  vSetupACK( psMsg );
+
+  // We send the message to the phone Bluetooth if it's connected,
+  // else we send it to the phone USB (if connected).
+  if ( boPhoneBtConnected == true )
+  {
+    (void) iBtSend( (void *)psMsg, psMsg->Msgheader.iLength );
+  }
+  else if ( boPhoneUsbConnected == true )
+  {
+    (void) iUsbSend( USB_HOST, (void *)psMsg, psMsg->Msgheader.iLength );
+  }
+  // Else no valid destination - discard the message.
 
   return;
 }
@@ -649,11 +658,13 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       MsgPacket sResponseMsg;
       MsgDummyPayload sDummy;
 
-      CLI_PRINT(("Sending MSG_UN20_WAKINGUP to phone\n"));
+      CLI_PRINT(("Waking up UN20\n"));
 
       // Start the UN20 powering up.
       vPowerUn20On();
 
+      vSetupACK( psPacket );
+#if 0
       // Generate a MSG_UN20_WAKINGUP message back to the phone.
       sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
       sResponseMsg.Msgheader.bMsgId = MSG_UN20_WAKINGUP;
@@ -664,20 +675,19 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       sResponseMsg.oPayload.DummyPayload = sDummy;
 
       sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload );
-
+#endif
       // We send the message to the phone Bluetooth if it's connected,
       // else we send it to the phone USB (if connected).
       if ( boPhoneBtConnected == true )
       {
-        (void) iBtSend( (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength );
+        (void) iBtSend( (void *) psPacket, psPacket->Msgheader.iLength );
       }
       else if ( boPhoneUsbConnected == true )
       {
-        (void) iUsbSend( USB_HOST, (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength );
+        (void) iUsbSend( USB_HOST, (void *) psPacket, psPacket->Msgheader.iLength );
       }
       // Else no valid destination - discard the message.
     }
-    
     break;
 
   case MSG_UN20_READY:
@@ -689,11 +699,9 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       boUn20ShuttingDown = false;
       boUn20PoweredUp = true;
 
-#if 0
       // Now is a good time to request the UN20's current config info.
       boNeedUn20Info = true;
-#endif
-
+#if 0
       // We also pass the message on to the phone.
 
       // We send the message to the phone Bluetooth if it's connected,
@@ -707,6 +715,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         (void) iUsbSend( USB_HOST, (void *) &(psMsg->oMsg), iMsglength );
       }
       // Else no valid destination - discard the message.
+#endif
     }
           
     break;
@@ -740,6 +749,8 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       
         CLI_PRINT(("Sending UN20-shutdown error response to phone\n"));
 
+        vSetupNACK( psPacket, MSG_STATUS_UN20_STATE_ERROR );
+#if 0
         sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
         sResponseMsg.Msgheader.bMsgId = psMsg->oMsg.Msgheader.bMsgId | MSG_REPLY; // Original message id with reply bit set
         sResponseMsg.Msgheader.bStatus = MSG_STATUS_UN20_STATE_ERROR;             // Error state
@@ -749,16 +760,16 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         sResponseMsg.oPayload.DummyPayload = sDummy;
 
         sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload );
-
+#endif
         // We send the message to the phone Bluetooth if it's connected,
         // else we send it to the phone USB (if connected).
         if ( boPhoneBtConnected == true )
         {
-          (void) iBtSend( (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength );
+          (void) iBtSend( (void *) psPacket, psPacket->Msgheader.iLength );
         }
         else if ( boPhoneUsbConnected == true )
         {
-          (void) iUsbSend( USB_HOST, (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength );
+          (void) iUsbSend( USB_HOST, (void *) psPacket, psPacket->Msgheader.iLength );
         }
         // Else no valid destination - discard the message.
 
@@ -769,14 +780,19 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
 
     // The UN20 is powered up.
 
-    // Set shutdown flag to protect against further messages
-    if ( (psMsg->oMsg.Msgheader.bMsgId & ~MSG_REPLY) == MSG_UN20_SHUTDOWN )
+    // If this is the outbound message, set shutdown flag to protect against further messages
+    if ( psMsg->oMsg.Msgheader.bMsgId == MSG_UN20_SHUTDOWN )
     {
-      // Start the 3s UN20 shutdown timer.
+      // Start the UN20 shutdown timer - this gives the UN20 time to halt.
       xTimerStart( hUn20ShutdownTimer, 0 );
 
       boUn20ShuttingDown = true;
+    } // if this is the acknowledgment, then the UN20 is now logically disconnected
+    else if ( psMsg->oMsg.Msgheader.bMsgId == ( MSG_UN20_SHUTDOWN | MSG_REPLY) )
+    {
+      boUn20PoweredUp = false;
     }
+
 #if 0
     // Now is a good time to re-request the UN20's current config info.
     boNeedUn20Info = true;
@@ -810,7 +826,6 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       // Else no valid destination - discard the message.
     }
     // Else invalid source - discard the message.
-
     break;
 
   case MSG_REPORT_UI:
@@ -841,7 +856,7 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
     {
       if( psEventData->eInterface == USB_UN20 )
       {
-        CLI_PRINT(( "UN20 USB Connected\n" ));
+         CLI_PRINT(( "UN20 USB Connected\n" ));
 
          boUn20UsbConnected = true;
       }
@@ -871,7 +886,6 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
         xSemaphoreGive( hFlashSemaphore );
       }
     }
-
     break;
 
   case INTERFACE_EVENT_DISCONNECTED:
@@ -915,6 +929,19 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
       }
     }
 
+  // Reset the interfaces packet assembler when the interface connects and disconnects
+  switch (psEventData->eInterface)
+  {
+    case BT_HOST:
+      vProtocolReset( MSG_SOURCE_PHONE_BT );
+      break;
+    case USB_HOST:
+      vProtocolReset( MSG_SOURCE_PHONE_USB );
+      break;
+    case USB_UN20:
+      vProtocolReset( MSG_SOURCE_UN20_USB );
+      break;
+  }
   return;
 }
 

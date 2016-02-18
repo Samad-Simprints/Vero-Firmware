@@ -57,6 +57,8 @@ extern int un20_wsq_encode_mem(unsigned char **odata, int *olen, const float r_b
 }
 #endif
 
+#define COMPRESS_IMAGE  0
+
 /* baudrate settings are defined in <asm/termbits.h>, which is
 included by <termios.h> */
 #define BAUDRATE B9600
@@ -88,8 +90,8 @@ static BYTE *ImageBuffer;
 static int iImageBufferSize;
 
 // template data
-static DWORD templateSize;
-static BYTE *minutiaeBuffer1 = NULL;
+static DWORD iTemplateSize;
+static BYTE *MinutiaeBuffer = NULL;
 
 // data recovery controls
 static bool boImageValid = false;
@@ -108,10 +110,10 @@ static int port_fd;
 #define TIME(res, expr)  (res = expr)
 #else
 #define TIME_INIT()      struct timeval tstart, tend;
-#define TIME(res, expr)  ( gettimeofday(&tstart, NULL), res = expr , gettimeofday(&tend, NULL), print_time((char*)QUOTEME(expr), &tstart, &tend), res )
+#define TIME(res, expr)  ( gettimeofday(&tstart, NULL), res = expr , gettimeofday(&tend, NULL), print_time(QUOTEME(expr), &tstart, &tend), res )
 #endif
 
-static void print_time( char *expr, struct timeval *tstart, struct timeval *tend )
+static void print_time( char const*expr, struct timeval *tstart, struct timeval *tend )
 {
   long ms_start;
   long ms_end;
@@ -305,9 +307,9 @@ static int un20_sdk_shutdown()
     free( ImageBuffer );
   }
 
-  if ( minutiaeBuffer1 )
+  if ( MinutiaeBuffer )
   {
-    free( minutiaeBuffer1 );
+    free( MinutiaeBuffer );
   }
 
 #ifdef __cplusplus
@@ -390,22 +392,6 @@ static void receiver(int fd)
   }
 }
 
-// create a NACK packet for the supplied packet with the given error code
-static void vSetupNACK( MsgPacket *psPacket, int16 iStatusCode )
-{
-  psPacket->Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
-  psPacket->Msgheader.iLength = (sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ));
-  psPacket->Msgheader.bMsgId |= MSG_REPLY;
-  psPacket->Msgheader.bStatus = iStatusCode;
-  psPacket->oPayload.DummyPayload.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
-}
-
-// create an ACK packet for the supplied packet
-static void vSetupACK( MsgPacket *psPacket )
-{
-  vSetupNACK( psPacket, 0 );
-}
-
 static void vSetupReturnFragment( MsgPacket *psPacket, uint8 *pbData, int iSize)
 {
   int iStartOffset;
@@ -440,7 +426,7 @@ static void vSetupReturnFragment( MsgPacket *psPacket, uint8 *pbData, int iSize)
   }
   else
   {
-    vSetupNACK( psPacket, 1 );
+    vSetupNACK( psPacket, MSG_STATUS_ERROR );
   }
 
 }
@@ -456,6 +442,16 @@ static void vSetupImageQuality( MsgPacket *psPacket, int16 iScanQuality )
   psPacket->oPayload.ScanQuality.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
 }
 
+static void vSaveData( char const *path, void *pvData, int iSize)
+{
+  FILE *raw = fopen(path, "wb");
+  if (fwrite(pvData, iSize, 1, raw) != 1)
+  {
+    printf("UN20: write to %s failed\n", path);
+  }
+  fclose(raw);
+}
+
 
 // Called when a protocol message has been received from the UN20 or phone.
 static void vMessageProcess( MsgInternalPacket *psMsg )
@@ -467,6 +463,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   DWORD quality;
   DWORD templateSizeMax;
   long err, err1;
+  bool boSendResponse = true;
 
   TIME_INIT();
 
@@ -491,9 +488,9 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     // request for sensor information
     case MSG_UN20_GET_INFO:
       printf("UN20: GetInfo\n");
-      sUn20GetInfoPacket.oPayload.UN20Info.iStoreCount = 0;
+      sUn20GetInfoPacket.oPayload.UN20Info.iStoreCount = 5;
       sUn20GetInfoPacket.oPayload.UN20Info.iVersion = 0x4321;
-      vUN20SerialSend(&sUn20GetInfoPacket, sUn20GetInfoPacket.Msgheader.iLength);
+      memcpy(psPacket, &sUn20GetInfoPacket, sUn20GetInfoPacket.Msgheader.iLength);
       break;
 
     // capture an image
@@ -502,43 +499,33 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       boImageValid = false;
       boTemplateValid = false;
 
-      vSetupNACK( psPacket, 1 );
+      vSetupNACK( psPacket, MSG_STATUS_ERROR );
 
 #ifdef __cplusplus
       err = TIME(err, sgfplib->GetImage(ImageBuffer));
 #else
       err = TIME(err, SGFPM_GetImage(sgfplib, ImageBuffer));
 #endif
-      {
-        FILE *raw = fopen("/data/un20-raw", "wb");
-        if (fwrite(ImageBuffer, (deviceInfo.ImageWidth * deviceInfo.ImageHeight), 1, raw) != 1)
-        {
-          perror("fwrite");
-        }
-        fclose(raw);
-      }
 
       if ( err == SGFDX_ERROR_NONE )
       {
+        vSaveData("/data/un20-image", ImageBuffer, iImageBufferSize);
+
         boImageValid = true;
         vSetupACK( psPacket );
       }
-#if 0
+#if COMPRESS_IMAGE
       //memset(ImageBuffer, 0xff, (deviceInfo.ImageWidth * deviceInfo.ImageHeight));
       err = TIME(err, un20_wsq_encode_mem(&wsq, &size, bitrate, ImageBuffer, deviceInfo.ImageWidth, deviceInfo.ImageHeight, 8, -1, NULL));
 
       printf("UN20: Raw: %d, Compressed: %d\n", (deviceInfo.ImageWidth * deviceInfo.ImageHeight), size);
 #endif
-
       printf("UN20: Capture Image:(%d)\n", err);
-
-      // send response
-      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
 
     // Get image quality of captured image
     case MSG_IMAGE_QUALITY:
-      vSetupNACK( psPacket, 1 );
+      vSetupNACK( psPacket, MSG_STATUS_ERROR );
 
       if ( boImageValid )
       {
@@ -554,14 +541,11 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         }
         printf("UN20: Get Image Quality:(%d, %d)\n", err, quality);
       }
-
-      // send response
-      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
 
     // generate template for image
     case MSG_GENERATE_TEMPLATE:
-      vSetupNACK( psPacket, 1 );
+      vSetupNACK( psPacket, MSG_STATUS_ERROR );
 
       // cannot generate a template without an image
       if ( boImageValid )
@@ -574,30 +558,32 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         err |= SGFPM_GetMaxTemplateSize(sgfplib, &templateSizeMax);
 #endif
 
-        minutiaeBuffer1 = (BYTE*) realloc(minutiaeBuffer1, templateSizeMax);
+        // allocate space for the template
+        MinutiaeBuffer = (BYTE*) realloc(MinutiaeBuffer, templateSizeMax);
+
+        // create finger description record
         fingerInfo.FingerNumber = SG_FINGPOS_UK;
         fingerInfo.ViewNumber = 1;
         fingerInfo.ImpressionType = SG_IMPTYPE_LP;
         fingerInfo.ImageQuality = quality; //0 to 100
 
-        templateSize = 0;
+        iTemplateSize = 0;
 #ifdef __cplusplus
-        err |= TIME(err1, sgfplib->CreateTemplate(&fingerInfo, ImageBuffer, minutiaeBuffer1));
-        err |= sgfplib->GetTemplateSize(minutiaeBuffer1, &templateSize);
+        err |= TIME(err1, sgfplib->CreateTemplate(&fingerInfo, ImageBuffer, MinutiaeBuffer));
+        err |= sgfplib->GetTemplateSize(MinutiaeBuffer, &iTemplateSize);
 #else
-        err |= TIME(err1, SGFPM_CreateTemplate(sgfplib, &fingerInfo, ImageBuffer, minutiaeBuffer1));
-        err |= SGFPM_GetTemplateSize(sgfplib, minutiaeBuffer1, &templateSize);
+        err |= TIME(err1, SGFPM_CreateTemplate(sgfplib, &fingerInfo, ImageBuffer, MinutiaeBuffer));
+        err |= SGFPM_GetTemplateSize(sgfplib, MinutiaeBuffer, &iTemplateSize);
 #endif
         if ( err == SGFDX_ERROR_NONE )
         {
+          vSaveData("/data/un20-template", MinutiaeBuffer, iTemplateSize);
+
           boTemplateValid = true;
           vSetupACK( psPacket );
         }
-        printf("UN20: Generate Template:([0:%d],%d)\n", err, templateSize);
+        printf("UN20: Generate Template:([0:%d],%d)\n", err, iTemplateSize);
       }
-
-      // send response
-      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
 
   case MSG_GET_IMAGE_FRAGMENT:
@@ -609,11 +595,8 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       }
       else
       {
-        vSetupNACK( psPacket, 1 );
+        vSetupNACK( psPacket, MSG_STATUS_ERROR );
       }
-
-      // send response
-      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
 
   case MSG_GET_TEMPLATE_FRAGMENT:
@@ -621,31 +604,33 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
 
       if ( boTemplateValid )
       {
-        vSetupReturnFragment( psPacket, minutiaeBuffer1, templateSize );
+        vSetupReturnFragment( psPacket, MinutiaeBuffer, iTemplateSize );
       }
       else
       {
-        vSetupNACK( psPacket, 1 );
+        vSetupNACK( psPacket, MSG_STATUS_ERROR );
       }
-
-      // send response
-      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
       break;
 
     case MSG_UN20_SHUTDOWN:
       // Quit the server app, causing the controlling shell to shutdown the system
       printf("*** UN20 server shutdown requested ***\n");
+      vSetupACK( psPacket );
       boAppQuit = true;
       break;
 
     default:
       printf( "*** Rejecting unknown message: %d\n", psMsg->oMsg.Msgheader.bMsgId & ~MSG_REPLY );
-      vSetupNACK( psPacket, 1 );
-
-      // send response
-      vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
+      vSetupNACK( psPacket, MSG_STATUS_ERROR );
       break;
   }
+
+  if ( boSendResponse )
+  {
+    // send response
+    vUN20SerialSend( psPacket, psPacket->Msgheader.iLength );
+  }
+
 
 }
 
