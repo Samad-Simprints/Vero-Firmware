@@ -355,7 +355,7 @@ static int vUN20SerialSend(void *pvData, int iMsglength)
 {
 //  CLI_PRINT(( "vUN20SerialSend: length %d\n", iMsglength ));
 
-#if 1
+#if 0
   {
     uint8 *pbData = (uint8 *)pvData;
     while ( iMsglength-- > 0 )

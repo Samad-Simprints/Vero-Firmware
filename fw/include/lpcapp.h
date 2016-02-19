@@ -47,7 +47,7 @@ extern "C" {
 //******************************************************************************
 
 void vHalTest();
-
+void vLpcAppInit();
 void vLpcAppTask( void *pvParameters );
 
 #ifdef __cplusplus

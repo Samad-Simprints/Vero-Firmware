@@ -454,7 +454,7 @@ extern "C" void vApplicationIdleHook( void )
   //
   // put the processor to sleep, as there is nothing to do right now
   //
-#ifndef DEBUG
+#if 1//ndef DEBUG
   __asm__( "WFI" );
 #endif
 #endif

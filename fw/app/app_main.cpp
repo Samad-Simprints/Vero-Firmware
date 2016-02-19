@@ -262,13 +262,6 @@ void vLogAssert( const byte bReason, const char *pzFile, dword dwLine, const cha
   debug_break();
 }
 
-#if 0
-int _printf(const char *format, ...)
-{
-  debug_break();
-}
-#endif
-
 void check_failed(uint8_t *file, uint32_t line)
 {
 #ifdef DEBUG
@@ -367,7 +360,7 @@ int main( void )
   }
 
   /* Create the LPC App task. */
-  xTaskCreate( vLpcAppTask, ( signed char * ) "LPC", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );
+  vLpcAppInit();
 
   // initialise the Bluetooth stack
   bt_main();

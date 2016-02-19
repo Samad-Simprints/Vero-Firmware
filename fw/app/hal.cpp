@@ -749,10 +749,16 @@ void vPowerUn20Off()	// turn off the UN20 (takes 2 seconds){
 //
 void vPowerUn20On()
 {
+  tEventConnDisconn sEventData;
   SIMPLEASSERT( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING );
 
   DEBUGMSG(ZONE_COMMANDS,("vPowerUn20On()\n"));
 
+  if ( pvUsbPhoneCallback != NULL )
+  {
+    sEventData.eInterface = USB_UN20;
+    pvUsbUn20Callback( pvUsbUn20Context, INTERFACE_EVENT_CONNECTED, &sEventData );
+  }
 #if !defined(EVAL_BOARD)
   UN20B_nRESET->vSet( true );
   UN20B_POWER->vSet( true );
