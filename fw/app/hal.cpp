@@ -46,7 +46,7 @@
 #include "ser_dd.hpp"
 #include "adc_dd.hpp"
 
-#include "freertos.h"
+#include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
 

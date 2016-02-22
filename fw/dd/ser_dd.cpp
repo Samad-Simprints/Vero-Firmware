@@ -34,7 +34,7 @@
 
 #include "gpio_dd.hpp"
 
-#include "freertos.h"
+#include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 #include "proj_defs.h"

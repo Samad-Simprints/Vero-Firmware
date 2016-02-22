@@ -28,7 +28,7 @@
 
 #include "global.h"
 
-#include "freertos.h"
+#include "FreeRTOS.h"
 #include "semphr.h"
 #include "timers.h"
 

@@ -33,7 +33,7 @@
 
 #include "helpers.hpp"
 
-#include "freertos.h"
+#include "FreeRTOS.h"
 #include "queue.h"
 #include "list.h"
 

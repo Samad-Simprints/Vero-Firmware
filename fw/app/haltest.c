@@ -41,7 +41,7 @@
 #include "cli.h"
 #include "gpio_dd.hpp"
 
-#include "freertos.h"
+#include "FreeRTOS.h"
 #include "task.h"
 
 //******************************************************************************

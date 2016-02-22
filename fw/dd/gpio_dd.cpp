@@ -6,7 +6,7 @@
 
 #include "global.h"
 
-#include "freertos.h"
+#include "FreeRTOS.h"
 
 // eight handlers, for rising and falling edges or low or high level
 static tGPIOintHandler aprIntHandlers[8];

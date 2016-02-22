@@ -24,8 +24,6 @@
 
 #include <stddef.h>
 #include <stdio.h>
-//#include <lpc18xx.h>
-//#include <cross_studio_io.h>
 #include <string.h>
 
 #define ELEMENTSOF(_x_) ((sizeof(_x_) / sizeof(_x_[0])))
@@ -67,8 +65,8 @@ extern int _printf(const char *format, ...);
 #endif
 
 #if !defined( UN20_APP )
-#include <lpc18xx.h>
-#include "freertos.h"
+#include <LPC18xx.h>
+#include "FreeRTOS.h"
 #else
 #define configSER_INTERRUPT_PRIORITY  0
 #endif

@@ -28,7 +28,7 @@
 //******************************************************************************
 
 #include <ctl_api.h>
-#include <lpc18xx.h>
+#include <LPC18xx.h>
 #include <cross_studio_io.h>
 
 //#include "global.h"
@@ -39,7 +39,7 @@
 #include "gpio_dd.hpp"
 #include "ser_dd.hpp"
 
-#include "freertos.h"
+#include "FreeRTOS.h"
 #include "task.h"
 #undef TRUE
 #undef FALSE

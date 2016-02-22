@@ -33,7 +33,7 @@
 #define __CMSIS_H_
 
 #include "lpc_types.h"
-#include "lpc18xx.h"
+#include "LPC18xx.h"
 #if 0
 #ifdef __cplusplus
 extern "C" {
