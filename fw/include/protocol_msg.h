@@ -62,7 +62,7 @@ typedef void (*vMsgErrorCallback)(tMsgError eErrorCode);
 // Function Prototypes
 //******************************************************************************
 
-// Initialises the Protocol message block.
+// Initializes the Protocol message block.
 extern void vProtocolInit ( void );
 
 // Reset a specified channels packet assembler

@@ -46,7 +46,6 @@ extern "C" {
 // Function Prototypes
 //******************************************************************************
 
-void vHalTest();
 void vLpcAppInit();
 void vLpcAppTask( void *pvParameters );
 

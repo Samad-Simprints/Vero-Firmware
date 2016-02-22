@@ -67,7 +67,8 @@ enum
 {
   MSG_STATUS_GOOD = 0,          // No error
   MSG_STATUS_ERROR,             // Non-specific error
-  MSG_STATUS_UN20_STATE_ERROR   // UN20 is powered down
+  MSG_STATUS_UN20_STATE_ERROR,  // UN20 is in the wrong state for command
+  MSG_STATUS_UNSUPPORTED        // Message is unsupported
 };
 
 // message-ids as held in the message bMsgId field.
@@ -118,6 +119,16 @@ typedef enum
 }
 tMsgSource;
 
+typedef enum
+{
+  // Possible UN20 states in sensor status message
+  UN20_STATE_SHUTDOWN,      // un20 is powered off
+  UN20_STATE_STARTING_UP,   // un20 has powered on, waiting for connection
+  UN20_STATE_READY,         // un20 is powered up and ready
+  UN20_STATE_SHUTTING_DOWN  // un20 is shutting down
+}
+tUN20State;
+
 //
 // Scanner unit status information
 //
@@ -129,7 +140,7 @@ PACK( typedef struct tagSensorInfo
   int16 iBatteryLevel1;	// Analog input 1
   int16 iBatteryLevel2;	// Analog Input 2
   int16 iStoreCount;    // Number of stored images and templates
-  uint8 boPowerOn;      // true if UN20 is powered on, false if not
+  uint8 eUN20State;   // Current state of the UN20
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgSensorInfo;
