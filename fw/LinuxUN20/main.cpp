@@ -2,7 +2,7 @@
 //
 // Project INDEX Application header file
 //
-// (c) Fen Technology Ltd. 2014. All rights reserved.
+// (c) Fen Technology Ltd. 2016. All rights reserved.
 //
 // All rights reserved. Copying, compilation, modification, distribution or
 // any other use whatsoever of this material is strictly prohibited except in
@@ -15,7 +15,7 @@
 // $Date$
 // $Revision$
 // $Author$
-// DESCRIPTION:  see Header file for details
+// DESCRIPTION:  Main UN20 server loop
 //
 //******************************************************************************
 

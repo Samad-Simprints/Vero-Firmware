@@ -116,6 +116,7 @@ void vIncomingBytes(tMsgSource eSource, uint8 *pcData, int iLength)
 {
   int i;
   uint8 *pcDebugData = pcData;
+  printf("PKT(%d): ", eSource);
   for (i = 0; i < iLength; i++)
   {
     printf(" %02X", *pcDebugData++);
