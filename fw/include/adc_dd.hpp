@@ -57,5 +57,6 @@ public:
 //******************************************************************************
 
 extern IAdcUnit *poADCDDgetUnit( const int iUnit );
+extern int iReadBandGap();
 
 #endif  // <HEADER_DEFINE>

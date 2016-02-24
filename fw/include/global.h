@@ -69,6 +69,7 @@ extern int _printf(const char *format, ...);
 #include "FreeRTOS.h"
 #else
 #define configSER_INTERRUPT_PRIORITY  0
+#define configGPIO_INTERRUPT_PRIORITY 0
 #endif
 
 // Include proj_defs here so it can make use of the above typedefs

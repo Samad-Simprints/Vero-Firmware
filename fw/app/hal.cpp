@@ -557,10 +557,12 @@ void vHalInit(void)
   // Make sure the UN20 is powered off
   UN20B_POWER->vConfigure();
   UN20B_POWER->vSet( false );
-
-  //USB_VBUS_PWR_EN->vConfigure();
+#if 0
+  BAT_MON_0->vConfigure();
+  BAT_MON_1->vConfigure();
+  BANDGAP->vConfigure();
 #endif
-
+#endif
   // Initialise the UI elements
   vUiInit();
 
@@ -818,6 +820,8 @@ int iBatteryVoltage(int iChannel)
 #endif
 
   DEBUGMSG(ZONE_COMMANDS,("iBatteryVoltage(%d):%d\n", iChannel, iChannelValue));
+
+  //iReadBandGap();
   return iChannelValue;
 
 }

@@ -28,7 +28,7 @@
 //******************************************************************************
 #include "LPC18xx.h"
 #include "adc_dd.hpp"
-
+#include "lpc18xx_cgu.h"
 #include "global.h"
 
 #include "proj_defs.h"
@@ -97,6 +97,14 @@ tAdcUnit::tAdcUnit( LPC_ADCn_Type const *psSetAdc )
     boInitialised( false ),
     psADC( (LPC_ADCn_Type*)psSetAdc )
 {
+  if ( psSetAdc == LPC_ADC0 )
+  {
+    CGU_EntityConnect(CGU_CLKSRC_PLL1, CGU_BASE_APB1);
+  }
+  else if ( psSetAdc == LPC_ADC1 )
+  {
+    CGU_EntityConnect(CGU_CLKSRC_PLL1, CGU_BASE_APB3);
+  }
 }
 
 /* -----------------------------------------------------------------------
@@ -115,6 +123,17 @@ int tAdcUnit::iReadChannel( int iChannel )
   bool boDone = false;
   int iTmp;
 
+  // setup pin mapping
+#if 0
+  if ( psADC == LPC_ADC0 )
+  {
+    LPC_SCU->ENAIO0 |= ( 1 << iChannel );
+  }
+  else
+  {
+    LPC_SCU->ENAIO1 |= ( 1 << iChannel );
+  }
+#endif
   // work out control register settings
   int iAdcChannel = ((1 << iChannel) & ADC0_CR_SEL_Msk);
   int iClkDiv = (( SystemCoreClock / ADC_MAX_CLOCK ) << ADC0_CR_CLKDIV_Pos);
@@ -136,6 +155,25 @@ int tAdcUnit::iReadChannel( int iChannel )
   return iResult;
 }
 
+int iReadBandGap()
+{
+  int iResult;
+  int SFSPF_7 = LPC_SCU->SFSPF_7;
+  int ENAIO1 = LPC_SCU->ENAIO1;
+  int ENAIO2 = LPC_SCU->ENAIO2;
+
+  LPC_SCU->SFSPF_7 = 0x10;
+  LPC_SCU->ENAIO1 =  0x80;
+  LPC_SCU->ENAIO2 = 0x10;
+
+  iResult = poADCDDgetUnit(1)->iReadChannel(7);
+
+  LPC_SCU->SFSPF_7 = SFSPF_7;
+  LPC_SCU->ENAIO1 =  ENAIO1;
+  LPC_SCU->ENAIO2 = ENAIO2;
+
+  return iResult;
+}
 
 //******************************************************************************
 //******************************************************************************

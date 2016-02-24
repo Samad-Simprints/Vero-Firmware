@@ -148,6 +148,7 @@ numeric value the higher the interrupt priority). */
 #define configEMAC_INTERRUPT_PRIORITY               5
 #define configUSB_INTERRUPT_PRIORITY                6
 #define configSER_INTERRUPT_PRIORITY                6
+#define configGPIO_INTERRUPT_PRIORITY               6
 
 /*-----------------------------------------------------------
  * Macros required to setup the timer for the run time stats.

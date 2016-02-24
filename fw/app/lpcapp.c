@@ -59,9 +59,7 @@ static void vPhoneUsbCallbackHandler(void *context, tInterfaceEvent event, void 
 static void vCallbackCaptureHandler(void);
 static void vUn20UsbCallbackHandler(void *context, tInterfaceEvent event, void *event_data);
 
-static void vVibrateTask( void *pvParameters );
 static void vVibTimerCallback( xTimerHandle xTimer );
-static void vFlashTask( void *pvParameters );
 static void vFlashTimerCallback( xTimerHandle xTimer );
 
 static void vUn20ShutdownTimerCallback( xTimerHandle xTimer );
@@ -83,11 +81,6 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 // Constants
 //******************************************************************************
 
-#define VIBRATE_TASK_STACK_SIZE          ( 128 + TASK_DEBUG_OVERHEAD )
-#define VIBRATE_TASK_PRIORITY            ( tskIDLE_PRIORITY + 3 )
-#define FLASH_TASK_STACK_SIZE            ( 128 + TASK_DEBUG_OVERHEAD )
-#define FLASH_TASK_PRIORITY              ( tskIDLE_PRIORITY + 2 )
-
 #define VIBRATE_OFF                      ( 0 )
 #define VIBRATE_ON                       ( 1 )
 
@@ -95,10 +88,10 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 #define FLASH_TICK_MS                    ( 500 )
 
 // Delay after requesting the UN20 to shutdown before we power it off.
-#define UN20_SHUTDOWN_DELAY_MS           ( 10 * 1000 )
+#define UN20_SHUTDOWN_DELAY_MS           ( 4 * 1000 )
 
 // Default UN20 idle timer value: 10 minutes in ms.
-#define UN20_IDLE_TIMEOUT_MS             ( 60 * 60 * 1000 )
+#define UN20_IDLE_TIMEOUT_MS             ( 10 * 60 * 1000 )
 
 // Default system idle timer value: 60 minutes in ms.
 #define SYSTEM_IDLE_TIMEOUT_MS             ( 60 * 60 * 1000 )
@@ -106,18 +99,16 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 //******************************************************************************
 // Definitions
 //******************************************************************************
+#define BATT_WARN_LOW_MV  3400      // flash RED LED below 3.4V
+#define BATT_SHUTOFF_MV   3300      // power unit off below 3.3V
+
+#define LPCAPP_MSG_QUEUE_SIZE 10
 
 //******************************************************************************
 // Local Storage
 //******************************************************************************
 
 static xQueueHandle hMsgQueue = NULL;
-
-static xTaskHandle oVibrateTaskHandle = NULL;
-static xTaskHandle oFlashTaskHandle = NULL;
-
-static xSemaphoreHandle hVibrateSemaphore = NULL;
-static xSemaphoreHandle hFlashSemaphore = NULL;
 
 static xTimerHandle hUn20ShutdownTimer;
 static xTimerHandle hUn20IdleTimer;        // Times idle seconds before UN20 power off
@@ -149,11 +140,14 @@ static bool boEnableTrigger = false;       // True if the trigger button is enab
 static bool boSetLeds = false;             // LED setting
 static bool boTriggerVibrate = false;      // True if vibrate requested
 static uint8 bLedState[LED_MAX_LED_COUNT]; // off, red, green, orange, on, <flash choice>
-static int16 iVibrateMs = 100;             // 0 = off, > 0 trigger vibrate for Ms (then stop)
 
 static bool boFlashConnectionLed = true;   // True if we are flashing the blue Connection LED
-static bool boFlashConnLedIsOn = true;     // True if the flashing Connection LED is currently ON.
+static bool boFlashBatteryLed = false;     // True if we are flashing the red battery LED
+static int iBatteryLedState = 0;           // current state of the battery LED
+static int iConnectionLedState = 0;        // current state of the connection LED
+
 static xTimerHandle hFlashTimer;
+static xTimerHandle hTimer;
 
 // UN20 Config items.
 
@@ -165,12 +159,22 @@ static MsgUINotification sNotification;
 static MsgDummyPayload sDummy;
 static MsgPacket sRequestMsg;
 
+static MsgInternalPacket sPowerButtonMsg;
+static MsgInternalPacket sScanButtonMsg;
+
 // This app operates mostly stateless (except for some hardware peripheral states such as
 // the vibrate motor, LED flash state etc.
 // Other state information is defined here:
 
 // current state of the UN20 reported to the outside world
 static tUN20State eUN20State = UN20_STATE_SHUTDOWN;
+
+enum
+{
+  // Internal message ID's used to process button events
+  MSG_POWER_BUTTON = (MSG_NUM_MSGS + 0),
+  MSG_SCAN_BUTTON = (MSG_NUM_MSGS + 1)
+};
 
 enum
 {
@@ -267,101 +271,33 @@ static void vSystemIdleTimerCallback( xTimerHandle xTimer )
   return;
 }
 
-
 // Callback for the LED-flash timer.
 static void vFlashTimerCallback( xTimerHandle xTimer )
 {
   // Re-evaluate LEDs needing to be flashed.
   if ( boFlashConnectionLed == true )
   {
-    if ( boFlashConnLedIsOn == true )
-    {
-      // Next an OFF flash.
-      vUiLedSet( LED_CONNECTED, OFF );
-
-      boFlashConnLedIsOn = false;
-    }
-    else
-    {
-      // Next an ON flash.
-      vUiLedSet( LED_CONNECTED, ON );
-
-      boFlashConnLedIsOn = true;
-    }
+    iConnectionLedState ^= 1;
+    vUiLedSet( LED_CONNECTED, (iConnectionLedState ? ON : OFF) );
   }
-  // Else flash not required. The flash task will have left the LED state as required.
+  else
+  {
+    vUiLedSet( LED_CONNECTED, ON );
+  }
+
+  if ( boFlashBatteryLed == true )
+  {
+    iBatteryLedState ^= 1;
+    vUiLedSet( LED_BATTERY, (iBatteryLedState ? ON : OFF) );
+  }
+  else
+  {
+    vUiLedSet( LED_BATTERY, OFF );
+  }
 
   return;
 }
 
-
-// LED Flash task.
-// At the moment this only flashes the blue Connection LED but could be
-// generalised to flash any LED in the future.
-static void vFlashTask( void *pvParameters )
-{
-  const char acTimerName[] = "Flash timer";
-
-  CLI_PRINT(("vFlashTask: Starting\n"));
-
-  hFlashTimer = xTimerCreate( acTimerName,
-                         MS_TO_TICKS(FLASH_TICK_MS),
-                         pdTRUE,    // Continuous timeouts
-                         NULL,
-                         vFlashTimerCallback );
-
-  // Evaluate LEDs needing to be flashed.
-
-  if ( boFlashConnectionLed == true )
-  {
-    // Start the timer.
-    xTimerStart( hFlashTimer, 0 );
-
-    // Start with an ON flash.
-    bLedState[ LED_CONNECTED ] = MED_FLASH_ON;
-    vUiLedSet( LED_CONNECTED, ON );
-
-    boFlashConnLedIsOn = true;
-  }
-
-  // Flash task main loop.
-  while ( 1 )
-  {
-    // Wait to be prodded.
-    if ( hFlashSemaphore != NULL )
-    {
-      xSemaphoreTake( hFlashSemaphore, portMAX_DELAY );
-    }
-
-    // Re-evaluate LEDs needing to be flashed.
-    if ( boFlashConnectionLed == true )
-    {
-      // Start the timer.
-      xTimerStart( hFlashTimer, 0 );
-
-      // Start with an ON flash.
-      bLedState[ LED_CONNECTED ] = MED_FLASH_ON;
-      vUiLedSet( LED_CONNECTED, ON );
-
-      boFlashConnLedIsOn = true;
-    }
-    else
-    {
-      // Flash not required.
-
-      // Stop the timer.
-      xTimerStop( hFlashTimer, 0 );
-
-      // Check for stopping a flashing LED.
-      if ( bLedState[ LED_CONNECTED ] == MED_FLASH_ON )
-      {
-        // Stop flashing but leave the LED on. The phone app may change it if required.
-        bLedState[ LED_CONNECTED ] = ON;
-        vUiLedSet( LED_CONNECTED, ON );
-      }
-    }
-  } // End while
-}
 
 static void vVibTimerCallback( xTimerHandle xTimer )
 {
@@ -371,44 +307,21 @@ static void vVibTimerCallback( xTimerHandle xTimer )
   return;
 }
 
-
-static void vVibrateTask( void *pvParameters )
+static void vVibrateTrigger(int iVibrateMs)
 {
-  xTimerHandle hTimer;
-  const char acTimerName[] = "Vibrate timer";
-
-  CLI_PRINT(("vVibrateTask: Starting\n"));
-
-  hTimer = xTimerCreate( acTimerName,
-                         MS_TO_TICKS( iVibrateMs ),
-                         pdFALSE, // One-shot timeout
-                         NULL,
-                         vVibTimerCallback );
-
-  // Vibrate task main loop.
-  while ( 1 )
+  if( iVibrateMs > 0 )
   {
+    // Start the vibrate motor.
+    vUiVibrateControl ( VIBRATE_ON );
 
-    // Wait to be kicked off.
-    if ( hVibrateSemaphore != NULL )
-    {
-      xSemaphoreTake( hVibrateSemaphore, portMAX_DELAY );
-    }
-
-    if( iVibrateMs > 0 )
-    {
-      // Set the new period.
-      xTimerChangePeriod( hTimer,( iVibrateMs / portTICK_RATE_MS ), 0 );
-     
-      // Start the timer.
-      xTimerStart( hTimer, 0 );
-    
-      // Start the vibrate motor.
-      vUiVibrateControl ( VIBRATE_ON );
-    }
-
-  } // End while
+    // Set the new period.
+    xTimerChangePeriod( hTimer,( iVibrateMs / portTICK_RATE_MS ), 0 );
+   
+    // Start the timer.
+    xTimerStart( hTimer, 0 );
+  }
 }
+
 
 static void vReturnSensorInfo( MsgPacket *psMsg, int iMsglength )
 {
@@ -478,6 +391,7 @@ static void vSetSensorConfig( MsgPacket *psMsg, int iMsglength )
 static void vSetUi( MsgPacket *psMsg, int iMsglength )
 {
   MsgUIControl *psEventData;
+  int16 iVibrateMs;
   int iLoop;
 
   psEventData = (MsgUIControl *) &(psMsg->oPayload);
@@ -509,11 +423,8 @@ static void vSetUi( MsgPacket *psMsg, int iMsglength )
 
   if ( boTriggerVibrate == true )
   {
-    // Notify the vibrate period to our vibrate task and let it run the vibration.
-    if ( hVibrateSemaphore != NULL )
-    {
-      xSemaphoreGive( hVibrateSemaphore );
-    }
+    // Notify the vibrate period to our vibrate handler and let it run the vibration.
+    vVibrateTrigger( iVibrateMs );
   }
 
   // setup an ACK message and send it
@@ -758,6 +669,64 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     // Else invalid source - discard the message.
     break;
 
+  case MSG_POWER_BUTTON:
+
+    CLI_PRINT(("*** Powering off ***\n"));
+
+    // We just switch off without telling the phone app.
+
+    // Cleanly shut down the UN20 app.
+    sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
+    sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload );
+    sResponseMsg.Msgheader.bMsgId = MSG_UN20_SHUTDOWN;
+    sResponseMsg.Msgheader.bStatus = MSG_STATUS_GOOD;
+
+    sDummy.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
+    sResponseMsg.oPayload.DummyPayload = sDummy;
+
+    // send shutdown message to UN20
+    iIfSend(IF_UN20, (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength);
+
+    // Pause here for a short while to allow the UN20 to cleanly shut down.
+    vTaskDelay( MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ));
+  
+    // Power down the UN20.
+    vPowerUn20Off();
+
+    // Now power down the whole scanner.
+    vPowerSelfOff();
+
+    // Should never be reached!
+    break;
+
+  case MSG_SCAN_BUTTON:
+    CLI_PRINT(("*** Scan request ***\n"));
+
+    // Reset the system inactivity timeout.
+    xTimerReset( hInactivityTimer, 0 );
+
+    // If the capture button is enabled, we pass this indication on to the phone.
+    if ( boEnableTrigger == true )
+    {
+      sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
+      sResponseMsg.Msgheader.bMsgId = MSG_REPORT_UI;
+      sResponseMsg.Msgheader.bStatus = MSG_STATUS_GOOD;
+
+      sNotification.boTriggerPressed = true;
+
+      sNotification.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
+
+      sResponseMsg.oPayload.UINotification = sNotification;
+
+      sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgUINotification );
+
+      // Send the response message from the UN20 on to the phone
+      iIfSend((IF_USB | IF_BT), (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength);
+    }
+    // Else ignore this button press.
+    break;
+
+
   case MSG_REPORT_UI:
   case MSG_UN20_WAKINGUP:
   default:
@@ -815,12 +784,6 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
     if (( boPhoneBtConnected == true ) || ( boPhoneUsbConnected == true ))
     {
       boFlashConnectionLed = false;
-
-      // Notify our flash task to stop the flash.
-      if ( hFlashSemaphore != NULL )
-      {
-        xSemaphoreGive( hFlashSemaphore );
-      }
     }
     break;
 
@@ -857,12 +820,6 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
     if (( boPhoneBtConnected == false ) && ( boPhoneUsbConnected == false ))
     {
       boFlashConnectionLed = true;
-
-      // Notify our flash task and let it run the flash.
-      if ( hFlashSemaphore != NULL )
-      {
-        xSemaphoreGive( hFlashSemaphore );
-      }
     }
 
   // Reset the interfaces packet assembler when the interface connects and disconnects
@@ -982,65 +939,23 @@ static void vPhoneUsbCallbackHandler(void *context, tInterfaceEvent event, void 
 // Power button pressed.
 static void vCallbackPowerOffHandler(void)
 {
-  CLI_PRINT(("vCallbackPowerOffHandler\n"));
+  portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+  MsgInternalPacket *psMsg = &sPowerButtonMsg;
+  sPowerButtonMsg.oMsg.Msgheader.bMsgId = MSG_POWER_BUTTON;
 
-  // We just switch off without telling the phone app.
-
-  // Cleanly shut down the UN20 app.
-  sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
-  sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload );
-  sResponseMsg.Msgheader.bMsgId = MSG_UN20_SHUTDOWN;
-  sResponseMsg.Msgheader.bStatus = MSG_STATUS_GOOD;
-
-  sDummy.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
-  sResponseMsg.oPayload.DummyPayload = sDummy;
-
-  // send shutdown message to UN20
-  iIfSend(IF_UN20, (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength);
-
-  // Pause here for a short while to allow the UN20 to cleanly shut down.
-  vTaskDelay( MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ));
-  
-  // Power down the UN20.
-  vPowerUn20Off();
-
-  // Now power down the whole scanner.
-  vPowerSelfOff();
-
-  // Should never be reached!
-  return;
+  xQueueSendToBackFromISR( hMsgQueue, &psMsg, &xHigherPriorityTaskWoken );
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 // Capture button pressed.
 static void vCallbackCaptureHandler(void)
 {
-  CLI_PRINT(("vCallbackCaptureHandler\n"));
+  portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+  MsgInternalPacket *psMsg = &sScanButtonMsg;
+  sScanButtonMsg.oMsg.Msgheader.bMsgId = MSG_SCAN_BUTTON;
 
-  // Reset the system inactivity timeout.
-  xTimerReset( hInactivityTimer, 0 );
-
-  // If the capture button is enabled, we pass this indication on to the phone.
-  if ( boEnableTrigger == true )
-  {
-
-    sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
-    sResponseMsg.Msgheader.bMsgId = MSG_REPORT_UI;
-    sResponseMsg.Msgheader.bStatus = MSG_STATUS_GOOD;
-
-    sNotification.boTriggerPressed = true;
-
-    sNotification.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
-
-    sResponseMsg.oPayload.UINotification = sNotification;
-
-    sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgUINotification );
-
-    // Send the response message from the UN20 on to the phone
-    iIfSend((IF_USB | IF_BT), (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength);
-  }
-  // Else ignore this button press.
-
-  return;
+  xQueueSendToBackFromISR( hMsgQueue, &psMsg, &xHigherPriorityTaskWoken );
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 
@@ -1054,6 +969,9 @@ void vLpcAppInit()
   const char acShutdownTimerName[] = "UN20 shutdown timer";
   const char acUn20IdleTimerName[] = "UN20 idle timer";
   const char acInactivityTimerName[] = "System idle timer";
+  const char acFlashTimerName[] = "Flash timer";
+  const char acVibrateTimerName[] = "Vibrate timer";
+
 
   CLI_PRINT(("vLpcAppInit: Initialising LpcTask\n"));
 
@@ -1084,12 +1002,6 @@ void vLpcAppInit()
 
   vUiVibrateControl( false );
 
-  // Create the semaphore for unblocking the vibrate task.
-  vSemaphoreCreateBinary( hVibrateSemaphore );
-
-    // Create the semaphore for prodding the flash task.
-  vSemaphoreCreateBinary( hFlashSemaphore );
-
   // Create a timer for timing UN20 shutdown.
   hUn20ShutdownTimer = xTimerCreate( acShutdownTimerName,
                                      MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ),
@@ -1117,13 +1029,23 @@ void vLpcAppInit()
   // Start the timer.
   xTimerStart( hInactivityTimer, 0 );
 
-  // Create the Vibrate task
-  xTaskCreate( vVibrateTask, ( signed char * ) "Vibrate", VIBRATE_TASK_STACK_SIZE, ( void * ) NULL, VIBRATE_TASK_PRIORITY, &oVibrateTaskHandle );
+  // Create the vibrate control timer
+  hTimer = xTimerCreate( acVibrateTimerName,
+                         MS_TO_TICKS( 100 ),
+                         pdFALSE, // One-shot timeout
+                         NULL,
+                         vVibTimerCallback );
 
-  // Create the flash task
-  xTaskCreate( vFlashTask, ( signed char * ) "Flash", FLASH_TASK_STACK_SIZE, ( void * ) NULL, FLASH_TASK_PRIORITY, &oFlashTaskHandle );
+  // Create the LED flash timer
+  hFlashTimer = xTimerCreate( acFlashTimerName,
+                         MS_TO_TICKS(FLASH_TICK_MS),
+                         pdTRUE,    // Continuous timeouts
+                         NULL,
+                         vFlashTimerCallback );
 
-#define LPCAPP_MSG_QUEUE_SIZE 10
+  // Start the flash timer.
+  xTimerStart( hFlashTimer, 0 );
+
   hMsgQueue = xQueueCreate( LPCAPP_MSG_QUEUE_SIZE, sizeof(MsgInternalPacket*) );
 
   // Initialise the transport callbacks after everything is ready as we may get immediate callbacks.
@@ -1205,6 +1127,8 @@ void vLpcAppTask( void *pvParameters )
         iIfSend(IF_UN20, (void *) &sRequestMsg, sRequestMsg.Msgheader.iLength);
       }
     }
+
+    boFlashBatteryLed = ( iBatteryVoltage( 0 ) < BATT_WARN_LOW_MV );
   }
 }
 

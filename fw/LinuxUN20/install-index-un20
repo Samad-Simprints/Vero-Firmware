@@ -3,6 +3,7 @@ echo "Installing UN20 server application"
 cd /data
 gunzip index.tar.gz
 tar xv -f index.tar
+cp /data/lib/secugenun202015.cfg5 /data
 chmod +x start-index-un20
 chmod +x InitScript
 chmod +x index-un20app

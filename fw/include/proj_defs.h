@@ -82,8 +82,11 @@
 #define GPIO_INTERRUPT_PRIORITY       ( configMAX_LIBRARY_INTERRUPT_PRIORITY + 1 )
 #define GPDMA_INTERRUPT_PRIORITY      ( configMAX_LIBRARY_INTERRUPT_PRIORITY + 1 )
 #else
-#define GPIO_INTERRUPT_PRIORITY       ( configMAX_SYSCALL_INTERRUPT_PRIORITY + 1 )
+//#define GPIO_INTERRUPT_PRIORITY       ( configMAX_SYSCALL_INTERRUPT_PRIORITY + 1 )
 #endif
+
+// GPIO_DD configuration
+static const dword                    GPIO_DD_INTERRUPT_PRIORITY     = configGPIO_INTERRUPT_PRIORITY;
 
 // SER_DD configuration
 static const dword                    SER_DD_INTERRUPT_PRIORITY     = configSER_INTERRUPT_PRIORITY;

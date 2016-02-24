@@ -225,7 +225,7 @@ static int un20_sdk_startup()
   err = sgfplib->Init(SG_DEV_AUTO);
   if (err != SGFDX_ERROR_NONE)
   {
-     printf("ERROR - Unable to initialize device.\n\n");
+     printf("ERROR - Unable to initialize device(%d).\n\n", err);
      return false;
   }
 

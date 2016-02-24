@@ -97,6 +97,7 @@ enum tPinFunction
 #define   PIN_DRIVE_MASK          ( 0x300 )
 
 #define   PIN_SPECIAL             ( 0x800 ) // pin is not a GPIO. Just set function
+#define   PIN_ANALOG              ( 0x1000 )
 
 //******************************************************************************
 // Definitions
@@ -168,7 +169,8 @@ public:
   void vSetMode( const tPullUpDown ePullUpDown,
                  const bool boGlitchFilter,
                  const bool boFastSlewRate,
-                 const tDriveStrength eDriveStrength );
+                 const tDriveStrength eDriveStrength,
+                 const bool boDisableInput );
 
   // accessors
   inline void vSetActive()

@@ -33,10 +33,11 @@ PINFUNC_DEF( BT_RTS,                  7,  5, H, ALT2, PIN_OUT )               //
 PINFUNC_DEF( BT_RESET,                2,  3, H, GPIO, PIN_OUT )               // pin 4_3
 PINFUNC_DEF( BT_SPARE2,               2,  4, H, GPIO, PIN_IN )                // pin 4_4
 //
-// Battery monitors
+// Battery monitors are on dedicated pins with no GPIO function
 //
-//PINFUNC_DEF( BAT_MON_0,               2,  4, H, GPIO, PIN_IN )                // Not GPIO
-//PINFUNC_DEF( BAT_MON_1,               2,  4, H, GPIO, PIN_IN )                // Not GPIO
+//PINFUNC_DEF( BAT_MON_0,               2,  3, H, GPIO, PIN_IN | PIN_NONE | PIN_ANALOG )     // Not GPIO
+//PINFUNC_DEF( BAT_MON_1,               2,  1, H, GPIO, PIN_IN | PIN_NONE | PIN_ANALOG )     // Not GPIO
+//PINFUNC_DEF( BANDGAP,                 7, 21, H, GPIO, PIN_IN | PIN_NONE | PIN_ANALOG )     // Not GPIO
 //
 // LEDs
 //

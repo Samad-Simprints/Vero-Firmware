@@ -151,7 +151,8 @@ void tGPIOpin::vConfigure()
   vSetMode( eMode,
             ( wMode & PIN_NO_GLITCH_FILTER ) == 0,
             ( wMode & PIN_FAST_SLEW ) != 0,
-            eStrength );
+            eStrength,
+            ( wMode & PIN_ANALOG ) != 0);
 }
 
 void tGPIOpin::vSetPinFunction()
@@ -287,7 +288,7 @@ void tGPIOpin::vSetPinInterruptHandler( const IRQn_Type eNVICchannel,
       aprIntHandlers[ iChannel ] = prHandler;
 
       // enable or disable GPIO interrupts
-      NVIC_SetPriority( eNVICchannel, GPIO_INTERRUPT_PRIORITY );
+      NVIC_SetPriority( eNVICchannel, GPIO_DD_INTERRUPT_PRIORITY );
       if ( prHandler )
       {
         NVIC_EnableIRQ( eNVICchannel );
@@ -308,16 +309,20 @@ void tGPIOpin::vSetPinInterruptHandler( const IRQn_Type eNVICchannel,
 void tGPIOpin::vSetMode( const tPullUpDown ePullUpDown,
                          const bool boGlitchFilter,
                          const bool boFastSlewRate,
-                         const tDriveStrength eDriveStrength )
+                         const tDriveStrength eDriveStrength,
+                         const bool boDisableInput)
 {
   REG32 pdwPinSel = pdwGetConfigRegister();
 
   if ( pdwPinSel )
   {
-    dword dwSetting = (((*pdwPinSel) & ~( SCU_GPIO_EPD | SCU_GPIO_EHS | SCU_GPIO_ZIF | SCU_GPIO_EHD_MASK )) | SCU_GPIO_EPUN_DISABLE) ;
-    // always enable the input buffer
-    dwSetting |= SCU_GPIO_EZI;
+    dword dwSetting = (((*pdwPinSel) & ~( SCU_GPIO_EPD | SCU_GPIO_EHS | SCU_GPIO_ZIF | SCU_GPIO_EZI | SCU_GPIO_EHD_MASK )) | SCU_GPIO_EPUN_DISABLE) ;
 
+    if ( !boDisableInput )
+    {
+      // enable the input buffer if its not disabled
+      dwSetting |= SCU_GPIO_EZI;
+    }
     // tPullUpDown is coded as the actual bits to set
     dwSetting |= (dword)ePullUpDown;
 
