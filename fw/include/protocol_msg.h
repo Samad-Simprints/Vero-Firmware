@@ -81,6 +81,7 @@ extern void vProtocolMsgError(vMsgErrorCallback pvCallback);
 // Utility functions to build messages
 extern void vSetupNACK( MsgPacket *psPacket, int16 iStatusCode );
 extern void vSetupACK( MsgPacket *psPacket );
+extern void vSetupMessage( MsgPacket *psPacket, int8 bMessage, int8 bStatus, void *pvPayload, int iPayloadSize );
 
 #ifdef __cplusplus
 }

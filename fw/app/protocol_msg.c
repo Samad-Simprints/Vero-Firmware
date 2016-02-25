@@ -317,3 +317,26 @@ void vSetupACK( MsgPacket *psPacket )
 {
   vSetupNACK( psPacket, MSG_STATUS_GOOD );
 }
+
+// create an arbitrary length message packet, payload is set and message trailer inserted after payload
+void vSetupMessage( MsgPacket *psPacket, int8 bMessage, int8 bStatus, void *pvPayload, int iPayloadSize )
+{
+  int8 *pdwFooter;
+  psPacket->Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
+  psPacket->Msgheader.iLength = (sizeof( MsgPacketheader ) + iPayloadSize/* + sizeof( uint32 )*/);
+  psPacket->Msgheader.bMsgId = bMessage;
+  psPacket->Msgheader.bStatus = bStatus;
+
+  if ( pvPayload && iPayloadSize )
+  {
+    memcpy(&psPacket->oPayload, pvPayload, iPayloadSize);
+  }
+  // horrible special case until we remove the trailer signature from the structure definitions
+  if ( iPayloadSize == 0 )
+  {
+    psPacket->Msgheader.iLength += sizeof( uint32 );
+  }
+
+  pdwFooter = &((int8*)psPacket)[psPacket->Msgheader.iLength - sizeof( uint32 )];
+  *((uint32*)pdwFooter) = MSG_PACKET_FOOTER_SYNC_WORD;
+}

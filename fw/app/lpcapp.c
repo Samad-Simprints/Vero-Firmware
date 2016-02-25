@@ -154,11 +154,10 @@ static xTimerHandle hTimer;
 static int16 iUn20Version = 0;	           // UN20 client firmware version
 static int16 iUn20StoreCount = 0;          // Number of stored images and templates
 
-static MsgPacket sResponseMsg;
-static MsgUINotification sNotification;
-static MsgDummyPayload sDummy;
-static MsgPacket sRequestMsg;
+// message structure used for internally generated messages
+static MsgPacket sInternalMsg;
 
+// message structure for power and scan button notification
 static MsgInternalPacket sPowerButtonMsg;
 static MsgInternalPacket sScanButtonMsg;
 
@@ -240,33 +239,13 @@ static void vUn20IdleTimerCallback( xTimerHandle xTimer )
 
   eUN20State = UN20_STATE_SHUTTING_DOWN;
 
-  // Cleanly shut down the UN20 app by sending it a MSG_UN20_SHUTDOWN message.
-  sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
-  sResponseMsg.Msgheader.bMsgId = MSG_UN20_SHUTDOWN;
-  sResponseMsg.Msgheader.bStatus = MSG_STATUS_GOOD;
+  // Cleanly shut down the UN20 app if it is running (UN20 powered up).
+  vSetupMessage( &sInternalMsg, MSG_UN20_SHUTDOWN, MSG_STATUS_GOOD, NULL, 0 );
 
-  sDummy.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
-
-  sResponseMsg.oPayload.DummyPayload = sDummy;
-
-  sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload );
-
-  iIfSend(IF_UN20, (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength);
+  iIfSend(IF_UN20, (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
 
   // Start the UN20 poweroff timer.
   xTimerStart( hUn20ShutdownTimer, 0 );
-
-  return;
-}
-
-
-// Callback for system inactivity (Idle) timeout.
-static void vSystemIdleTimerCallback( xTimerHandle xTimer )
-{
-  CLI_PRINT(("vSystemIdleTimerCallback\n"));
-
-  // We take the same actions as when the user presses the power button.
-  vCallbackPowerOffHandler();
 
   return;
 }
@@ -325,22 +304,20 @@ static void vVibrateTrigger(int iVibrateMs)
 
 static void vReturnSensorInfo( MsgPacket *psMsg, int iMsglength )
 {
+  MsgSensorInfo sInfo;
+
   CLI_PRINT(("vReturnSensorInfo\n"));
 
-  psMsg->Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
-  psMsg->Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgSensorInfo );
-  psMsg->Msgheader.bMsgId = MSG_GET_SENSOR_INFO | MSG_REPLY;
-  psMsg->Msgheader.bStatus = MSG_STATUS_GOOD;
-
   // Build up the payload.
-  memcpy((void *) &psMsg->oPayload.SensorInfo.btAddr, (void *) sScannerBtAddr, sizeof( sScannerBtAddr ));
-  psMsg->oPayload.SensorInfo.iUCVersion = 0 /* TODO */;
-  psMsg->oPayload.SensorInfo.iUN20Version = iUn20Version;
-  psMsg->oPayload.SensorInfo.iBatteryLevel1 = iBatteryVoltage( 0 );
-  psMsg->oPayload.SensorInfo.iBatteryLevel2 = iBatteryVoltage( 1 );
-  psMsg->oPayload.SensorInfo.iStoreCount = iUn20StoreCount;
-  psMsg->oPayload.SensorInfo.eUN20State = eUN20State;
-  psMsg->oPayload.SensorInfo.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
+  memcpy((void *) &sInfo.btAddr, (void *) sScannerBtAddr, sizeof( sScannerBtAddr ));
+  sInfo.iUCVersion = 0 /* TODO */;
+  sInfo.iUN20Version = iUn20Version;
+  sInfo.iBatteryLevel1 = iBatteryVoltage( 0 );
+  sInfo.iBatteryLevel2 = iBatteryVoltage( 1 );
+  sInfo.iStoreCount = iUn20StoreCount;
+  sInfo.eUN20State = eUN20State;
+
+  vSetupMessage( psMsg, (MSG_GET_SENSOR_INFO | MSG_REPLY), MSG_STATUS_GOOD, &sInfo, sizeof( sInfo ) );
 
   CLI_PRINT(("Status: UN20:%d, Bat1:%d, Bat2:%d\n",
                   psMsg->oPayload.SensorInfo.eUN20State,
@@ -379,8 +356,8 @@ static void vSetSensorConfig( MsgPacket *psMsg, int iMsglength )
   // Put the timeout items into action.
   xTimerStop( hUn20IdleTimer, 0 );
   xTimerStop( hInactivityTimer, 0 );
-  xTimerChangePeriod( hUn20IdleTimer, ( iUn20IdleTimeoutSecs * 1000 ) / portTICK_RATE_MS, 0 );
-  xTimerChangePeriod( hInactivityTimer, ( iPowerOffTimeoutSecs * 1000 ) / portTICK_RATE_MS, 0 );
+  xTimerChangePeriod( hUn20IdleTimer, SECS_TO_TICKS( iUn20IdleTimeoutSecs ), 0 );
+  xTimerChangePeriod( hInactivityTimer, SECS_TO_TICKS( iPowerOffTimeoutSecs ), 0 );
   xTimerStart( hUn20IdleTimer, 0 );
   xTimerStart( hInactivityTimer, 0 );
 
@@ -553,6 +530,27 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     {
       CLI_PRINT(("%sWaking up UN20\n", (eUN20State == UN20_STATE_SHUTDOWN ? "" :"Not ")));
 
+      switch ( eUN20State )
+      {
+        case UN20_STATE_READY:
+        case UN20_STATE_STARTING_UP:
+          // already actioned required state change
+          vSetupACK( psPacket );
+          break;
+
+        case UN20_STATE_SHUTTING_DOWN:
+          // in the process of shutting down so cant stop it
+          vSetupNACK( psPacket, MSG_STATUS_UN20_STATE_ERROR );
+          break;
+
+        case UN20_STATE_SHUTDOWN:
+          // Start the UN20 powering up.
+          eUN20State = UN20_STATE_STARTING_UP;
+          vPowerUn20On();
+          vSetupACK( psPacket );
+          break;
+      }
+#if 0
       // already in progress or ready, do nothing
       if ( eUN20State == UN20_STATE_READY || eUN20State == UN20_STATE_STARTING_UP )
       {
@@ -570,6 +568,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       { // must be in the process of shutting down so cant stop it
         vSetupNACK( psPacket, MSG_STATUS_UN20_STATE_ERROR );
       }
+#endif
       // send ACK or NACK on behalf of the UN20 as it cannot respond
       iIfSend((IF_USB | IF_BT), psPacket, psPacket->Msgheader.iLength);
     }
@@ -594,6 +593,32 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     {
       CLI_PRINT(("%sShutting down UN20\n", (eUN20State == UN20_STATE_READY ? "" : "Not ")));
 
+      switch ( eUN20State )
+      {
+        case UN20_STATE_READY:
+          // Start the UN20 powering off.
+          eUN20State = UN20_STATE_SHUTTING_DOWN;
+          // response will come from the UN20 which we forward on
+          iIfSend(IF_UN20, psPacket, psPacket->Msgheader.iLength);
+
+          // Start the UN20 shutdown timer - this gives the UN20 time to halt.
+          xTimerStart( hUn20ShutdownTimer, 0 );
+          break;
+
+        case UN20_STATE_STARTING_UP:
+          // starting up so cant stop it, reject request
+          vSetupNACK( psPacket, MSG_STATUS_UN20_STATE_ERROR );
+          iIfSend((IF_USB | IF_BT), psPacket, psPacket->Msgheader.iLength);
+          break;
+
+        case UN20_STATE_SHUTDOWN:
+        case UN20_STATE_SHUTTING_DOWN:
+          // already actioned required state change
+          vSetupACK( psPacket );
+          iIfSend((IF_USB | IF_BT), psPacket, psPacket->Msgheader.iLength);
+          break;
+      }
+#if 0
       if ( eUN20State == UN20_STATE_READY )
       {
         // Start the UN20 powering off.
@@ -609,6 +634,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         vSetupNACK( psPacket, MSG_STATUS_UN20_STATE_ERROR );
         iIfSend((IF_USB | IF_BT), psPacket, psPacket->Msgheader.iLength);
       }
+#endif
     }
     else
     {
@@ -673,19 +699,14 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
 
     CLI_PRINT(("*** Powering off ***\n"));
 
-    // We just switch off without telling the phone app.
+    if ( boUn20UsbConnected == true )
+    {
+      // Cleanly shut down the UN20 app if it is running (UN20 powered up).
+      vSetupMessage( &sInternalMsg, MSG_UN20_SHUTDOWN, MSG_STATUS_GOOD, NULL, 0 );
 
-    // Cleanly shut down the UN20 app.
-    sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
-    sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload );
-    sResponseMsg.Msgheader.bMsgId = MSG_UN20_SHUTDOWN;
-    sResponseMsg.Msgheader.bStatus = MSG_STATUS_GOOD;
-
-    sDummy.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
-    sResponseMsg.oPayload.DummyPayload = sDummy;
-
-    // send shutdown message to UN20
-    iIfSend(IF_UN20, (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength);
+      // send shutdown message to UN20
+      iIfSend(IF_UN20, (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
+    }
 
     // Pause here for a short while to allow the UN20 to cleanly shut down.
     vTaskDelay( MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ));
@@ -702,26 +723,16 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   case MSG_SCAN_BUTTON:
     CLI_PRINT(("*** Scan request ***\n"));
 
-    // Reset the system inactivity timeout.
-    xTimerReset( hInactivityTimer, 0 );
-
     // If the capture button is enabled, we pass this indication on to the phone.
     if ( boEnableTrigger == true )
     {
-      sResponseMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
-      sResponseMsg.Msgheader.bMsgId = MSG_REPORT_UI;
-      sResponseMsg.Msgheader.bStatus = MSG_STATUS_GOOD;
+      MsgUINotification sUINotification;
+      sUINotification.boTriggerPressed = true;
 
-      sNotification.boTriggerPressed = true;
-
-      sNotification.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
-
-      sResponseMsg.oPayload.UINotification = sNotification;
-
-      sResponseMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgUINotification );
+      vSetupMessage( &sInternalMsg, MSG_REPORT_UI, MSG_STATUS_GOOD, &sUINotification, sizeof( sUINotification ) );
 
       // Send the response message from the UN20 on to the phone
-      iIfSend((IF_USB | IF_BT), (void *) &sResponseMsg, sResponseMsg.Msgheader.iLength);
+      iIfSend((IF_USB | IF_BT), (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
     }
     // Else ignore this button press.
     break;
@@ -936,11 +947,25 @@ static void vPhoneUsbCallbackHandler(void *context, tInterfaceEvent event, void 
   } // End switch
 }
 
-// Power button pressed.
+// Callback for system inactivity (Idle) timeout.
+static void vSystemIdleTimerCallback( xTimerHandle xTimer )
+{
+  MsgInternalPacket *psMsg = &sPowerButtonMsg;
+
+  CLI_PRINT(("vSystemIdleTimerCallback\n"));
+
+  // We take the same actions as when the user presses the power button.
+  sPowerButtonMsg.oMsg.Msgheader.bMsgId = MSG_POWER_BUTTON;
+  vQueueMessageCompleteCallback( psMsg  );
+  return;
+}
+
+// Power button pressed. Called from ISR context
 static void vCallbackPowerOffHandler(void)
 {
   portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
   MsgInternalPacket *psMsg = &sPowerButtonMsg;
+
   sPowerButtonMsg.oMsg.Msgheader.bMsgId = MSG_POWER_BUTTON;
 
   xQueueSendToBackFromISR( hMsgQueue, &psMsg, &xHigherPriorityTaskWoken );
@@ -1114,17 +1139,9 @@ void vLpcAppTask( void *pvParameters )
       if ( boUn20UsbConnected == true )
       {
         // Connected to the UN20 and need its config. Fire off a request.
-        sRequestMsg.Msgheader.uMsgHeaderSyncWord = MSG_PACKET_HEADER_SYNC_WORD;
-        sRequestMsg.Msgheader.bMsgId = MSG_UN20_GET_INFO;
-        sRequestMsg.Msgheader.bStatus = MSG_STATUS_GOOD;
+        vSetupMessage( &sInternalMsg, MSG_UN20_GET_INFO, MSG_STATUS_GOOD, NULL, 0 );
 
-        sDummy.uMsgFooterSyncWord = MSG_PACKET_FOOTER_SYNC_WORD;
-
-        sRequestMsg.oPayload.DummyPayload = sDummy;
-
-        sRequestMsg.Msgheader.iLength = sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload );
-
-        iIfSend(IF_UN20, (void *) &sRequestMsg, sRequestMsg.Msgheader.iLength);
+        iIfSend(IF_UN20, (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
       }
     }
 

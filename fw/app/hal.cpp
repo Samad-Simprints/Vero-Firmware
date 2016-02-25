@@ -45,7 +45,7 @@
 #include "gpio_dd.hpp"
 #include "ser_dd.hpp"
 #include "adc_dd.hpp"
-
+#include "protocol_msg.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
@@ -146,6 +146,8 @@ static void *pvUsbUn20Context = NULL;
 static void *pvUsbPhoneContext = NULL;
 
 static xSemaphoreHandle hSendCompleteSemaphore = NULL;
+
+static MsgPacket sMsg;
 
 //******************************************************************************
 //******************************************************************************
@@ -340,179 +342,138 @@ static bool boVibrate( char **papzArgs, int iInstance, int iNumArgs )
   vUiVibrateControl(boOnOff);
 }
 
+// inject the message into the Phones USB RX stream
+static void vUSBRx(MsgPacket *psMsg)
+{
+  tEventRxData sEventData;
 
+  sEventData.iLength = psMsg->Msgheader.iLength;
+  sEventData.pcData = (char *)psMsg;
+
+  if ( pvUsbPhoneCallback != NULL )
+  {
+    pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
+  }
+}
+
+// inject the message into the UN20's USB RX stream
+static void vUN20Rx(MsgPacket *psMsg)
+{
+  tEventRxData sEventData;
+
+  sEventData.iLength = psMsg->Msgheader.iLength;
+  sEventData.pcData = (char *)psMsg;
+
+  if ( pvUsbUn20Callback != NULL )
+  {
+    pvUsbUn20Callback( pvUsbUn20Context, INTERFACE_EVENT_RX_DATA, &sEventData );
+  }
+}
 
 static bool boUsb( char **papzArgs, int iInstance, int iNumArgs )
 {
   int iParam = atoi(papzArgs[1]);
   int iArg = 0;
+  tEventRxData sEventData;
   
   if ( iNumArgs > 2 )
   {
      iArg = atoi(papzArgs[2]);
   }
 
-  tEventRxData sEventData;
-
   switch ( iParam )
   {
   case MSG_GET_SENSOR_INFO:
     {
-      sEventData.iLength = sGetSensorInfoPacket.Msgheader.iLength;
-      sEventData.pcData = (char *) &sGetSensorInfoPacket;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_GET_SENSOR_INFO, MSG_STATUS_GOOD, NULL, 0 );
+      vUSBRx( &sMsg );
     }
     break;
 
   case MSG_SET_SENSOR_CONFIG:
     {
-      sEventData.iLength = sSensorConfigPacket.Msgheader.iLength;
-      sEventData.pcData = (char *) &sSensorConfigPacket;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_SET_SENSOR_CONFIG, MSG_STATUS_GOOD, &sSensorConfigPacket.oPayload, sizeof(sSensorConfigPacket.oPayload.SensorConfig) );
+      vUSBRx( &sMsg );
     }
     break;
 
   case MSG_SET_UI:
     {
-      sEventData.iLength = sSetuiPacket.Msgheader.iLength;
-      sEventData.pcData = (char *) &sSetuiPacket;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_SET_UI, MSG_STATUS_GOOD, &sSetuiPacket.oPayload, sizeof(sSetuiPacket.oPayload.UIControl) );
+      vUSBRx( &sMsg );
     }
     break;
 
   case MSG_CAPTURE_IMAGE:
     {
-      sEventData.iLength = sCaptureImagePacket.Msgheader.iLength;
-      sEventData.pcData = (char *) &sCaptureImagePacket;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_CAPTURE_IMAGE, MSG_STATUS_GOOD, &sCaptureImagePacket.oPayload, sizeof(sCaptureImagePacket.oPayload.ScanRequest) );
+      vUSBRx( &sMsg );
     }
 
     break;
 
   case MSG_CAPTURE_PROGRESS:
     {
-      sEventData.iLength = sCaptureProgressPacket.Msgheader.iLength;
-      sEventData.pcData = (char *) &sCaptureProgressPacket;
-
-      if ( pvUsbUn20Callback != NULL )
-      {
-        pvUsbUn20Callback( pvUsbUn20Context, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_CAPTURE_PROGRESS, MSG_STATUS_GOOD, &sCaptureProgressPacket.oPayload, sizeof(sCaptureProgressPacket.oPayload.ScanProgress) );
+      vUN20Rx( &sMsg );
     }
-
     break;
 
   case MSG_UN20_SHUTDOWN:
     {
-      sEventData.iLength = sShutdownUn20Packet.Msgheader.iLength;
-      sEventData.pcData = (char *) &sShutdownUn20Packet;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_UN20_SHUTDOWN, MSG_STATUS_GOOD, NULL, 0 );
+      vUSBRx( &sMsg );
     }
     break;
 
   case MSG_UN20_WAKEUP:
     {
-      sEventData.iLength = sWakeupUn20Packet.Msgheader.iLength;
-      sEventData.pcData = (char *) &sWakeupUn20Packet;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_UN20_WAKEUP, MSG_STATUS_GOOD, NULL, 0 );
+      vUSBRx( &sMsg );
     }
     break;
 
   case MSG_UN20_READY:
     {
-      sEventData.iLength = sUn20ReadyPacket.Msgheader.iLength;
-      sEventData.pcData = (char *) &sUn20ReadyPacket;
-
-      if ( pvUsbUn20Callback != NULL )
-      {
-        pvUsbUn20Callback( pvUsbUn20Context, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_UN20_READY, MSG_STATUS_GOOD, NULL, 0 );
+      vUN20Rx( &sMsg );
     }
     break;
 
   case MSG_UN20_GET_INFO:
     {
-      sEventData.iLength = sUn20GetInfoPacket.Msgheader.iLength;
-      sEventData.pcData = (char *) &sUn20GetInfoPacket;
-
-      if ( pvUsbUn20Callback != NULL )
-      {
-        pvUsbUn20Callback( pvUsbUn20Context, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, (MSG_UN20_GET_INFO | MSG_REPLY), MSG_STATUS_GOOD, &sUn20GetInfoPacket.oPayload, sizeof(sUn20GetInfoPacket.oPayload.UN20Info) );
+      vUN20Rx( &sMsg );
     }
     break;
 
   case MSG_IMAGE_QUALITY:        // Processed by UN20 App
     {
-      sEventData.iLength = sGetQualityPacket.Msgheader.iLength;
-      sEventData.pcData = (char *) &sGetQualityPacket;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_IMAGE_QUALITY, MSG_STATUS_GOOD, NULL, 0 );
+      vUSBRx( &sMsg );
     }
     break;
 
   case MSG_GENERATE_TEMPLATE:    // Processed by UN20 App
     {
-      sEventData.iLength = sGetGenerateTemplatePacket.Msgheader.iLength;
-      sEventData.pcData = (char *) &sGetGenerateTemplatePacket;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_GENERATE_TEMPLATE, MSG_STATUS_GOOD, NULL, 0 );
+      vUSBRx( &sMsg );
     }
     break;
 
   case MSG_GET_IMAGE_FRAGMENT:    // Processed by UN20 App
     {
       sGetImageFragment.oPayload.FragmentRequest.iFragmentNo = iArg;
-      sEventData.iLength = sGetImageFragment.Msgheader.iLength;
-      sEventData.pcData = (char *) &sGetImageFragment;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      vSetupMessage( &sMsg, MSG_GET_IMAGE_FRAGMENT, MSG_STATUS_GOOD, &sGetImageFragment.oPayload, sizeof( sGetImageFragment.oPayload.FragmentRequest ));
+      vUSBRx( &sMsg );
     }
     break;
 
   case MSG_GET_TEMPLATE_FRAGMENT:    // Processed by UN20 App
     {
-      sGetTemplateFragment.oPayload.FragmentRequest.iFragmentNo = iArg;
-      sEventData.iLength = sGetTemplateFragment.Msgheader.iLength;
-      sEventData.pcData = (char *) &sGetTemplateFragment;
-
-      if ( pvUsbPhoneCallback != NULL )
-      {
-        pvUsbPhoneCallback( pvUsbPhoneContext, INTERFACE_EVENT_RX_DATA, &sEventData );
-      }
+      sGetImageFragment.oPayload.FragmentRequest.iFragmentNo = iArg;
+      vSetupMessage( &sMsg, MSG_GET_TEMPLATE_FRAGMENT, MSG_STATUS_GOOD, &sGetImageFragment.oPayload, sizeof( sGetImageFragment.oPayload.FragmentRequest ));
+      vUSBRx( &sMsg );
     }
     break;
 
@@ -927,10 +888,10 @@ static void vUN20Task(void* params)
 
   // flush buffers before we start
   poUN20Port->vFlush();
-
+#if 0
   // simulate the UN20 interface coming up
   vUN20CallbackFunction( INTERFACE_EVENT_CONNECTED, &oInterface );
-
+#endif
   for(;;)
   {
     if ( poUN20Port->iHasChars() )
