@@ -97,14 +97,16 @@ tAdcUnit::tAdcUnit( LPC_ADCn_Type const *psSetAdc )
     boInitialised( false ),
     psADC( (LPC_ADCn_Type*)psSetAdc )
 {
+#if 1
   if ( psSetAdc == LPC_ADC0 )
   {
-    CGU_EntityConnect(CGU_CLKSRC_PLL1, CGU_BASE_APB1);
+    CGU_EntityConnect(CGU_CLKSRC_XTAL_OSC, CGU_BASE_APB1);
   }
   else if ( psSetAdc == LPC_ADC1 )
   {
-    CGU_EntityConnect(CGU_CLKSRC_PLL1, CGU_BASE_APB3);
+    CGU_EntityConnect(CGU_CLKSRC_XTAL_OSC, CGU_BASE_APB3);
   }
+#endif
 }
 
 /* -----------------------------------------------------------------------

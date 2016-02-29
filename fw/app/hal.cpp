@@ -777,7 +777,7 @@ int iBatteryVoltage(int iChannel)
   iChannelValue = poADC0->iReadChannel( iChannel );
 
   // calculate result in mV taking into account VREF and conditioning logic
-  iChannelValue = (((( (3300 * 100) / 1023 ) * iChannelValue) / 100) * 2);
+  iChannelValue = ( 3260 * 2 * iChannelValue ) / ( 1023 );
 #endif
 
   DEBUGMSG(ZONE_COMMANDS,("iBatteryVoltage(%d):%d\n", iChannel, iChannelValue));

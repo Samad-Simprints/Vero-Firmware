@@ -99,8 +99,8 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 //******************************************************************************
 // Definitions
 //******************************************************************************
-#define BATT_WARN_LOW_MV  3400      // flash RED LED below 3.4V
-#define BATT_SHUTOFF_MV   3300      // power unit off below 3.3V
+#define BATT_WARN_LOW_MV  3680      // flash RED LED below 3.68V
+#define BATT_SHUTOFF_MV   3500      // power unit off below 3.5V
 
 #define LPCAPP_MSG_QUEUE_SIZE 10
 
@@ -143,8 +143,8 @@ static uint8 bLedState[LED_MAX_LED_COUNT]; // off, red, green, orange, on, <flas
 
 static bool boFlashConnectionLed = true;   // True if we are flashing the blue Connection LED
 static bool boFlashBatteryLed = false;     // True if we are flashing the red battery LED
-static int iBatteryLedState = 0;           // current state of the battery LED
-static int iConnectionLedState = 0;        // current state of the connection LED
+static int iLedState = 0;                   // current state of flashing LED
+
 
 static xTimerHandle hFlashTimer;
 static xTimerHandle hTimer;
@@ -253,11 +253,13 @@ static void vUn20IdleTimerCallback( xTimerHandle xTimer )
 // Callback for the LED-flash timer.
 static void vFlashTimerCallback( xTimerHandle xTimer )
 {
+  // Toggle the LED state for this cycle
+  iLedState ^= 1;
+
   // Re-evaluate LEDs needing to be flashed.
   if ( boFlashConnectionLed == true )
   {
-    iConnectionLedState ^= 1;
-    vUiLedSet( LED_CONNECTED, (iConnectionLedState ? ON : OFF) );
+    vUiLedSet( LED_CONNECTED, (iLedState ? ON : OFF) );
   }
   else
   {
@@ -266,8 +268,7 @@ static void vFlashTimerCallback( xTimerHandle xTimer )
 
   if ( boFlashBatteryLed == true )
   {
-    iBatteryLedState ^= 1;
-    vUiLedSet( LED_BATTERY, (iBatteryLedState ? ON : OFF) );
+    vUiLedSet( LED_BATTERY, (iLedState ? ON : OFF) );
   }
   else
   {
@@ -1126,6 +1127,7 @@ void vLpcAppTask( void *pvParameters )
   while ( 1 )
   {
     MsgInternalPacket *psMsg;
+    int iCurrentBatteryVoltage;
 
     // wait for a message to process
     if ( xQueueReceive( hMsgQueue, &psMsg, MS_TO_TICKS(500) ) == pdTRUE )
@@ -1145,7 +1147,14 @@ void vLpcAppTask( void *pvParameters )
       }
     }
 
-    boFlashBatteryLed = ( iBatteryVoltage( 0 ) < BATT_WARN_LOW_MV );
+    iCurrentBatteryVoltage = iBatteryVoltage( 0 );
+
+    boFlashBatteryLed = ( iCurrentBatteryVoltage < BATT_WARN_LOW_MV );
+
+    if ( iCurrentBatteryVoltage < BATT_SHUTOFF_MV )
+    {
+      vSystemIdleTimerCallback( NULL );
+    }
   }
 }
 
