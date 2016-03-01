@@ -37,7 +37,7 @@ update:
 	adb push  $(TARGET)	/data
 
 install:
-	tar cvz -f index.tar.gz lib/* runtimes/* $(TARGET) InitScript start-index-un20
+	tar cvz -f index.tar.gz un20-lib/* lib/* runtimes/* $(TARGET) InitScript start-index-un20
 	adb push index.tar.gz /data
 	adb push install-index-un20 /data
 

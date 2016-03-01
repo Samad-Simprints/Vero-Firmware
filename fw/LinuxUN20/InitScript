@@ -4,6 +4,7 @@ echo "Configuring Linux runtime for Index app"
 cd /data
 cp /data/lib/* /usr/lib
 cp /data/runtimes/* /usr/lib
+cp /data/un20-lib/* /lib
 # everything setup start the app
 /bin/sh /data/start-index-un20 &
 

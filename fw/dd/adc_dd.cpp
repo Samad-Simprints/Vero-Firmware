@@ -100,10 +100,12 @@ tAdcUnit::tAdcUnit( LPC_ADCn_Type const *psSetAdc )
 #if 1
   if ( psSetAdc == LPC_ADC0 )
   {
+    CGU_ConfigPWR( CGU_PERIPHERAL_ADC0, ENABLE );
     CGU_EntityConnect(CGU_CLKSRC_XTAL_OSC, CGU_BASE_APB1);
   }
   else if ( psSetAdc == LPC_ADC1 )
   {
+    CGU_ConfigPWR( CGU_PERIPHERAL_ADC1, ENABLE );
     CGU_EntityConnect(CGU_CLKSRC_XTAL_OSC, CGU_BASE_APB3);
   }
 #endif

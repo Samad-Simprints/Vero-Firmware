@@ -50,6 +50,8 @@
 #include "task.h"
 #include "semphr.h"
 
+#include "lpc18xx_cgu.h"
+
 
 //******************************************************************************
 // Private Function Prototypes
@@ -502,11 +504,64 @@ static bool boBt( char **papzArgs, int iInstance, int iNumArgs )
 //
 //
 //
+CGU_PERIPHERAL_T eClocks[] =
+{
+//  CGU_PERIPHERAL_ADC0,                                          /**< ADC0 		*/
+  CGU_PERIPHERAL_ADC1,						/**< ADC1 		*/
+  CGU_PERIPHERAL_AES,						/**< AES		*/
+  //	CGU_PERIPHERAL_ALARMTIMER_CGU_RGU_RTC_WIC,
+//  CGU_PERIPHERAL_APB1_BUS,					/**< APB1 bus			*/
+//  CGU_PERIPHERAL_APB3_BUS,					/**< APB3 bus			*/
+  CGU_PERIPHERAL_CAN,						/**< CAN 				*/
+//  CGU_PERIPHERAL_CREG,						/**< CREG				*/
+  CGU_PERIPHERAL_DAC,						/**< DAC				*/
+  CGU_PERIPHERAL_DMA,						/**< DMA				*/
+  CGU_PERIPHERAL_EMC,						/**< EMC				*/
+  CGU_PERIPHERAL_ETHERNET,					/**< Ethernet			*/
+  CGU_PERIPHERAL_ETHERNET_TX, //HIDE                            /**< Ethernet transmit 	*/
+//  CGU_PERIPHERAL_GPIO,						/**< GPIO				*/
+  CGU_PERIPHERAL_I2C0,						/**< I2C0				*/
+  CGU_PERIPHERAL_I2C1,						/**< I2C1				*/
+  CGU_PERIPHERAL_I2S,						/**< I2S				*/
+  CGU_PERIPHERAL_LCD,						/**< LCD				*/
+//  CGU_PERIPHERAL_M3CORE,					/**< ARM Cortex-M3 Core	*/
+//  CGU_PERIPHERAL_M3_BUS,					/**< ARM Cortex-M3 Bus	*/
+  CGU_PERIPHERAL_MOTOCON,					/**< Motor Control 		*/
+  CGU_PERIPHERAL_QEI,						/**< QEI				*/
+  CGU_PERIPHERAL_RITIMER,					/**< RIT Timer			*/
+//  CGU_PERIPHERAL_SCT,						/**< SCT				*/
+//  CGU_PERIPHERAL_SCU,						/**< SCU				*/
+  CGU_PERIPHERAL_SDIO,						/**< SDIO				*/
+  CGU_PERIPHERAL_SPIFI,						/**< SPIFI				*/
+  CGU_PERIPHERAL_SSP0,						/**< SSP0				*/
+  CGU_PERIPHERAL_SSP1,						/**< SSP1				*/
+  CGU_PERIPHERAL_TIMER0,					/**< TIMER 0 			*/
+  CGU_PERIPHERAL_TIMER1,					/**< TIMER 1			*/
+  CGU_PERIPHERAL_TIMER2,					/**< TIMER 2			*/
+  CGU_PERIPHERAL_TIMER3,					/**< TIMER 3			*/
+//  CGU_PERIPHERAL_UART0,						/**< UART0				*/
+//  CGU_PERIPHERAL_UART1,						/**< UART1				*/
+  CGU_PERIPHERAL_UART2,						/**< UART2				*/
+  CGU_PERIPHERAL_UART3,						/**< UART3				*/
+  CGU_PERIPHERAL_USB0,						/**< USB0				*/
+  CGU_PERIPHERAL_USB1,						/**< USB1				*/
+  CGU_PERIPHERAL_WWDT,						/**< WWDT				*/
+};
+
 void vHalInit(void)
 {
+  int iClock;
+
   DEBUG_MODULE_INIT( HAL_FD );
 
 #if !defined(EVAL_BOARD)
+
+  // disable all the clocks, for things we are not using
+  for ( iClock = 0; iClock < ELEMENTSOF(eClocks); iClock++ )
+  {
+    CGU_ConfigPWR( eClocks[ iClock ], DISABLE );
+  }
+
   // Latch the power on to the CPU
   nPWR_DOWN->vConfigure();
   nPWR_DOWN->vSet( false );
@@ -534,6 +589,7 @@ void vHalInit(void)
 //
 // Hal functions here
 //
+
 static void vNullHandler(void)
 {
   debug_break();
@@ -856,7 +912,7 @@ void vUN20CallbackFunction(tInterfaceEvent event, void *event_data)
 }
  
 static const tLineCoding sUN20portConfig = {
-  /*.dwDTERate =*/ 9600,                            // Data terminal rate in bits per second
+  /*.dwDTERate =*/ 115200,                          // Data terminal rate in bits per second
   /*.bCharFormat =*/ 0,                             // Number of stop bits
   /*.bParityType =*/ 0,                             // Parity bit type
   /*.bDataBits =*/ 8                                // Number of data bits
