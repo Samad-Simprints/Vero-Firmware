@@ -543,8 +543,8 @@ CGU_PERIPHERAL_T eClocks[] =
 //  CGU_PERIPHERAL_UART1,						/**< UART1				*/
   CGU_PERIPHERAL_UART2,						/**< UART2				*/
   CGU_PERIPHERAL_UART3,						/**< UART3				*/
-  CGU_PERIPHERAL_USB0,						/**< USB0				*/
-  CGU_PERIPHERAL_USB1,						/**< USB1				*/
+//  CGU_PERIPHERAL_USB0,						/**< USB0				*/
+//  CGU_PERIPHERAL_USB1,						/**< USB1				*/
   CGU_PERIPHERAL_WWDT,						/**< WWDT				*/
 };
 

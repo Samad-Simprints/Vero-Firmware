@@ -366,7 +366,7 @@ int main( void )
   bt_main();
 
   // initialise the USB stack
-  //usb_main();
+  // REINSTATE usb_main();
 
 #if 0
   /* Create the test App task. */

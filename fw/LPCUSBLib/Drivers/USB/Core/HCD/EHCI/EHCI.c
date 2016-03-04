@@ -285,16 +285,19 @@ HCD_STATUS HcdControlTransfer(uint32_t PipeHandle,
 	}
 
 	ASSERT_STATUS_OK(PipehandleParse(PipeHandle, &HostID, &XferType, &QhdIdx) );
+        vTaskDelay( 10 );
 
 	Datalength = pDeviceRequest->wLength;
 	direction =  pDeviceRequest->bmRequestType & 0x80;
 
 	/*---------- Setup Stage ----------*/
 	ASSERT_STATUS_OK(AllocQTD(HostID, &SetupTdIdx, (uint8_t *) pDeviceRequest, 8, SETUP_TRANSFER, 0, 0) );			/* Setup TD: DirectionPID=00 - DataToggle=10b (always DATA0) */
+        vTaskDelay( 10 );
 
 	/*---------- Data Stage ----------*/
 	if (Datalength) {
 		ASSERT_STATUS_OK(AllocQTD(HostID, &DataTdIdx, buffer, Datalength, direction ? IN_TRANSFER : OUT_TRANSFER, 1, 0) );
+                vTaskDelay( 1 );
 	}
 	else {
 		DataTdIdx = SetupTdIdx;	/* Data TD is skipped */
@@ -302,6 +305,7 @@ HCD_STATUS HcdControlTransfer(uint32_t PipeHandle,
 
 	/*---------- Status Stage ----------*/
 	ASSERT_STATUS_OK(AllocQTD(HostID, &StatusTdIdx, NULL, 0, direction ? OUT_TRANSFER : IN_TRANSFER, 1, 1) );	/* Status TD: Direction=opposite of data direction - DataToggle=11b (always DATA1) */
+        vTaskDelay( 10 );
 
 	/* Hook TDs Together */
 	HcdQTD(HostID, SetupTdIdx)->NextQtd = (uint32_t) HcdQTD(HostID, DataTdIdx);
@@ -312,9 +316,11 @@ HCD_STATUS HcdControlTransfer(uint32_t PipeHandle,
 	/* Hook TDs to QHD */
 	HcdQHD(HostID, QhdIdx)->FirstQtd = Align32( (uint32_t) HcdQTD(HostID, SetupTdIdx) );
 	HcdQHD(HostID, QhdIdx)->Overlay.NextQtd = (uint32_t) HcdQTD(HostID, SetupTdIdx);
+        vTaskDelay( 10 );
 
 	/* wait for semaphore compete TDs */
 	ASSERT_STATUS_OK(WaitForTransferComplete(HostID, QhdIdx) );
+        vTaskDelay( 10 );
 
 	return HCD_STATUS_OK;
 }

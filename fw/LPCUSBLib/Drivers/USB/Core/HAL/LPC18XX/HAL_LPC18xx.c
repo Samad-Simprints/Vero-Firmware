@@ -260,7 +260,17 @@ void HAL_USBInit(uint8_t corenum)
     }
     else
     {
-#if 1
+      // generate 60MHz clock from 180MHz USB0 PLL1 (via divide by 3 prescaler)
+      CGU_EntityConnect(CGU_CLKSRC_PLL1, CGU_CLKSRC_IDIVA);
+      CGU_SetDIV(CGU_CLKSRC_IDIVA, 3);
+      //CGU_EntityConnect(CGU_CLKSRC_IDIVA, CGU_CLKSRC_IDIVB);
+      //CGU_SetDIV(CGU_CLKSRC_IDIVB, 4);
+      CGU_EntityConnect(CGU_CLKSRC_IDIVA, CGU_BASE_USB1);
+      CGU_EnableEntity(CGU_CLKSRC_IDIVA, ENABLE);
+      //CGU_EnableEntity(CGU_CLKSRC_IDIVB, ENABLE);
+      CGU_EnableEntity(CGU_BASE_USB1, ENABLE);
+
+#if 0
       // generate 60MHz clock from 480MHz USB0 PLL (via divide by 8 prescaler (/2 /4))
       CGU_EntityConnect(CGU_CLKSRC_PLL0, CGU_CLKSRC_IDIVA);
       CGU_SetDIV(CGU_CLKSRC_IDIVA, 2);
@@ -273,13 +283,13 @@ void HAL_USBInit(uint8_t corenum)
 
       iFreq = CGU_GetPCLKFrequency(CGU_PERIPHERAL_USB1);
 
-#else
+//#else
       /* connect CLK_USB1 to CPU 180MHz clock */
       CGU_EntityConnect(CGU_CLKSRC_PLL1, CGU_BASE_USB1);
 #endif
 
       /* Turn on the phy */
-      LPC_CREG->CREG0 &= ~(1<<5);
+      //LPC_CREG->CREG0 &= ~(1<<5);
 
 #if defined(USB_CAN_BE_HOST)
       /* enable USB1_DP and USB1_DN on chip FS phy */
@@ -296,21 +306,33 @@ void HAL_USBInit(uint8_t corenum)
   }
 
 #if defined(USB_CAN_BE_DEVICE)&&(!defined(USB_DEVICE_ROM_DRIVER))
+
   /* reset the controller */
   USB_REG(corenum)->USBCMD_D = USBCMD_D_Reset;
   /* wait for reset to complete */
   while (USB_REG(corenum)->USBCMD_D & USBCMD_D_Reset);
 
   /* Program the controller to be the USB device controller */
-  USB_REG(corenum)->USBMODE_D =   (0x2<<0)/*| (1<<4)*//*| (1<<3)*/ ;
+  //USB_REG(corenum)->USBMODE_D =   (0x2<<0)/*| (1<<4)*//*| (1<<3)*/ ;
+
   if(corenum == 0)
   {
+    /* Program the controller to be the USB device controller */
+    USB_REG(corenum)->USBMODE_D =   (0x2<<0)/*| (1<<4)*//*| (1<<3)*/ ;
+
     /* set OTG transcever in proper state, device is present
     on the port(CCS=1), port enable/disable status change(PES=1). */
     LPC_USB0->OTGSC = (1<<3) | (1<<0) /*| (1<<16)| (1<<24)| (1<<25)| (1<<26)| (1<<27)| (1<<28)| (1<<29)| (1<<30)*/;
 #if (USB_FORCED_FULLSPEED)
     LPC_USB0->PORTSC1_D |= (1<<24);
 #endif
+  }
+  else
+  {
+    // Host port.
+
+    /* Program the controller to be the USB host controller */
+    USB_REG(corenum)->USBMODE_H =   (0x3<<0)/*| (1<<4)*//*| (1<<3)*/ ;
   }
   HAL_Reset( corenum );
 #endif

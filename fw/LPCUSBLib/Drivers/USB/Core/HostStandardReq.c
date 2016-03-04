@@ -56,15 +56,21 @@ uint8_t USB_Host_SendControlRequest(const uint8_t corenum, void* const BufferPtr
 	ret = (uint8_t)HcdControlTransfer(PipeInfo[corenum][pipeselected[corenum]].PipeHandle, &USB_ControlRequest,
 					   PipeInfo[corenum][pipeselected[corenum]].Buffer);
 
+        //for( int i = 0; i < 1000; i++ ){}
+
 	if(ret == (uint8_t)HOST_SENDCONTROL_Successful)
 	{
 		if ((USB_ControlRequest.bmRequestType & CONTROL_REQTYPE_DIRECTION) == REQDIR_DEVICETOHOST)
 		{
 			PipeInfo[corenum][pipeselected[corenum]].ByteTransfered = USB_ControlRequest.wLength;
+
+                        for( int i = 0; i < 1000; i++ ){}
+
 			while(DataLen)
 			{
 				*(DataStream++) = Pipe_Read_8(corenum);
 				DataLen--;
+                                for( int i = 0; i < 100; i++ ){}
 			}
 			/* Pipe_Read_Stream_LE(BufferPtr, DataLen, NULL); cannot use read stream as it call HcdDataTransfer*/
 		}

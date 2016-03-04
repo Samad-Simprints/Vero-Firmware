@@ -52,6 +52,10 @@ void USB_Host_ProcessNextHostState(uint8_t corenum)
 	static uint16_t WaitMSRemaining;
 	static uint8_t  PostWaitState;
 
+        //for( int i = 0; i < 1000; i++ ){}
+        if(( USB_HostState[corenum] != HOST_STATE_Powered_WaitForDeviceSettle ) &&
+           ( USB_HostState[corenum] != HOST_STATE_WaitForDevice )) vTaskDelay( 1 );
+
 	switch (USB_HostState[corenum]) {
 	case HOST_STATE_WaitForDevice:
 		if (WaitMSRemaining) {
@@ -75,8 +79,9 @@ void USB_Host_ProcessNextHostState(uint8_t corenum)
 
 	case HOST_STATE_Powered_WaitForDeviceSettle:
 		if (WaitMSRemaining--) {
-			Delay_MS(1);
-			break;
+			//Delay_MS(1);
+			vTaskDelay( 1 );
+                        break;
 		}
 		else {
 			USB_Host_VBUS_Manual_Off();
@@ -90,7 +95,7 @@ void USB_Host_ProcessNextHostState(uint8_t corenum)
 		break;
 
 	case HOST_STATE_Powered_WaitForConnect:
-		HOST_TASK_NONBLOCK_WAIT(corenum, 100, HOST_STATE_Powered_DoReset);
+		HOST_TASK_NONBLOCK_WAIT(corenum, 1000, HOST_STATE_Powered_DoReset);
 		break;
 
 	case HOST_STATE_Powered_DoReset: {
@@ -98,7 +103,7 @@ void USB_Host_ProcessNextHostState(uint8_t corenum)
 		HcdRhPortReset(corenum);
 		HcdGetDeviceSpeed(corenum,&DeviceSpeed);	// skip checking status
 		USB_Host_SetDeviceSpeed(corenum, DeviceSpeed);
-		HOST_TASK_NONBLOCK_WAIT(corenum, 200, HOST_STATE_Powered_ConfigPipe);
+		HOST_TASK_NONBLOCK_WAIT(corenum, 2000, HOST_STATE_Powered_ConfigPipe);
 	}
 	break;
 
@@ -135,7 +140,7 @@ void USB_Host_ProcessNextHostState(uint8_t corenum)
 		Pipe_ClosePipe(corenum, PIPE_CONTROLPIPE);
 		HcdRhPortReset(corenum);
 
-		HOST_TASK_NONBLOCK_WAIT(corenum, 200, HOST_STATE_Default_PostReset);
+		HOST_TASK_NONBLOCK_WAIT(corenum, 2000, HOST_STATE_Default_PostReset);
 	}
 	break;
 
@@ -163,7 +168,7 @@ void USB_Host_ProcessNextHostState(uint8_t corenum)
 		}
 
 		Pipe_ClosePipe(corenum, PIPE_CONTROLPIPE);
-		HOST_TASK_NONBLOCK_WAIT(corenum, 100, HOST_STATE_Default_PostAddressSet);
+		HOST_TASK_NONBLOCK_WAIT(corenum, 1000, HOST_STATE_Default_PostAddressSet);
 		break;
 
 	case HOST_STATE_Default_PostAddressSet:
@@ -192,7 +197,10 @@ void USB_Host_ProcessNextHostState(uint8_t corenum)
 
 uint8_t USB_Host_WaitMS(uint8_t MS)
 {
-	return HOST_WAITERROR_Successful;
+	//for( int i = 0; i < 1000 * MS; i++ );
+        vTaskDelay( 1 );
+ 
+        return HOST_WAITERROR_Successful;
 }
 
 void USB_Host_Enumerate(uint8_t HostId)	/* Part of Interrupt Service Routine */

@@ -268,7 +268,11 @@ void EVENT_USB_Host_DeviceEnumerationComplete ( const uint8_t corenum )
 
   DEBUGMSG(ZONE_DBG_ALWAYS, ("\r\nEVENT_USB_Host_DeviceEnumerationComplete, corenum %d\r\n", corenum));
 
+  for( int i = 0; i < 1000; i++ ){}
+
   bResponse = USB_Host_GetDeviceDescriptor( corenum,ConfigDescriptorData );
+
+  for( int i = 0; i < 1000; i++ ){}
 
   if( USB_Host_GetDeviceConfigDescriptor( corenum, 1, &ConfigDescriptorSize, ConfigDescriptorData,
                                           sizeof ( ConfigDescriptorData ) ) != HOST_GETCONFIG_Successful )
@@ -403,8 +407,8 @@ static void USBTaskProc(void* params)
   DEBUGMSG(ZONE_DBG_ALWAYS,("\r\n\n\n\n\n== Dual USB demo ==\r\n"));
   DEBUGMSG(ZONE_DBG_ALWAYS,("CPU speed = %d MHz\n\r", CGU_GetPCLKFrequency(CGU_PERIPHERAL_M3CORE)/1000000));
 
-  CDCHostSetupHardware();
   CDCDeviceSetupHardware();
+  CDCHostSetupHardware();
 
   for( ;; )
   {

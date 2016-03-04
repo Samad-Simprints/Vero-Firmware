@@ -56,7 +56,8 @@
 
 /** Maximum number of endpoints/pipes that a single USB host core can support
  */
-#define HCD_MAX_ENDPOINT                    8
+//#define HCD_MAX_ENDPOINT                    8
+#define HCD_MAX_ENDPOINT                    10
 
 /** Pre-defined counter value for reseting USB host core
  */
