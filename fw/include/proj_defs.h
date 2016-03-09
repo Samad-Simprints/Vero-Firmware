@@ -34,7 +34,7 @@
 //#define EVAL_BOARD                    ( 1 )
 
 // firmware version number
-#define INDEX_REVISION_NUMBER         0
+#define INDEX_REVISION_NUMBER         100
 
 //
 // Processor clock frequency

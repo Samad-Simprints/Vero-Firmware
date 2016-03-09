@@ -44,6 +44,7 @@
 #undef TRUE
 #undef FALSE
 #include "lpc18xx_cgu.h"
+#include "lpc18xx_pwr.h"
 #include "hal.h"
 #include "lpcapp.h"
 #include "helpers.hpp"
@@ -111,13 +112,15 @@ static bool boShowVersion( char **papzArgs, int iInstance, int iNumArgs );
 static bool boQuit(char **papzArgs, int iInstance, int iNumArgs);
 #endif
 static bool boUN20Echo(char **papzArgs, int iInstance, int iNumArgs);
+static bool boSleep(char **papzArgs, int iInstance, int iNumArgs);
 
 const tParserEntry asMainCLI[] =
 {
 #if defined(CM_HOSTED)
   CLICMD("quit", "Quit CM", 1, "", boQuit, 0),
 #endif
-  CLICMD( "un20ser", "Send to UN20 Uart", 2, "", boUN20Echo, 0 )
+  CLICMD( "un20ser", "Send to UN20 Uart", 2, "", boUN20Echo, 0 ),
+  CLICMD( "sleep", "Sleep", 1, "", boSleep, 0 )
 };
 
 //******************************************************************************
@@ -126,9 +129,9 @@ const tParserEntry asMainCLI[] =
 
 // Serial port config
 static const int            MAX_DEBUG_RX_QUEUE_SIZE         = 300;
-static const int            MAX_DEBUG_TX_QUEUE_SIZE         = 10;
+static const int            MAX_DEBUG_TX_QUEUE_SIZE         = 64;
 
-static const tLineCoding sALMportConfig = {
+static const tLineCoding sDebugPortConfig = {
   /*.dwDTERate =*/ 115200,                          // Data terminal rate in bits per second
   /*.bCharFormat =*/ 0,                             // Number of stop bits
   /*.bParityType =*/ 0,                             // Parity bit type
@@ -164,6 +167,13 @@ static bool boUN20Echo(char **papzArgs, int iInstance, int iNumArgs)
 
   return true;
 }
+
+static bool boSleep(char **papzArgs, int iInstance, int iNumArgs)
+{
+  PWR_PowerDown();
+  return true;
+}
+
 
 //******************************************************************************
 // main
@@ -276,7 +286,8 @@ uint32_t	xCGU_Init(void)
   CGU_EntityConnect(CGU_CLKSRC_XTAL_OSC, CGU_CLKSRC_PLL1);
   /* Disable PLL1 - Flash mode hang */
   //CGU_EnableEntity(CGU_CLKSRC_PLL1, DISABLE);
-  CGU_SetPLL1(15);
+  //CGU_SetPLL1(15);
+  CGU_SetPLL1(8);
   /* Enable PLL1 after setting is done */
   CGU_EnableEntity(CGU_CLKSRC_PLL1, ENABLE);
   /* Distribute it to Main Base Clock */
@@ -284,19 +295,6 @@ uint32_t	xCGU_Init(void)
   /* Update Clock Frequency */
   CGU_UpdateClock();
   return 0;
-}
-
-static void vTestAppTask(void* params)
-{
-  vTaskDelay(SECS_TO_TICKS(1));
-  DEBUGMSG(ZONE_DBG_ALWAYS,("\n== Poweringup UN20 ==\n"));
-
-  vPowerUn20On();
-
-  for(;;)
-  {
-    vTaskDelay(1);
-  }
 }
 
 tMain::tMain()
@@ -314,7 +312,7 @@ void tMain::vInit()
   oPrintfLock.vInit();
 
   poDebugPort = poSERDDgetPort( CONSOLE_UART );
-  poDebugPort->vConfigurePort( &sALMportConfig, 64, 300 );
+  poDebugPort->vConfigurePort( &sDebugPortConfig, MAX_DEBUG_TX_QUEUE_SIZE, MAX_DEBUG_RX_QUEUE_SIZE );
 
   // set to blocking mode for transmit but not receive
   poDebugPort->vSetBlockingMode( ISerialPort::bmTransmitOnly );
@@ -368,10 +366,6 @@ int main( void )
   // initialise the USB stack
   // REINSTATE usb_main();
 
-#if 0
-  /* Create the test App task. */
-  xTaskCreate( vTestAppTask, ( signed char * ) "TEST", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );
-#endif
   /* Start the scheduler. */
   vTaskStartScheduler();
 

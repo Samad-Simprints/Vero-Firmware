@@ -479,6 +479,13 @@ static bool boUsb( char **papzArgs, int iInstance, int iNumArgs )
     }
     break;
 
+  case MSG_STORE_IMAGE:    // Processed by UN20 App
+    {
+      vSetupMessage( &sMsg, MSG_STORE_IMAGE, MSG_STATUS_GOOD, &sSaveImage.oPayload, sizeof( sSaveImage.oPayload.StoreScan ));
+      vUSBRx( &sMsg );
+    }
+    break;
+
   default:
     break;
 
@@ -543,8 +550,8 @@ CGU_PERIPHERAL_T eClocks[] =
 //  CGU_PERIPHERAL_UART1,						/**< UART1				*/
   CGU_PERIPHERAL_UART2,						/**< UART2				*/
   CGU_PERIPHERAL_UART3,						/**< UART3				*/
-//  CGU_PERIPHERAL_USB0,						/**< USB0				*/
-//  CGU_PERIPHERAL_USB1,						/**< USB1				*/
+  CGU_PERIPHERAL_USB0,						/**< USB0				*/
+  CGU_PERIPHERAL_USB1,						/**< USB1				*/
   CGU_PERIPHERAL_WWDT,						/**< WWDT				*/
 };
 
@@ -561,6 +568,11 @@ void vHalInit(void)
   {
     CGU_ConfigPWR( eClocks[ iClock ], DISABLE );
   }
+
+  DEBUG_GPIO0->vConfigure();
+  DEBUG_GPIO1->vConfigure();
+  DEBUG_GPIO2->vConfigure();
+  DEBUG_GPIO3->vConfigure();
 
   // Latch the power on to the CPU
   nPWR_DOWN->vConfigure();
@@ -912,7 +924,7 @@ void vUN20CallbackFunction(tInterfaceEvent event, void *event_data)
 }
  
 static const tLineCoding sUN20portConfig = {
-  /*.dwDTERate =*/ 115200,                          // Data terminal rate in bits per second
+  /*.dwDTERate =*/ 230400/*115200*/,                          // Data terminal rate in bits per second
   /*.bCharFormat =*/ 0,                             // Number of stop bits
   /*.bParityType =*/ 0,                             // Parity bit type
   /*.bDataBits =*/ 8                                // Number of data bits

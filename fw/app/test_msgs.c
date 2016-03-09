@@ -147,3 +147,9 @@
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgRequestFragment ), MSG_GET_TEMPLATE_FRAGMENT, 0x00 },
   .oPayload.FragmentRequest = { 0x0, 0xF5F5F5F5 }
   };
+
+  MsgPacket sSaveImage = {
+  .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgStoreScan ), MSG_STORE_IMAGE, 0x00 },
+  .oPayload.StoreScan = { 14, "this-is-a-guid", 0, 0xF5F5F5F5 }
+  };
+

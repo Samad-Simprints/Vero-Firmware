@@ -16,6 +16,21 @@
 // $Author$
 // DESCRIPTION:  INDEX header file
 //
+// Messages are intended to be sent over an error free transport.
+// Error detection and recovery is handled by the underlying transport.
+// With few exceptions all messages are acknowledged.
+// The same message format is used for all sources and destinations.
+//
+// All messages have a standard header and are wrapped in a packet header and
+// trailer syncword pair:
+//
+// 0xFAFAFAFA
+//  uint16 iLength;
+//  uint8  bMsgId;
+//  uint8  bStatus;
+//  message specific payload[]
+// 0xF5F5F5F5
+//
 //******************************************************************************
 
 #if !defined(_MSG_FORMAT_H_)
@@ -68,7 +83,12 @@ enum
   MSG_STATUS_GOOD = 0,          // No error
   MSG_STATUS_ERROR,             // Non-specific error
   MSG_STATUS_UN20_STATE_ERROR,  // UN20 is in the wrong state for command
-  MSG_STATUS_UNSUPPORTED        // Message is unsupported
+  MSG_STATUS_UNSUPPORTED,       // Message is unsupported,
+  MSG_STATUS_NO_IMAGE,          // No current image to operate on
+  MSG_STATUS_NO_QUALITY,        // No current quality value for current image
+  MSG_STATUS_NO_TEMPLATE,       // No current template to operate on
+  MSG_STATUS_SAVE_ERROR,        // Unable to save image
+  MSG_STATUS_SDK_ERROR          // Error in UN20 SDK caused operation to fail
 };
 
 // message-ids as held in the message bMsgId field.
@@ -104,6 +124,7 @@ enum
 
   MSG_GET_IMAGE_FRAGMENT    = 21,   // Processed by UN20 App
   MSG_GET_TEMPLATE_FRAGMENT = 22,   // Processed by UN20 App
+  MSG_UN20_SHUTDOWN_NO_ACK = 23,    // Like MSG_UN20_SHUTDOWN but the UN20 does not send an ACK response
   MSG_NUM_MSGS,             // Number of valid message types
 
   MSG_REPLY = 0x80          // Top bit set indicates a reply
@@ -115,7 +136,8 @@ typedef enum
   MSG_SOURCE_UN20_USB = 0,  // Message came from the scanner via USB
   MSG_SOURCE_PHONE_USB,     // Message came from the phone via USB
   MSG_SOURCE_PHONE_BT,      // Message came from the phone via Bluetooth
-  MSG_SOURCE_NUM_SOURCES    // Number of message sources
+  MSG_SOURCE_NUM_SOURCES,   // Number of message sources
+  MSG_SOURCE_INTERNAL       // Message was generated internally (no buffer space required)
 }
 tMsgSource;
 
@@ -300,7 +322,8 @@ MsgImageQuality;
 //
 PACK( typedef struct tagStoreScan
 {
-  int32 iFileTag;	// user supplied file tag
+  uint8 bFilenameLength;// number of bytes in the filename
+  uint8 bFileName[100]; // user supplied filename
   uint8 boCompress;     // compress image when storing
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })

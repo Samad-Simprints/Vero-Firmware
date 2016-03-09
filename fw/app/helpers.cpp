@@ -32,7 +32,7 @@
 //#include "exception.h"
 
 #include "helpers.hpp"
-
+#include "gpio_pindefs.hpp"
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "list.h"
@@ -455,7 +455,9 @@ extern "C" void vApplicationIdleHook( void )
   // put the processor to sleep, as there is nothing to do right now
   //
 #if 1//ndef DEBUG
+  DEBUG_GPIO0->vSet(true);
   __asm__( "WFI" );
+  DEBUG_GPIO0->vSet(false);
 #endif
 #endif
 }

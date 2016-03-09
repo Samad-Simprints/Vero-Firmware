@@ -125,6 +125,16 @@ static void sppStateCallback(bt_spp_port_t* port, bt_spp_port_event_e evt, void*
   }
 }
 
+// cancel any pending transfers and disconnect
+int sppCancelAndDisconnect()
+{
+  if ( mPort )
+  {
+    bt_spp_cancel_receive( mPort );
+    bt_spp_cancel_send( mPort );
+    bt_spp_disconnect(mPort);
+  }
+}
 
 static void sppReceiveCallback(bt_spp_port_t* port, bt_int bytesReceived, void* param)
 {

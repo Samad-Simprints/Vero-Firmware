@@ -54,6 +54,7 @@ extern MsgPacket sGetGenerateTemplatePacket;
 
 extern MsgPacket sGetImageFragment;
 extern MsgPacket sGetTemplateFragment;
+extern MsgPacket sSaveImage;
 
 #ifdef __cplusplus
 }

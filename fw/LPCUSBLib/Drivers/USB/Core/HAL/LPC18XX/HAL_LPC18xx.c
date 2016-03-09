@@ -244,12 +244,12 @@ void HAL_USBInit(uint8_t corenum)
 
       /* Enable PLL after all setting is done */
       CGU_EnableEntity(CGU_CLKSRC_PLL0, ENABLE);
-
     }
 
     if(corenum == 0)
     {
       /* connect CLK_USB0 to 480MHz clock */
+      CGU_ConfigPWR( CGU_PERIPHERAL_USB0, ENABLE );
       CGU_EntityConnect(CGU_CLKSRC_PLL0, CGU_BASE_USB0);
       CGU_EnableEntity(CGU_BASE_USB0, ENABLE);
 
@@ -260,6 +260,7 @@ void HAL_USBInit(uint8_t corenum)
     }
     else
     {
+#if 0
       // generate 60MHz clock from 180MHz USB0 PLL1 (via divide by 3 prescaler)
       CGU_EntityConnect(CGU_CLKSRC_PLL1, CGU_CLKSRC_IDIVA);
       CGU_SetDIV(CGU_CLKSRC_IDIVA, 3);
@@ -269,9 +270,9 @@ void HAL_USBInit(uint8_t corenum)
       CGU_EnableEntity(CGU_CLKSRC_IDIVA, ENABLE);
       //CGU_EnableEntity(CGU_CLKSRC_IDIVB, ENABLE);
       CGU_EnableEntity(CGU_BASE_USB1, ENABLE);
-
-#if 0
+#else
       // generate 60MHz clock from 480MHz USB0 PLL (via divide by 8 prescaler (/2 /4))
+      CGU_ConfigPWR( CGU_PERIPHERAL_USB1, ENABLE );
       CGU_EntityConnect(CGU_CLKSRC_PLL0, CGU_CLKSRC_IDIVA);
       CGU_SetDIV(CGU_CLKSRC_IDIVA, 2);
       CGU_EntityConnect(CGU_CLKSRC_IDIVA, CGU_CLKSRC_IDIVB);
@@ -282,10 +283,6 @@ void HAL_USBInit(uint8_t corenum)
       CGU_EnableEntity(CGU_BASE_USB1, ENABLE);
 
       iFreq = CGU_GetPCLKFrequency(CGU_PERIPHERAL_USB1);
-
-//#else
-      /* connect CLK_USB1 to CPU 180MHz clock */
-      CGU_EntityConnect(CGU_CLKSRC_PLL1, CGU_BASE_USB1);
 #endif
 
       /* Turn on the phy */

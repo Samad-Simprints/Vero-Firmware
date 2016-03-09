@@ -9,7 +9,7 @@ CC = $(CROSS)gcc
 INCPATH = -I./ -I./inc -I../include -I./libwsq-mips-packaged/raw-wsq-mips/include
 LIBS    =  -L./lib -L./libwsq-mips-packaged/libpng-1.6.20/.libs -L./libwsq-mips-packaged/zlib-1.2.8 -L./libwsq-mips-packaged/raw-wsq-mips
 FLAGS   = -DUN20_APP
-OBJS =	main.o compress.o protocol_msg.o test_msgs.o
+OBJS =	main.o compress.o protocol_msg.o
 #LDFLAGS = 
 TARGET  = index-un20app
 
