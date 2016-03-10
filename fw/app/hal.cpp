@@ -75,17 +75,6 @@ enum {
 
 #define UN20_POWERON_DELAY_MS         100
 
-#define INDEX_VERSION_MAJOR                     0
-#define INDEX_VERSION_MINOR                     6
-#define INDEX_VERSION_BUGFIX                    0
-#define INDEX_REVISION_NUMBER                   0
-
-#define INDEX_VERSION   QUOTEME(INDEX_VERSION_MAJOR) "."   \
-                        QUOTEME(INDEX_VERSION_MINOR) "."   \
-                        QUOTEME(INDEX_VERSION_BUGFIX) ":"  \
-                        QUOTEME(INDEX_REVISION_NUMBER) " " \
-                        "Built: " __DATE__ " " __TIME__
-
 //******************************************************************************
 // Local Storage
 //******************************************************************************
@@ -161,7 +150,6 @@ static MsgPacket sMsg;
 // CLI
 //******************************************************************************
 
-static bool boVersion( char **papzArgs, int iInstance, int iNumArgs );
 static bool boConn( char **papzArgs, int iInstance, int iNumArgs );
 static bool boCapture( char **papzArgs, int iInstance, int iNumArgs );
 static bool boPower( char **papzArgs, int iInstance, int iNumArgs );
@@ -183,7 +171,6 @@ static bool boVbus( char **papzArgs, int iInstance, int iNumArgs );
 
 static const tParserEntry asHalCLI[] =
 {
-  CLICMD("version",               "Display version", 1, "", boVersion, 0),
   CLICMD("power",                 "Power button", 1, "", boPower, 0),
   CLICMD("capture",               "Capture button", 1, "", boCapture, 0),
   CLICMD("conn",                  "USB/BT connect", 1, "", boConn, 0),
@@ -203,12 +190,6 @@ tParserEntry asHalMainCLI =
 {
   DEBUG_MODULE_REF(HAL_FD), "HAL", "HAL commands", "", 1, 0, 0, asHalCLI, ELEMENTSOF(asHalCLI)
 };
-
-static bool boVersion(char **papzArgs, int iInstance, int iNumArgs)
-{
-  CLI_PRINT(( "VERSION: %s\n", INDEX_VERSION ));
-  return true;
-}
 
 static bool boDisconn( char **papzArgs, int iInstance, int iNumArgs )
 {

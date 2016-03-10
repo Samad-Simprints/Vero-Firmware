@@ -23,7 +23,7 @@
 // Compilation switches
 //******************************************************************************
 // Indicate we have local debug zones. Disable the default legacy ones
-//#define DBG_LOCAL_DEFS
+#define DBG_LOCAL_DEFS
 
 //******************************************************************************
 // Includes
@@ -82,6 +82,11 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 //******************************************************************************
 // Constants
 //******************************************************************************
+enum {
+  ZONE_ERROR,
+  ZONE_TRACE,
+  ZONE_DATA
+};
 
 #define VIBRATE_OFF                      ( 0 )
 #define VIBRATE_ON                       ( 1 )
@@ -110,6 +115,18 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 //******************************************************************************
 // Local Storage
 //******************************************************************************
+
+DEBUG_MODULE_DEFINE( LPC_FD ) =
+{
+  "LPC_FD",
+  { "Error", "Trace", "Data", 0 },
+#ifdef DEBUG
+  DEBUGZONE(ZONE_ERROR) | DEBUGZONE(ZONE_TRACE) | DEBUGZONE(ZONE_DATA)
+#else
+  DEBUGZONE(ZONE_ERROR)
+#endif
+};
+DEBUG_MODULE_USE( LPC_FD );
 
 static xQueueHandle hMsgQueue = NULL;
 
@@ -191,6 +208,24 @@ enum
 // Private Functions
 //******************************************************************************
 //******************************************************************************
+static bool boTest( char **papzArgs, int iInstance, int iNumArgs );
+
+static const tParserEntry asLpcCLI[] =
+{
+  CLICMD("test",                  "Test", 1, "", boTest, 0),
+};
+
+tParserEntry asLpcMainCLI =
+{
+  DEBUG_MODULE_REF(LPC_FD), "LPC", "LPC commands", "", 1, 0, 0, asLpcCLI, ELEMENTSOF(asLpcCLI)
+};
+
+static bool boTest( char **papzArgs, int iInstance, int iNumArgs )
+{
+  CLI_PRINT(("Test\n"));
+
+  return true;
+}
 
 // Send a message to one or more connected interfaces
 static int iIfSend(int iWhere, void *pvData, int iLength)
@@ -198,7 +233,8 @@ static int iIfSend(int iWhere, void *pvData, int iLength)
   int iResult = 0;
   MsgPacket *psPacket = (MsgPacket*)pvData;
 
-  CLI_PRINT(( "iIfSend: To %s%s%s length %d, MsgId 0x%02x, Status %02d\n",
+  DEBUGMSG(ZONE_DATA,
+              ( "iIfSend: To %s%s%s length %d, MsgId 0x%02x, Status %02d\n",
               (( iWhere & IF_UN20) ? "UN20USB," : ""),
               (( iWhere & IF_USB)  ? "HostUSB," : ""),
               (( iWhere & IF_BT)   ? "HostBT," : ""),
@@ -278,7 +314,7 @@ static void vReturnSensorInfo( MsgPacket *psMsg, int iMsglength )
 {
   MsgSensorInfo sInfo;
 
-  CLI_PRINT(("vReturnSensorInfo\n"));
+  DEBUGMSG(ZONE_TRACE,("vReturnSensorInfo\n"));
 
   // Build up the payload.
   memcpy((void *) &sInfo.btAddr, (void *) sScannerBtAddr, sizeof( sScannerBtAddr ));
@@ -291,10 +327,10 @@ static void vReturnSensorInfo( MsgPacket *psMsg, int iMsglength )
 
   vSetupMessage( psMsg, (MSG_GET_SENSOR_INFO | MSG_REPLY), MSG_STATUS_GOOD, &sInfo, sizeof( sInfo ) );
 
-  CLI_PRINT(("Status: UN20:%d, Bat1:%d, Bat2:%d\n",
-                  psMsg->oPayload.SensorInfo.eUN20State,
-                  psMsg->oPayload.SensorInfo.iBatteryLevel1,
-                  psMsg->oPayload.SensorInfo.iBatteryLevel2));
+  DEBUGMSG(ZONE_TRACE,("Status: UN20:%d, Bat1:%d, Bat2:%d\n",
+                        psMsg->oPayload.SensorInfo.eUN20State,
+                        psMsg->oPayload.SensorInfo.iBatteryLevel1,
+                        psMsg->oPayload.SensorInfo.iBatteryLevel2));
 
   // Send the response message from the UN20 on to the phone
   iIfSend((IF_USB | IF_BT), psMsg, psMsg->Msgheader.iLength);
@@ -322,7 +358,7 @@ static void vSetSensorConfig( MsgPacket *psMsg, int iMsglength )
   iScanBrightness = psEventData->iScanBrightness;   // default scan brightness - NOT USED
   iRetryLimit = psEventData->iRetryLimit;           // default scan retry limit - NOT USED
 
-  CLI_PRINT(( "vSetSensorConfig: PwrOffTO=%d, IdleTO=%d, GoodThr=%d, ScanTO=%d, ScanBr=%d, Retry=%d\n",
+  DEBUGMSG(ZONE_TRACE,( "vSetSensorConfig: PwrOffTO=%d, IdleTO=%d, GoodThr=%d, ScanTO=%d, ScanBr=%d, Retry=%d\n",
               iPowerOffTimeoutSecs, iUn20IdleTimeoutSecs, iGoodImageThreshold, iScanTimeout, iScanBrightness, iRetryLimit ));
 
   // Put the timeout items into action.
@@ -355,8 +391,8 @@ static void vSetUi( MsgPacket *psMsg, int iMsglength )
     bLedState[ iLoop ] = psEventData->bLedState[ iLoop ];
   }
 
-  CLI_PRINT(( "vSetUi: EnTrig=%d, SetLeds=%d, TrigVib=%d, VibMs=%d\n",
-              boEnableTrigger, boSetLeds, boTriggerVibrate, iVibrateMs ));
+  DEBUGMSG(ZONE_TRACE,( "vSetUi: EnTrig=%d, SetLeds=%d, TrigVib=%d, VibMs=%d\n",
+                      boEnableTrigger, boSetLeds, boTriggerVibrate, iVibrateMs ));
 
   // Put these items into action.
 
@@ -388,7 +424,7 @@ static void vSetUi( MsgPacket *psMsg, int iMsglength )
 
 static void vBtPair( MsgPacket *psMsg, int iMsglength )
 {
-  CLI_PRINT(("vBtPair\n"));
+  DEBUGMSG(ZONE_TRACE,("vBtPair\n"));
 
   return;
 }
@@ -406,8 +442,7 @@ static void vSetUn20Info( MsgPacket *psMsg, int iMsglength )
   // We don't immediately need to re-get the config info.
   boNeedUn20Info = false;
 
-  CLI_PRINT(( "vSetUn20Info: Ver 0x%04X, StoreCount %d\n",
-              iUn20Version, iUn20StoreCount ));
+  DEBUGMSG(ZONE_TRACE,("vSetUn20Info: Ver 0x%04X, StoreCount %d\n", iUn20Version, iUn20StoreCount));
 
   return;
 }
@@ -445,7 +480,8 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   psHeader = &(psMsg->oMsg.Msgheader);
   iMsglength = psHeader->iLength;
 
-  CLI_PRINT(( "vMessageCompleteCallback: From %s, length %d, MsgId 0x%02X\n",
+  DEBUGMSG(ZONE_DATA,
+                ( "vMessageCompleteCallback: From %s, length %d, MsgId 0x%02X\n",
                 ( bSource == MSG_SOURCE_PHONE_BT )  ? "HostBT"  :
                 ( bSource == MSG_SOURCE_PHONE_USB ) ? "HostUSB" :
                 ( bSource == MSG_SOURCE_UN20_USB )  ? "UN20USB" : "Internal",
@@ -510,7 +546,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   case MSG_UN20_WAKEUP:
     if (( bSource == MSG_SOURCE_PHONE_BT ) || ( bSource == MSG_SOURCE_PHONE_USB ))
     {
-      CLI_PRINT(("%sWaking up UN20\n", (eUN20State == UN20_STATE_SHUTDOWN ? "" :"Not ")));
+      DEBUGMSG(ZONE_TRACE,("%sWaking up UN20\n", (eUN20State == UN20_STATE_SHUTDOWN ? "" :"Not ")));
 
       switch ( eUN20State )
       {
@@ -564,7 +600,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     }
     else
     {
-      CLI_PRINT(("%sShutting down UN20\n", (eUN20State == UN20_STATE_READY ? "" : "Not ")));
+      DEBUGMSG(ZONE_TRACE,("%sShutting down UN20\n", (eUN20State == UN20_STATE_READY ? "" : "Not ")));
 
       switch ( eUN20State )
       {
@@ -626,7 +662,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         // The UN20 is in the wrong state to process this message.
         // We just return an error response.
       
-        CLI_PRINT(("Sending UN20-shutdown error response to phone\n"));
+        DEBUGMSG(ZONE_TRACE,("Sending UN20-shutdown error response to phone\n"));
 
         vSetupNACK( psPacket, MSG_STATUS_UN20_STATE_ERROR );
 
@@ -658,24 +694,24 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   case MSG_POWER_BUTTON:
     CLI_PRINT(("*** Powering off ***\n"));
 
-    if ( boUn20UsbConnected == true )
-    {
-      // Cleanly shut down the UN20 app if it is running (UN20 powered up).
-      vSetupMessage( &sInternalMsg, MSG_UN20_SHUTDOWN_NO_ACK, MSG_STATUS_GOOD, NULL, 0 );
-
-      // send shutdown message to UN20
-      iIfSend(IF_UN20, (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
-    }
-
     // cancel any pending transfers and disconnect from remote device (if any)
     {
       extern int sppCancelAndDisconnect();
       sppCancelAndDisconnect();
     }
 
-    // Pause here for a short while to allow the UN20 to cleanly shut down.
-    vTaskDelay( MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ));
-  
+    if ( eUN20State != UN20_STATE_SHUTDOWN )
+    {
+      // Cleanly shut down the UN20 app if it is running (UN20 powered up).
+      vSetupMessage( &sInternalMsg, MSG_UN20_SHUTDOWN_NO_ACK, MSG_STATUS_GOOD, NULL, 0 );
+
+      // send shutdown message to UN20
+      iIfSend(IF_UN20, (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
+
+      // Pause here for a short while to allow the UN20 to cleanly shut down.
+      vTaskDelay( MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ));
+    }
+
     // Power down the UN20.
     vPowerUn20Off();
 
@@ -686,7 +722,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     break;
 
   case MSG_SCAN_BUTTON:
-    CLI_PRINT(("*** Scan request ***\n"));
+    DEBUGMSG(ZONE_TRACE,("*** Scan request ***\n"));
 
     // If the capture button is enabled, we pass this indication on to the phone.
     if ( boEnableTrigger == true )
@@ -707,7 +743,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   case MSG_UN20_WAKINGUP:
   default:
     // Invalid or unexpected message type - discard the message.
-    CLI_PRINT(("*** Ignoring message\n"));
+    DEBUGMSG(ZONE_ERROR,("*** Ignoring message\n"));
 
     if (( bSource == MSG_SOURCE_PHONE_BT ) || ( bSource == MSG_SOURCE_PHONE_USB ))
     {
@@ -724,7 +760,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
 
 static void vMessageErrorCallback( tMsgError eErrorCode )
 {
-  CLI_PRINT(( "vMessageErrorCallback: error %d\n", eErrorCode ));
+  DEBUGMSG(ZONE_ERROR,( "vMessageErrorCallback: error %d\n", eErrorCode ));
 
   return;
 }
@@ -737,19 +773,19 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
     {
       if( psEventData->eInterface == USB_UN20 )
       {
-         CLI_PRINT(( "UN20 USB Connected\n" ));
+         DEBUGMSG(ZONE_TRACE,( "UN20 USB Connected\n" ));
 
          boUn20UsbConnected = true;
       }
       else if( psEventData->eInterface == USB_HOST )
       {
-        CLI_PRINT(( "Phone USB Connected\n" ));
+        DEBUGMSG(ZONE_TRACE,( "Phone USB Connected\n" ));
 
         boPhoneUsbConnected = true;
       }
       else if ( psEventData->eInterface == BT_HOST )
       {
-        CLI_PRINT(( "Phone BT Connected\n" ));
+        DEBUGMSG(ZONE_TRACE,( "Phone BT Connected\n" ));
 
         boPhoneBtConnected = true;
       }
@@ -767,19 +803,19 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
     {
       if( psEventData->eInterface == USB_UN20 )
       {
-        CLI_PRINT(( "UN20 USB Disconnected\n" ));
+        DEBUGMSG(ZONE_TRACE,( "UN20 USB Disconnected\n" ));
 
         boUn20UsbConnected = false;
       }
       else if( psEventData->eInterface == USB_HOST )
       {
-        CLI_PRINT(( "Phone USB Disconnected\n" ));
+        DEBUGMSG(ZONE_TRACE,( "Phone USB Disconnected\n" ));
 
         boPhoneUsbConnected = false;
       }
       else if ( psEventData->eInterface == BT_HOST )
       {
-        CLI_PRINT(( "Phone BT Disconnected\n" ));
+        DEBUGMSG(ZONE_TRACE,( "Phone BT Disconnected\n" ));
 
         boPhoneBtConnected = false;
       }
@@ -822,7 +858,7 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 
 static void vBtCallbackHandler(void *context, tInterfaceEvent event, void *event_data)
 {
-  CLI_PRINT(("vBtCallbackHandler: event %d\n", event));
+  DEBUGMSG(ZONE_DATA,("vBtCallbackHandler: event %d\n", event));
 
   // Reset the system inactivity timeout.
   xTimerReset( hInactivityTimer, 0 );
@@ -862,7 +898,7 @@ static void vUn20UsbCallbackHandler(void *context, tInterfaceEvent event, void *
   case INTERFACE_EVENT_CONNECTED:
   case INTERFACE_EVENT_DISCONNECTED:
 
-    CLI_PRINT(("vUn20UsbCallbackHandler: event %d\n", event));
+    DEBUGMSG(ZONE_DATA,("vUn20UsbCallbackHandler: event %d\n", event));
     vInterfaceConnDisconn( event, (tEventConnDisconn *) event_data );
     break;
 
@@ -871,7 +907,7 @@ static void vUn20UsbCallbackHandler(void *context, tInterfaceEvent event, void *
       tEventRxData *psEventData = event_data;
       if ( psEventData->iLength > 1 )
       {
-        CLI_PRINT(("vUn20UsbCallbackHandler: event %d\n", event));
+        DEBUGMSG(ZONE_DATA,("vUn20UsbCallbackHandler: event %d\n", event));
       }
       vIncomingBytes( MSG_SOURCE_UN20_USB, (char *) psEventData->pcData, psEventData->iLength );
     }
@@ -887,7 +923,7 @@ static void vPhoneUsbCallbackHandler(void *context, tInterfaceEvent event, void 
 {
   PRECOND( event_data != NULL );
   
-  CLI_PRINT(("vPhoneUsbCallbackHandler: event %d\n", event));
+  DEBUGMSG(ZONE_DATA,("vPhoneUsbCallbackHandler: event %d\n", event));
 
   // Reset the system inactivity timeout.
   xTimerReset( hInactivityTimer, 0 );
@@ -916,7 +952,7 @@ static void vPhoneUsbCallbackHandler(void *context, tInterfaceEvent event, void 
 // Callback for the UN20 poweroff timer.
 static void vUn20ShutdownTimerCallback( xTimerHandle xTimer )
 {
-  CLI_PRINT(("vUn20ShutdownTimerCallback\n"));
+  DEBUGMSG(ZONE_TRACE,("vUn20ShutdownTimerCallback\n"));
 
   eUN20State = UN20_STATE_SHUTDOWN;
 
@@ -929,7 +965,7 @@ static void vUn20ShutdownTimerCallback( xTimerHandle xTimer )
 // Callback for the UN20 inactivity (idle) timer.
 static void vUn20IdleTimerCallback( xTimerHandle xTimer )
 {
-  CLI_PRINT(("vUn20IdleTimerCallback\n"));
+  DEBUGMSG(ZONE_TRACE,("vUn20IdleTimerCallback\n"));
 
   // Send a special UN20 shutdown message that generates no ACK to the phone
   vSetupMessage( &sUN20ShutdownMsg.oMsg, MSG_UN20_SHUTDOWN_NO_ACK, MSG_STATUS_GOOD, NULL, 0 );
@@ -940,7 +976,7 @@ static void vUn20IdleTimerCallback( xTimerHandle xTimer )
 // Callback for system inactivity (Idle) timeout.
 static void vSystemIdleTimerCallback( xTimerHandle xTimer )
 {
-  CLI_PRINT(("vSystemIdleTimerCallback\n"));
+  DEBUGMSG(ZONE_TRACE,("vSystemIdleTimerCallback\n"));
 
   // We take the same actions as when the user presses the power button.
   sPowerButtonMsg.oMsg.Msgheader.bMsgId = MSG_POWER_BUTTON;
@@ -989,6 +1025,8 @@ void vLpcAppInit()
   const char acFlashTimerName[] = "Flash timer";
   const char acVibrateTimerName[] = "Vibrate timer";
 
+  DEBUG_MODULE_INIT( LPC_FD );
+  boCLIregisterEntry( &asLpcMainCLI );
 
   CLI_PRINT(("vLpcAppInit: Initialising LpcTask\n"));
 

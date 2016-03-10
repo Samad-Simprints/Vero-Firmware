@@ -56,8 +56,6 @@ extern int un20_wsq_encode_mem(unsigned char **odata, int *olen, const float r_b
 }
 #endif
 
-// set to 1 for a release build, suppresses debug output
-#define RELEASE_BUILD   0
 // set to 1 to enable image compression
 #define COMPRESS_IMAGE  1
 
@@ -73,11 +71,7 @@ included by <termios.h> */
 
 #define CLI_PRINT( str )              printf str
 
-#if RELEASE_BUILD
-#define DEBUG_PRINT( str )
-#else
-#define DEBUG_PRINT( str )            printf str
-#endif
+#define DEBUG_PRINT( str )            ( boDebug ? printf str : 0 )
 
 DEBUG_MODULE_DEFINE( INDEX_DEFAULTS ) = {
     "INDEX_DEFAULT", {
@@ -113,6 +107,7 @@ static int size;
 
 static bool boAppQuit = false;
 static int port_fd;
+static bool boDebug = false;
 
 #if 0
 #define TIME_INIT()
@@ -678,7 +673,12 @@ main(int argc, char *argv[])
 
   CLI_PRINT(("\nINDEX - SW: " INDEX_VERSION "\n"));
 
-  if ( argc == 2 )
+  if ( argc == 3 )
+  {
+    boDebug = true;
+  }
+
+  if ( argc >= 2 )
   {
     un20_sdk_startup();
     port_fd = serial_startup(argv[1], &oldtio, BAUDRATE);
@@ -699,7 +699,7 @@ main(int argc, char *argv[])
   }
   else
   {
-    CLI_PRINT(("usage: %s <serial-port>\n", argv[0]));
+    CLI_PRINT(("usage: %s <serial-port> [debug]\n", argv[0]));
     iExitStatus = EXIT_FAILURE;
   }
 
