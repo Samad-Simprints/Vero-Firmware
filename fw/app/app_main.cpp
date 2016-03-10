@@ -129,7 +129,7 @@ const tParserEntry asMainCLI[] =
 
 // Serial port config
 static const int            MAX_DEBUG_RX_QUEUE_SIZE         = 300;
-static const int            MAX_DEBUG_TX_QUEUE_SIZE         = 64;
+static const int            MAX_DEBUG_TX_QUEUE_SIZE         = 300;
 
 static const tLineCoding sDebugPortConfig = {
   /*.dwDTERate =*/ 115200,                          // Data terminal rate in bits per second
@@ -151,7 +151,7 @@ static bool boUN20Echo(char **papzArgs, int iInstance, int iNumArgs)
   int iRes;
 
   poUN20Port = poSERDDgetPort( UN20_UART );
-  poUN20Port->vConfigurePort( &sUN20portConfig, 64, 300 );
+  poUN20Port->vConfigurePort( &sUN20portConfig, 300, 64 );
 
   // set to blocking mode for transmit but not receive
   poUN20Port->vSetBlockingMode( ISerialPort::bmTransmitOnly );
@@ -312,7 +312,7 @@ void tMain::vInit()
   oPrintfLock.vInit();
 
   poDebugPort = poSERDDgetPort( CONSOLE_UART );
-  poDebugPort->vConfigurePort( &sDebugPortConfig, MAX_DEBUG_TX_QUEUE_SIZE, MAX_DEBUG_RX_QUEUE_SIZE );
+  poDebugPort->vConfigurePort( &sDebugPortConfig,MAX_DEBUG_RX_QUEUE_SIZE, MAX_DEBUG_TX_QUEUE_SIZE );
 
   // set to blocking mode for transmit but not receive
   poDebugPort->vSetBlockingMode( ISerialPort::bmTransmitOnly );

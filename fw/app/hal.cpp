@@ -930,7 +930,7 @@ static void vUN20Task(void* params)
   oInterface.eInterface = USB_UN20;
 
   poUN20Port = poSERDDgetPort( UN20_UART );
-  poUN20Port->vConfigurePort( (tLineCoding const *)params, 64, 300 );
+  poUN20Port->vConfigurePort( (tLineCoding const *)params, 300, 64 );
 
   // set to blocking mode for transmit but not receive
   poUN20Port->vSetBlockingMode( ISerialPort::bmTransmitOnly );

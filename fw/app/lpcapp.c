@@ -1026,9 +1026,10 @@ void vLpcAppInit()
   const char acVibrateTimerName[] = "Vibrate timer";
 
   DEBUG_MODULE_INIT( LPC_FD );
-  boCLIregisterEntry( &asLpcMainCLI );
 
   CLI_PRINT(("vLpcAppInit: Initialising LpcTask\n"));
+
+  boCLIregisterEntry( &asLpcMainCLI );
 
   vProtocolInit();
 
