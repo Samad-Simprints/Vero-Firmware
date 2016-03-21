@@ -68,7 +68,7 @@
   //  uint8  bStatus;              // Status for responses
   // <Payload>
   //  uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
-  MsgPacket sGetSensorInfoPacket = {
+  const MsgPacket sGetSensorInfoPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_GET_SENSOR_INFO, 0x00 },
   .oPayload.DummyPayload = { 0xF5F5F5F5 }
   };
@@ -79,7 +79,7 @@
   //    bool boTriggerVibrate;              // set vibrate according to boVibrateState
   //    uint8 bLedState[LED_MAX_LED_COUNT]; // off, red, green, orange, on
   //    int16 iVibrateMs;                   // 0 = off, > 0 trigger vibrate for Ms (then stop)
-  MsgPacket sSetuiPacket = {
+  const MsgPacket sSetuiPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgUIControl ), MSG_SET_UI, 0x00 },
   .oPayload.UIControl = { true, true, true, GREEN, GREEN, ORANGE, RED, ORANGE, GREEN, GREEN, GREEN, RED, ON, ON, 3000, 0xF5F5F5F5 }
   };
@@ -93,47 +93,47 @@
   //    int16 iScanTimeout;         // default scan timeout
   //    int16 iScanBrightness;      // default scan brightness
   //    int16 iRetryLimit;          // default scan retry limit
-  MsgPacket sSensorConfigPacket = {
+  const MsgPacket sSensorConfigPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgSensorConfig ), MSG_SET_SENSOR_CONFIG, 0x00 },
   .oPayload.SensorConfig = { 60, 30, 0x30, 0x0A, 0x20, 0x40, 0x64, 0x0A, 0x50, 0x08, 0xF5F5F5F5 }
   };
 
-  MsgPacket sShutdownUn20Packet = {
+  const MsgPacket sShutdownUn20Packet = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_UN20_SHUTDOWN, 0x00 },
   .oPayload.DummyPayload = { 0xF5F5F5F5 }
   };
 
-  MsgPacket sWakeupUn20Packet = {
+  const MsgPacket sWakeupUn20Packet = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_UN20_WAKEUP, 0x00 },
   .oPayload.DummyPayload = { 0xF5F5F5F5 }
   };
 
-  MsgPacket sUn20ReadyPacket = {
+  const MsgPacket sUn20ReadyPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_UN20_READY, 0x00 },
   .oPayload.DummyPayload = { 0xF5F5F5F5 }
   };
 
-  MsgPacket sUn20GetInfoPacket = {
+  const MsgPacket sUn20GetInfoPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgUN20Info ), MSG_UN20_GET_INFO | MSG_REPLY, 0x00 },
   .oPayload.UN20Info = {0x1234, 7, 0xF5F5F5F5 }
   };
 
-  MsgPacket sCaptureImagePacket = {
+  const MsgPacket sCaptureImagePacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgScanRequest ), MSG_CAPTURE_IMAGE, 0x00 },
   .oPayload.ScanRequest = { 0, 5, 8, 80, 75, 0xF5F5F5F5 }
   };
 
-  MsgPacket sCaptureProgressPacket = {
+  const MsgPacket sCaptureProgressPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgScanProgress ), MSG_CAPTURE_PROGRESS, 0x00 },
   .oPayload.ScanProgress = { 2, 55, 0xF5F5F5F5 }
   };
 
-  MsgPacket sGetQualityPacket = {
+  const MsgPacket sGetQualityPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_IMAGE_QUALITY, 0x00 },
   .oPayload.DummyPayload = { 0xF5F5F5F5 }
  };
 
-  MsgPacket sGetGenerateTemplatePacket = {
+  const MsgPacket sGetGenerateTemplatePacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgDummyPayload ), MSG_GENERATE_TEMPLATE, 0x00 },
   .oPayload.DummyPayload = { 0xF5F5F5F5 }
   };
@@ -148,7 +148,7 @@
   .oPayload.FragmentRequest = { 0x0, 0xF5F5F5F5 }
   };
 
-  MsgPacket sSaveImage = {
+  const MsgPacket sSaveImage = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgStoreScan ), MSG_STORE_IMAGE, 0x00 },
   .oPayload.StoreScan = { 14, "this-is-a-guid", 0, 0xF5F5F5F5 }
   };
