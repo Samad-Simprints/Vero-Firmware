@@ -50,7 +50,7 @@
   .thumb_func
   .weak \name
 \name:
-1: b 1b /* endless loop */
+  b vLogUnexpectedInterrupt
 .endm
 
 .macro ISR_RESERVED

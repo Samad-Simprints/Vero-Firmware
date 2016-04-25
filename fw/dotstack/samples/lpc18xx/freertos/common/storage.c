@@ -43,7 +43,7 @@ void bttask_pal_initStorage(void)
 {
 	// Read data from Flash memory
 	memcpy(mRamCopy, (uint8_t*)FLASH_START_ADDR, sizeof(mRamCopy));
-        memset(mRamCopy, 0, sizeof(mRamCopy)); //NST
+//        memset(mRamCopy, 0, sizeof(mRamCopy));
 }
 
 
@@ -137,3 +137,15 @@ static void timerCallback(void)
 	mCallback();
 }
 
+// erase the link keys effectively unpairing us.
+void storage_erase_keys(void)
+{
+  // prepare IAP subsystem
+  iap_init();
+
+  // Prepare sector containing Bluetooth persistent data writing
+  iap_write_prepare(FLASH_SECTOR, FLASH_SECTOR, FLASH_BANK);
+
+  // Erase sector containing Bluetooth persistent data
+  iap_erase(FLASH_SECTOR, FLASH_SECTOR, FLASH_BANK);
+}

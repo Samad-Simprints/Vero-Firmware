@@ -1,8 +1,8 @@
 //******************************************************************************
 //
-// Project NIMBUS Application source file
+// Project INDEX Application source file
 //
-// (c) Fen Technology Ltd. 2013. All rights reserved.
+// (c) Fen Technology Ltd. 2016. All rights reserved.
 //
 // All rights reserved. Copying, compilation, modification, distribution or
 // any other use whatsoever of this material is strictly prohibited except in
@@ -10,7 +10,7 @@
 //
 //******************************************************************************
 //
-// COMPONENT:    NIMBUS
+// COMPONENT:    INDEX
 // MODULE:       watchdog_dd.c
 // $Date$
 // $Revision$
@@ -39,6 +39,8 @@
 //******************************************************************************
 // Definitions
 //******************************************************************************
+// take account of WDT /4 prescaler on any value we want to use
+#define WDT_PRESCALE(x)               ( (x) / 4ul )
 
 //******************************************************************************
 // Private Function Prototypes
@@ -90,15 +92,12 @@
 
 void vWDOGDDinit(void)
 {
-#if !defined(CM_HOSTED)
   // initialise the watchdog timer
-  // - select the internal RC clock to run it (4MHz) (locks the setting so it can't be changed now)
-  LPC_WDT->WDCLKSEL = 0x80000000ul;
-  // - time out after WATCHDOG_TIMEOUT_MS milliseconds
-  LPC_WDT->WDTC = ( 4000ul * WATCHDOG_TIMEOUT_MS );
+  // - uses the internal RC clock to run it (12MHz) (locks the setting so it can't be changed now)
+  // - time out after maximum WD delay (about 5 seconds!)
+  LPC_WWDT->TC = 0x00FFFFFF;
   // - configure the timer
-  LPC_WDT->WDMOD = WATCHDOG_MODE;
-#endif
+  LPC_WWDT->MOD = WATCHDOG_MODE;
   vWDOGDDkick();
 }
 
@@ -114,12 +113,10 @@ void vWDOGDDinit(void)
 
 void vWDOGDDkick(void)
 {
-#if !defined(CM_HOSTED)
   taskDISABLE_INTERRUPTS();
-  LPC_WDT->WDFEED = 0x000000aa;
-  LPC_WDT->WDFEED = 0x00000055;
+  LPC_WWDT->FEED = 0x000000aa;
+  LPC_WWDT->FEED = 0x00000055;
   taskENABLE_INTERRUPTS();
-#endif
 }
 
 /* -----------------------------------------------------------------------
@@ -137,16 +134,13 @@ void vWDOGDDreboot(void)
   // we initialise the watchdog here, as we're about to go down anyway
   vWDOGDDinit();
 
-#if !defined(CM_HOSTED)
   // feed the watchdog correctly to start it running if it isn't already
-  LPC_WDT->WDFEED = 0x000000aa;
-  LPC_WDT->WDFEED = 0x00000055;
-  vTaskDelay( MS_TO_TICKS( 1 ) );
+  LPC_WWDT->FEED = 0x000000aa;
+  LPC_WWDT->FEED = 0x00000055;
 
-  // deliberately mis-feed the watchdog to cause a reset
-  LPC_WDT->WDFEED = 0x000000aa;
-  LPC_WDT->WDFEED = 0x000000aa;
-#endif
+  // now deliberately mis-feed the watchdog to cause a reset
+  LPC_WWDT->FEED = 0x000000aa;
+  LPC_WWDT->FEED = 0x000000aa;
 
   for( ;; )
   {

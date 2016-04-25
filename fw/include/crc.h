@@ -11,16 +11,20 @@
 //******************************************************************************
 //
 // COMPONENT:    INDEX
-// MODULE:       watchdog_dd.h
+// MODULE:       crc.h
 // $Date$
 // $Revision$
 // $Author$
-// DESCRIPTION:
+// DESCRIPTION:  Defines CRC checking API
 //
 //******************************************************************************
 
-#if !defined(_WATCHDOG_DD_H_)
-#define _WATCHDOG_DD_H_
+#if !defined(_CRC_H_)
+#define _CRC_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //******************************************************************************
 // Includes
@@ -32,11 +36,12 @@
 // Constants
 //******************************************************************************
 
-#define WATCHDOG_TIMEOUT_MS           ( 20000ul )
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+//
+// The polynomial used for the CRC is 2^16 + 2^15 + 2^2 + 1 (0x8005),
+// otherwise known as ANSI X3.28
+//
+#define CRC_POLYNOMIAL                ( 0x8005 )
+#define CRC_SEED                      ( 0xfffful )
 
 //******************************************************************************
 // Definitions
@@ -46,12 +51,12 @@ extern "C" {
 // Function Prototypes
 //******************************************************************************
 
-extern void vWDOGDDinit(void);
-extern void vWDOGDDkick(void);
-extern void vWDOGDDreboot(void);
+extern word wCRCgenerateCRC(word wCRC, byte * pabBuffer, int iLength);
+extern void vCRCinit( void );
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // <HEADER_DEFINE>
+#endif  // _CRC_H_
+

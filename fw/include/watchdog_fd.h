@@ -11,16 +11,20 @@
 //******************************************************************************
 //
 // COMPONENT:    INDEX
-// MODULE:       watchdog_dd.h
+// MODULE:       watchdog_fd.h
 // $Date$
 // $Revision$
 // $Author$
-// DESCRIPTION:
+// DESCRIPTION:  Definitions relating to the watchdog monitor
 //
 //******************************************************************************
 
-#if !defined(_WATCHDOG_DD_H_)
-#define _WATCHDOG_DD_H_
+#if !defined(_WATCHDOG_FD_H_)
+#define _WATCHDOG_FD_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //******************************************************************************
 // Includes
@@ -32,26 +36,20 @@
 // Constants
 //******************************************************************************
 
-#define WATCHDOG_TIMEOUT_MS           ( 20000ul )
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 //******************************************************************************
 // Definitions
 //******************************************************************************
+
 
 //******************************************************************************
 // Function Prototypes
 //******************************************************************************
 
-extern void vWDOGDDinit(void);
-extern void vWDOGDDkick(void);
-extern void vWDOGDDreboot(void);
+void vWATCHDOGstart( void );
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // <HEADER_DEFINE>
+#endif  // _WATCHDOG_FD_H_
+

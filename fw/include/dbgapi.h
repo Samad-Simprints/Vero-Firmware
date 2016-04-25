@@ -1,6 +1,6 @@
 //******************************************************************************
 //
-// Project NIMBUS Application header file
+// Project INDEX Application header file
 //
 // (c) Fen Technology Ltd. 2009, 2010. All rights reserved.
 //
@@ -10,7 +10,7 @@
 //
 //******************************************************************************
 //
-// COMPONENT:    NIMBUS
+// COMPONENT:    INDEX
 // MODULE:       dbgapi.h
 // $Date$
 // $Revision$

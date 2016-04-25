@@ -533,7 +533,7 @@ CGU_PERIPHERAL_T eClocks[] =
   CGU_PERIPHERAL_UART3,						/**< UART3				*/
   CGU_PERIPHERAL_USB0,						/**< USB0				*/
   CGU_PERIPHERAL_USB1,						/**< USB1				*/
-  CGU_PERIPHERAL_WWDT,						/**< WWDT				*/
+//  CGU_PERIPHERAL_WWDT,						/**< WWDT				*/
 };
 
 void vHalInit(void)
@@ -585,7 +585,7 @@ void vHalInit(void)
 
 static void vNullHandler(void)
 {
-  debug_break();
+  PBC_ERROR( "NULL handler" );
 }
 
 static void vNullBtCallback(void *context,  tInterfaceEvent event, void *event_data)
@@ -652,18 +652,18 @@ void vUiInit()
 //
 void vUiLedSet(tLeds eLed, tColorOptions eColor)
 {
-  SIMPLEASSERT(eLed < LED_MAX_LED_COUNT);
+  PBC_ASSERT(eLed < LED_MAX_LED_COUNT);
 
   if ( oLedInfo[ eLed ].boIsMono )
   {
-    SIMPLEASSERT( (eColor == OFF) || (eColor == ON) );
+    PBC_ASSERT( (eColor == OFF) || (eColor == ON) );
 #if !defined(EVAL_BOARD)
     oLedInfo[ eLed ].oGreenLed->vSet( (eColor == ON));
 #endif
   }
   else
   {
-    SIMPLEASSERT( (eColor == OFF) || (eColor == RED) || (eColor == GREEN) || (eColor == ORANGE));
+    PBC_ASSERT( (eColor == OFF) || (eColor == RED) || (eColor == GREEN) || (eColor == ORANGE));
 #if !defined(EVAL_BOARD)
     switch (eColor)
     {
@@ -762,7 +762,7 @@ void vPowerUn20Off()	// turn off the UN20 (takes 2 seconds){
 void vPowerUn20On()
 {
   tEventConnDisconn sEventData;
-  SIMPLEASSERT( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING );
+  PBC_ASSERT( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING );
 
   DEBUGMSG(ZONE_COMMANDS,("vPowerUn20On()\n"));
 
@@ -818,7 +818,7 @@ int iBatteryVoltage(int iChannel)
 {
   int iChannelValue = (iChannel + 1) * 100;
 
-  SIMPLEASSERT( (iChannel >= 0) && (iChannel <= 1) );
+  PBC_ASSERT( (iChannel >= 0) && (iChannel <= 1) );
 
 #if !defined(EVAL_BOARD)
   poADC0 = poADCDDgetUnit( 0 );

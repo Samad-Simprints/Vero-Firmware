@@ -212,9 +212,13 @@ void btapp_onButtonUp(bt_uint button, bt_uint repeatCount)
 // Bluetooth device name and class
 // -------------------------------------------------------------------
 //
+extern bt_bdaddr_t mModuleAddress;
+static char device_name[32] = { "Undefined" };
+
 const char* bt_oem_get_device_name(void)
 {
-  return "Index Scanner";
+  snprintf(device_name, sizeof(device_name), "Simprints-%06X", (mModuleAddress.bd_addr_m & 0x00FFFFFF));
+  return device_name;
 }
 
 

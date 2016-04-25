@@ -30,8 +30,13 @@
 // Constants
 //******************************************************************************
 
-// Configure the project here
-//#define EVAL_BOARD                    ( 1 )
+// set to 1 to enable the watchdog feature. This will have a bad effect on the
+// debugger when the processor is reset 5 seconds after the code comes to a stop.
+#ifdef DEBUG
+#define WATCHDOG_HARDWARE_ENABLED                ( 0 )
+#else
+#define WATCHDOG_HARDWARE_ENABLED                ( 1 )
+#endif
 
 // firmware version number
 #define INDEX_REVISION_NUMBER         100
@@ -75,6 +80,14 @@
 
 #define USB_TASK_STACK_SIZE           ( 512 + TASK_DEBUG_OVERHEAD )
 #define USB_TASK_PRIORITY             ( tskIDLE_PRIORITY + 1 )
+
+// this definition not used. Here for documentation
+#define BT_TASK_PRIORITY              ( tskIDLE_PRIORITY + 2 )
+
+// watchdog task runs at high priority with little stack
+#define WDOG_TASK_STACK_SIZE          ( configMINIMAL_STACK_SIZE + TASK_DEBUG_OVERHEAD )
+#define WDOG_TASK_PRIORITY            ( tskIDLE_PRIORITY + 4 )
+#define WDOG_ACTIVITY_CHECK_MS        30000
 
 // - interrupt priorities - max 7 on LPC18xx
 #if 0

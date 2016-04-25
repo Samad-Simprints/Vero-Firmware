@@ -55,6 +55,8 @@ static bt_byte                  mLoadingInitScript;
 
 static bttask_StartCallback     mStartCallback;
 
+bt_bdaddr_t mModuleAddress;
+
 // Persistent Store (PS) values for BC7 initialization.
 static const bt_uint BC7_PS_VALUES[] =
 {
@@ -148,6 +150,7 @@ static void configureGPIOInputPin(uint8_t port, uint8_t pin,  uint8_t func, uint
 static void selHostInterfaceCallback(bt_bool success, btx_csr_autobaud_buffer_t* buffer);
 static void execScriptCallback(bt_bool success, btx_csr_exec_script_buffer_t* buffer);
 static void setPsVarsCallback(bt_bool success, btx_csr_set_ps_vars_buffer_t* buffer);
+static void setPsVarsCallback0(bt_bool success, btx_csr_set_ps_vars_buffer_t* buffer);
 static void timerCallback(void);
 static void warmResetCallback(bt_int status, bt_hci_command_t* cmd, bt_hci_event_t* evt);
 static void hciStopCallback(void* param);
@@ -162,6 +165,31 @@ void id_pin(int port, int id)
   }
 }
 
+
+extern bt_byte *pbGetBluetoothAddress(void);
+
+void vSetBluetoothAddress(void)
+{
+  bt_byte *paddr;
+  bt_byte default_addr[6] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC };
+
+  if ( !(paddr = (bt_byte*)pbGetBluetoothAddress()) )
+  {
+    paddr = default_addr;
+  }
+
+  mModuleAddress.bd_addr_l = 0;
+  mModuleAddress.bd_addr_m = 0;
+
+  mModuleAddress.bd_addr_l = ( mModuleAddress.bd_addr_l << 8 ) | paddr[0];
+  mModuleAddress.bd_addr_l = ( mModuleAddress.bd_addr_l << 8 ) | paddr[1];
+
+  mModuleAddress.bd_addr_m = ( mModuleAddress.bd_addr_m << 8 ) | paddr[2];
+  mModuleAddress.bd_addr_m = ( mModuleAddress.bd_addr_m << 8 ) | paddr[3];
+  mModuleAddress.bd_addr_m = ( mModuleAddress.bd_addr_m << 8 ) | paddr[4];
+  mModuleAddress.bd_addr_m = ( mModuleAddress.bd_addr_m << 8 ) | paddr[5];
+}
+
 void bttask_pal_initBluetoothPort(void)
 {
     mRxBuffer = NULL;
@@ -169,6 +197,8 @@ void bttask_pal_initBluetoothPort(void)
     mRxFifoHead = mRxFifoTail = 0;
     mStalled = 0;
     mTxBuffer = NULL;
+
+    vSetBluetoothAddress();
 
     CGU_ConfigPWR(CGU_PERIPHERAL_GPIO, ENABLE);
     CGU_ConfigPWR(CGU_PERIPHERAL_UART0, ENABLE);
@@ -317,7 +347,23 @@ static void execScriptCallback(bt_bool success, btx_csr_exec_script_buffer_t* bu
   if (success)
   {
     // Set configuration parameters.
-    btx_csr_set_ps_vars(BC7_PS_VALUES, &mWorkBuffers.btx_csr_set_ps_vars, setPsVarsCallback, NULL);
+    btx_csr_set_ps_vars(BC7_PS_VALUES, &mWorkBuffers.btx_csr_set_ps_vars, setPsVarsCallback0, NULL);
+  }
+  else
+  {
+    error_onFatalError();
+  }
+}
+
+static void setPsVarsCallback0(bt_bool success, btx_csr_set_ps_vars_buffer_t* buffer)
+{
+  bt_uint BC7_PS_VALUES_1[] = {
+      SET_PS_VALUE_BDADDR(PSKEY_BDADDR, mModuleAddress.bd_addr_l, mModuleAddress.bd_addr_m),  0x0000 };
+
+  if (success)
+  {
+    // Set configuration parameters (the Bluetooth address).
+    btx_csr_set_ps_vars(BC7_PS_VALUES_1, &mWorkBuffers.btx_csr_set_ps_vars, setPsVarsCallback, NULL);
   }
   else
   {

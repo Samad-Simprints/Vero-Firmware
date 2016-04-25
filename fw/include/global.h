@@ -67,6 +67,7 @@ extern int _printf(const char *format, ...);
 #if !defined( UN20_APP )
 #include <LPC18xx.h>
 #include "FreeRTOS.h"
+#include "task.h"
 #else
 #define configSER_INTERRUPT_PRIORITY  0
 #define configGPIO_INTERRUPT_PRIORITY 0
@@ -77,6 +78,7 @@ extern int _printf(const char *format, ...);
 
 // Include the debug api macros
 #include "dbgapi.h"
+#include "exception.h"
 
 #ifdef DEBUG
 #include <cross_studio_io.h>
@@ -97,31 +99,6 @@ extern int _printf(const char *format, ...);
 //
 #define UNUSED_VARIABLE( var )        (void)var
 
-#define   SIMPLEASSERT(condition)                       \
-  if (!(condition))                                     \
-  {                                                     \
-    DEBUG_ERROR(( "Assert failed: %s\n", #condition ));   \
-    while (1);                                          \
-    debug_break();                                      \
-  }
-// from exception.h
-extern void vLogAssert( const byte bReason, const char *pzFile, dword dwLine, const char *pzCondition );
-enum {
-  ERROR_HARDWARE_HARD_FAULT,
-  ERROR_HARDWARE_UNEXPECTED_INTERRUPT,
-  ERROR_SOFTWARE_RTOS_STACK,
-  ERROR_SOFTWARE_RTOS_MALLOC,
-  ERROR_SOFTWARE_RTOS_ASSERT,
-  ERROR_SOFTWARE_THREAD_STUCK,
-  ERROR_SOFTWARE_ASSERT,
-  ERROR_SOFTWARE_ERROR,
-  ERROR_SOFTWARE_ABORT,
-  ERROR_SOFTWARE_CPP_PURE_VIRTUAL,
-  ERROR_RESET,
-  ERROR_REQUESTED,
-  ERROR_UNKNOWN
-};
-
 // If programming by Contract Enabled
 #ifdef    PROG_BY_CONTRACT
 #define PBC_ASSERT( cond )          do { if( !(cond) ) { vLogAssert( ERROR_SOFTWARE_ASSERT, __FILE__, __LINE__, #cond ); } } while(0)
@@ -132,9 +109,9 @@ enum {
 #endif
 
 #ifdef PROG_BY_CONTRACT
-  #define PRECOND(str)                SIMPLEASSERT(str)
-  #define POSTCOND(str)               SIMPLEASSERT(str)
-  #define INVARIANT(str)              SIMPLEASSERT(str)
+  #define PRECOND(str)                PBC_ASSERT(str)
+  #define POSTCOND(str)               PBC_ASSERT(str)
+  #define INVARIANT(str)              PBC_ASSERT(str)
 #else
   #define PRECOND(str)
   #define POSTCOND(str)

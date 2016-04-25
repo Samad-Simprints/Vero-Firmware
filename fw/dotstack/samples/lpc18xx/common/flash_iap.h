@@ -11,7 +11,9 @@ enum command_code {
 	IAPCommand_Read_Boot_Code_version = 55,
 	IAPCommand_Compare = 56,
 	IAPCommand_Reinvoke_ISP = 57,
-	IAPCommand_Read_device_serial_number = 58
+	IAPCommand_Read_device_serial_number = 58,
+        IAPCommand_Erase_page = 59,
+        IAPCommand_Set_boot_bank = 60
 };
 
 enum error_code
@@ -83,5 +85,8 @@ unsigned int iap_blank_check(unsigned int start, unsigned int end, unsigned int 
 unsigned int iap_erase(unsigned int start, unsigned int end, unsigned int bank);
 unsigned int iap_compare(const char *src, const char *dst, int size);
 void iap_reinvoke_isp(void);
+
+unsigned int iap_erase_page(const char *page_start, const char *page_end);
+void iap_set_boot_bank(unsigned int bank);
 
 #endif /* IAP_H_ */

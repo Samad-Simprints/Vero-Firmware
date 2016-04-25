@@ -163,3 +163,35 @@ void iap_reinvoke_isp(void)
 	command[0]=IAPCommand_Reinvoke_ISP;
 	iap_entry(command, result);
 }
+
+/* Erase one or more 512 byte pages in a sector
+ * To erase one page set start == end
+ * Return: error_code
+ */
+unsigned int iap_erase_page(const char *page_start, const char *page_end)
+{
+    unsigned int command[5]={0,0,0,0,0};
+    unsigned int result[5]={0,0,0,0,0};
+
+    //iap_entry=(IAP)IAP_LOCATION;
+    command[0]= IAPCommand_Erase_page;
+    command[1]= (unsigned int)page_start;    //  Starting flash address of first page in sector to erase
+    command[2]= (unsigned int)page_end;      //  Ending flash address of last page in sector to erase
+    command[3]= SystemCoreClock/1000;       //  CPU Clock Frequency (CCLK) in kHz
+    iap_entry(command, result);
+    return result[0];
+}
+
+/* Specify which bank to boot code out of
+ */
+void iap_set_boot_bank(unsigned int bank)
+{
+    unsigned int command[5]={0,0,0,0,0};
+    unsigned int result[5]={0,0,0,0,0};
+
+    //iap_entry=(IAP)IAP_LOCATION;
+    command[0]= IAPCommand_Set_boot_bank;
+    command[1]= (unsigned int)bank;
+    command[2]= SystemCoreClock/1000;   //  CPU Clock Frequency (CCLK) in kHz
+    iap_entry(command, result);
+}

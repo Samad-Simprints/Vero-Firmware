@@ -1,6 +1,6 @@
 //******************************************************************************
 //
-// Project INDX Application header file
+// Project INDEX Application header file
 //
 // (c) Fen Technology Ltd. 2016. All rights reserved.
 //
@@ -10,7 +10,7 @@
 //
 //******************************************************************************
 //
-// COMPONENT:    NIMBUS
+// COMPONENT:    INDEX
 // MODULE:       adc_dd.h
 // $Date$
 // $Revision$

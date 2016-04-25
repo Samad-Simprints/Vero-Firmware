@@ -109,7 +109,7 @@ extern uint32_t SystemCoreClock;
 #define configCHECK_FOR_STACK_OVERFLOW              2
 #define configUSE_RECURSIVE_MUTEXES                 1
 #define configQUEUE_REGISTRY_SIZE                   10
-#define configGENERATE_RUN_TIME_STATS               0
+#define configGENERATE_RUN_TIME_STATS               1
 
 #define configUSE_TIMERS                            1
 #define configTIMER_TASK_PRIORITY                 ( configMAX_PRIORITIES - 1 )
@@ -154,14 +154,14 @@ numeric value the higher the interrupt priority). */
  * Macros required to setup the timer for the run time stats.
  *-----------------------------------------------------------*/
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
-extern void vConfigureTimerForRunTimeStats( void );
-#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()    vConfigureTimerForRunTimeStats()
-#define portGET_RUN_TIME_COUNTER_VALUE()            LPC_TIM0->TC
+extern unsigned long ulRunTimeStatsClock;
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() ulRunTimeStatsClock = 0
+#define portGET_RUN_TIME_COUNTER_VALUE() ulRunTimeStatsClock++;
 #endif
 
 /* Normal assert() semantics without relying on the provision of an assert.h
 header file. */
-#define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for( ;; ); }	
+#define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); vLogRTOSAssert( __FILE__, __LINE__, #x); }	
 
 /* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
 standard names. */

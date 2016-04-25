@@ -38,6 +38,8 @@
 #include "cli.h"
 #include "gpio_dd.hpp"
 #include "ser_dd.hpp"
+#include "watchdog_fd.h"
+#include "watchdog_dd.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -48,6 +50,9 @@
 #include "hal.h"
 #include "lpcapp.h"
 #include "helpers.hpp"
+
+#include "flash_iap.h"
+#include "crc.h"
 
 //******************************************************************************
 // Private Function Prototypes
@@ -78,18 +83,23 @@ public:
   virtual                  ~tMain();
 
   void                      vInit();
+  void                      vRecoverCrashLog();
 
   // Accessors
   tLock                    *poGetPrintfLock()                       { return &oPrintfLock; }
 
   inline ISerialPort       *poGetDebugPort()                        { return poDebugPort; }
+  bool                      boCrashDataAvailable;
 
 private:
+
   tLock                     oPrintfLock;
 
   ISerialPort              *poDebugPort;
 
 };
+
+unsigned long ulRunTimeStatsClock;
 
 //******************************************************************************
 // Local Storage
@@ -113,6 +123,7 @@ static bool boQuit(char **papzArgs, int iInstance, int iNumArgs);
 #endif
 static bool boUN20Echo(char **papzArgs, int iInstance, int iNumArgs);
 static bool boSleep(char **papzArgs, int iInstance, int iNumArgs);
+static bool boCrashLog(char **papzArgs, int iInstance, int iNumArgs);
 
 const tParserEntry asMainCLI[] =
 {
@@ -120,7 +131,8 @@ const tParserEntry asMainCLI[] =
   CLICMD("quit", "Quit CM", 1, "", boQuit, 0),
 #endif
   CLICMD( "un20ser", "Send to UN20 Uart", 2, "", boUN20Echo, 0 ),
-  CLICMD( "sleep", "Sleep", 1, "", boSleep, 0 )
+  CLICMD( "sleep", "Sleep", 1, "", boSleep, 0 ),
+  CLICMD( "clog", "Crash log", 1, "", boCrashLog, 0 )
 };
 
 //******************************************************************************
@@ -144,6 +156,22 @@ static const tLineCoding sUN20portConfig = {
   /*.bParityType =*/ 0,                             // Parity bit type
   /*.bDataBits =*/ 8                                // Number of data bits
 };
+
+static tExceptionRecord oException;
+
+static bool boCrashLog(char **papzArgs, int iInstance, int iNumArgs)
+{
+  if ( oMain.boCrashDataAvailable )
+  {
+    vPrintCrashRecord( &oException );
+  }
+  else
+  {
+    CLI_PRINT(("Crash log contains no data\n"));
+  }
+
+  return true;
+}
 
 static bool boUN20Echo(char **papzArgs, int iInstance, int iNumArgs)
 {
@@ -189,6 +217,8 @@ static bool boSleep(char **papzArgs, int iInstance, int iNumArgs)
 extern "C" void bt_main(void);
 extern "C" void usb_main(void);
 extern "C" void check_failed(uint8_t *file, uint32_t line);
+extern "C" void storage_erase_keys(void);
+extern "C" byte *pbGetBluetoothAddress(void);
 
 extern "C" void vHalTest(void);
 
@@ -267,16 +297,25 @@ extern "C" int kbhit( void )
   return iRes;
 }
 
-void vLogAssert( const byte bReason, const char *pzFile, dword dwLine, const char *pzCondition )
-{
-  debug_break();
-}
-
 void check_failed(uint8_t *file, uint32_t line)
 {
-#ifdef DEBUG
-  for (;;);
-#endif
+  vLogAssert( ERROR_SOFTWARE_ASSERT, (const char*)file, line, "LPClib" );
+}
+
+void tMain::vRecoverCrashLog()
+{
+  tExceptionRecord *poException;
+  word wLength;
+  bool boLogEventPresent = boLogGet( &poException, &wLength );
+
+  if ( boLogEventPresent && poException->sHeader.dwReason != ERROR_REQUESTED )
+  {
+      memcpy( &oException, poException, wLength );
+      boCrashDataAvailable = true;
+  }
+
+  // Invalidate whatever was stored in RAM
+  vLogClear();
 }
 
 uint32_t	xCGU_Init(void)
@@ -299,7 +338,8 @@ uint32_t	xCGU_Init(void)
 
 tMain::tMain()
   : oPrintfLock(),
-    poDebugPort( 0 )
+    poDebugPort( 0 ),
+    boCrashDataAvailable( false )
 {
 }
 
@@ -319,6 +359,45 @@ void tMain::vInit()
 
   // flush buffers before we start
   poDebugPort->vFlush();
+}
+
+// Are both the buttons pushed to indicate pairing erase
+bool vCheckForPairingClear()
+{
+  bool boScan;
+  bool boPower;
+  /* configure the buttons so we can sense then */
+  BUTTON_0_POWER->vConfigure();
+  BUTTON_1_SCAN->vConfigure();
+
+  boPower = BUTTON_0_POWER->boGet();
+  boScan  = BUTTON_1_SCAN->boGet();
+
+  if ( !boPower && !boScan )
+  {
+    CLI_PRINT(("*** Erase link keys ***\n"));
+    storage_erase_keys();
+  }
+}
+
+// structure in CPU flash that contains the BTADDR
+PACK(
+struct flash_bt_addr
+{
+  byte BDADDR[6];
+  word crc;
+});
+
+// return a pointer to a 6 byte BTADDR, called from the bluetooth stack
+byte *pbGetBluetoothAddress(void)
+{
+  struct flash_bt_addr *paddr = (struct flash_bt_addr *)FLASH_ADDR(FLASH_BANK_B, FLASH_SECTOR_1);
+
+  if ( paddr->crc != wCRCgenerateCRC( CRC_SEED, paddr->BDADDR, sizeof(paddr->BDADDR) ) )
+  {
+    paddr = NULL;
+  }
+  return paddr->BDADDR;
 }
 
 int main( void )
@@ -357,6 +436,16 @@ int main( void )
     boCLIregisterEntry( &asMainCLI[i] );
   }
 
+  // recover the crash log if present
+  oMain.vRecoverCrashLog();
+
+  // clear link keys if scan button pressed at power up
+  vCheckForPairingClear();
+
+  // start up the watchdog and its monitor
+  //vWDOGDDinit();
+  vWATCHDOGstart();
+
   /* Create the LPC App task. */
   vLpcAppInit();
 
@@ -382,48 +471,3 @@ tLock *poGetPrintfLock()
   return oMain.poGetPrintfLock();
 }
 
-static void vGetRegistersFromStack( dword *pdwFaultStackAddress )
-{
-  /* These are volatile to try and prevent the compiler/linker optimising them
-  away as the variables never actually get used.  If the debugger won't show the
-  values of the variables, make them global my moving their declaration outside
-  of this function. */
-  volatile dword r0;
-  volatile dword r1;
-  volatile dword r2;
-  volatile dword r3;
-  volatile dword r12;
-  volatile dword lr;    // Link register.
-  volatile dword pc;    // Program counter.
-  volatile dword psr;   // Program status register.
-
-  r0 = pdwFaultStackAddress[ 0 ];
-  r1 = pdwFaultStackAddress[ 1 ];
-  r2 = pdwFaultStackAddress[ 2 ];
-  r3 = pdwFaultStackAddress[ 3 ];
-
-  r12 = pdwFaultStackAddress[ 4 ];
-  lr = pdwFaultStackAddress[ 5 ];
-  pc = pdwFaultStackAddress[ 6 ];
-  psr = pdwFaultStackAddress[ 7 ];
-
-  // When the following line is hit, the variables contain the register values.
-  for( ;; );
-}
-
-// The fault handler implementation calls a function called
-// vGetRegistersFromStack().
- __attribute__( ( naked ) ) void HardFault_Handler(void)
-{
-    __asm volatile
-    (
-        " tst lr, #4                                                \n"
-        " ite eq                                                    \n"
-        " mrseq r0, msp                                             \n"
-        " mrsne r0, psp                                             \n"
-        " ldr r1, [r0, #24]                                         \n"
-        " ldr r2, handler2_address_const                            \n"
-        " bx r2                                                     \n"
-        " handler2_address_const: .word vGetRegistersFromStack      \n"
-    );
-}

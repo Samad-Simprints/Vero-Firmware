@@ -29,7 +29,7 @@
 #include <string.h>
 
 #include "global.h"
-//#include "exception.h"
+#include "exception.h"
 
 #include "helpers.hpp"
 #include "gpio_pindefs.hpp"
@@ -379,56 +379,10 @@ Returns : Nothing
 extern "C" void abort()
 {
   taskDISABLE_INTERRUPTS();
-  //vLogGeneral( ERROR_SOFTWARE_ABORT, 0, 0 );
+  vLogGeneral( ERROR_SOFTWARE_ABORT, 0, 0 );
 }
 #endif
 
-#if 0
-/* -----------------------------------------------------------------------
-   __cxa_pure_virtual
-   .......................................................................
-   Description  : Helper giving support for C++
-
-   Params : None
-
-   Returns : Nothing
-   ----------------------------------------------------------------------- */
-
-extern "C" void __cxa_pure_virtual()
-{
-  taskDISABLE_INTERRUPTS();
-  //vLogGeneral( ERROR_SOFTWARE_CPP, 0, 0 );
-}
-
-/* -----------------------------------------------------------------------
-   __cxa_guard_acquire
-   .......................................................................
-   Description  : Helper giving support for C++
-
-   Params : None
-
-   Returns : Nothing
-   ----------------------------------------------------------------------- */
-
-extern "C" int __cxa_guard_acquire( long long *pllLock )
-{
-  return 0;
-}
-
-/* -----------------------------------------------------------------------
-   __cxa_guard_release
-   .......................................................................
-   Description  : Helper giving support for C++
-
-   Params : None
-
-   Returns : Nothing
-   ----------------------------------------------------------------------- */
-
-extern "C" void __cxa_guard_release( long long *pllLock )
-{
-}
-#endif
 
 /* -----------------------------------------------------------------------
    vApplicationIdleHook
@@ -488,7 +442,7 @@ extern "C" void vApplicationMallocFailedHook( void )
   // log malloc failure and restart
   taskDISABLE_INTERRUPTS();
   char *pzTaskName = (char*)pcTaskGetTaskName( NULL );
-  //vLogGeneral( ERROR_SOFTWARE_RTOS_MALLOC, pzTaskName, strlen(pzTaskName)+1 );
+  vLogGeneral( ERROR_SOFTWARE_RTOS_MALLOC, pzTaskName, strlen(pzTaskName)+1 );
 }
 
 /* -----------------------------------------------------------------------
@@ -513,7 +467,7 @@ extern "C" void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *
   function is called if a stack overflow is detected. */
 
   // log stack error and restart
-  //vLogGeneral( ERROR_SOFTWARE_RTOS_STACK, pcTaskName, strlen((char*)pcTaskName)+1 );
+  vLogGeneral( ERROR_SOFTWARE_RTOS_STACK, pcTaskName, strlen((char*)pcTaskName)+1 );
 }
 
 #if defined(CM_HOSTED)
