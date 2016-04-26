@@ -29,7 +29,7 @@
 
 #include "global.h"
 
-#include "freertos.h"
+#include "FreeRTOS.h"
 
 //******************************************************************************
 // Constants
