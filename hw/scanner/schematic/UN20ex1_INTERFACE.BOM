@@ -1,0 +1,24 @@
+UN20EX1 Interface Board  Revised: Thursday, May 05, 2016
+Index Sensor Interface          Revision: A
+
+Fen Technology Ltd
+Oakington Business Park
+Oakington
+Cambridge
+CB24 3DQ
+
+Bill Of Materials            May 5,2016      16:09:18	Page1
+
+Item	Quantity	Reference	Part	Footprint	Manufacturer	Manufacturer's Part Number	Supplier	Supplier Part Number\
+______________________________________________
+
+1	10	C1,C2,C3,C4,C5,C6,C7,C11,C12,C13	27pF/50V	0402	Phycomp	CC0402JRNPO9BN270	Farnell	1816735
+2	2	C8,C9	2.2uF, X5R	0402	TDK	C1005X5R0J225K050BC	Farnell	2346873
+3	1	C10	10uF	0805	TDK	C2012X5R0J106M	Farnell	2309029
+4	2	J1,J3	DF40C-20DS		Hirose	DF40C-20DS-0.4V(51)	DigiKey	H11619CT-ND
+5	1	J2	Molex 12W FFC 0.5mm		Molex	52746-1271	Farnell	2060699
+6	1	J4	53398-0371	53398-3way	Molex	53398-0371	Farnell	1125353
+7	1	J5	53398-0571	53398-5way	Molex	53398-0571	Farnell	1125354
+8	1	R1	100K	0402	Multicomp	MC 0.0625W 0402 1% 100K	Farnell	1358096
+9	10	TPVIA1,TPVIA2,TPVIA3,TPVIA4,TPVIA5,TPVIA6,TPVIA7,TPVIA8,TPVIA9,TPVIA10	TPVIA	TPVIA				
+10	1	U1	TPS60150	QFN2x2	Texas Instruments	TPS60150DRVT	Farnell	2437649
