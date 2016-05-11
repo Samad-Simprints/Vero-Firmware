@@ -170,13 +170,7 @@ extern bt_byte *pbGetBluetoothAddress(void);
 
 void vSetBluetoothAddress(void)
 {
-  bt_byte *paddr;
-  bt_byte default_addr[6] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC };
-
-  if ( !(paddr = (bt_byte*)pbGetBluetoothAddress()) )
-  {
-    paddr = default_addr;
-  }
+  bt_byte *paddr = (bt_byte*)pbGetBluetoothAddress();
 
   mModuleAddress.bd_addr_l = 0;
   mModuleAddress.bd_addr_m = 0;

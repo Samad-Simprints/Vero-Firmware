@@ -45,7 +45,7 @@
 
 #define LOG_PRINT( str )              printf str
 
-/* Cortex M3 defintions missing from the core_cm3.h eader file */
+/* Cortex M3 defintions missing from the core_cm3.header file */
 /* Memory Management Fault Status register */
 #define SCB_CFSR_MMFSR_MMARVALID_Pos          7                                             /*!< SCB CFSR(MMFSR): MMARVALID Position */
 #define SCB_CFSR_MMFSR_MMARVALID_Msk          (1UL << SCB_CFSR_MMFSR_MMARVALID_Pos)         /*!< SCB CFSR(MMFSR): MMARVALID Mask */
@@ -114,6 +114,10 @@ static volatile bool boFaultRecorded = false;
 
 // global time counter updated by the watchdog task
 volatile dword dwLogTimerTick = 0;
+
+// control information for managing a copy of the log data
+static tExceptionRecord *poCachedException = NULL;
+static word wCachedLength = 0;
 
 //******************************************************************************
 //******************************************************************************
@@ -332,6 +336,39 @@ void vLogInit( dword dwSetVersion )
 }
 
 #define RSID_REASON_MASK      ( 0x0f )
+
+// create a copy of the log in some storage provided by the caller
+bool boLogCache( tExceptionRecord *poLogCache )
+{
+  bool boValid = false;
+  tExceptionRecord *poException;
+  word wLength;
+  
+  if ( poLogCache && boLogGet( &poException, &wLength ) )
+  {
+    memcpy(poLogCache, poException, wLength);
+    poCachedException = poLogCache;
+    wCachedLength = wLength;
+    boValid = true;
+  }
+  return boValid;
+}
+
+// return cached copy of log
+bool boLogCacheGet( tExceptionRecord **poException, word *pwLength )
+{
+  *poException = poCachedException;
+  *pwLength = wCachedLength;
+
+  return ( poCachedException && wCachedLength );
+}
+
+// clear the cached log
+void vLogCacheClear()
+{
+  poCachedException = NULL;
+  wCachedLength = 0;
+}
 
 // returns a pointer to the RAM log area if the record is valid
 bool boLogGet( tExceptionRecord **poException, word *pwLength )

@@ -25,8 +25,8 @@
 
 #define FLASH_BANK           FLASH_BANK_B_ID
 // Note sector number specified in next 2 lines!
-#define FLASH_SECTOR         10
-#define FLASH_START_ADDR     FLASH_ADDR(FLASH_BANK_B, FLASH_SECTOR_10)
+#define FLASH_SECTOR_ID      2
+#define FLASH_START_ADDR     FLASH_ADDR(FLASH_BANK_B, FLASH_SECTOR_2)
 #define FLASH_WRITE_SIZE     512
 
 // Storage size in FLASH_WRITE_SIZE-byte blocks
@@ -108,17 +108,17 @@ static void timerCallback(void)
         iap_init();
 
 	// Prepare sector containing Bluetooth persistent data writing
-	iap_write_prepare(FLASH_SECTOR, FLASH_SECTOR, FLASH_BANK);
+	iap_write_prepare(FLASH_SECTOR_ID, FLASH_SECTOR_ID, FLASH_BANK);
 	
 	// Erase sector containing Bluetooth persistent data
-	iap_erase(FLASH_SECTOR, FLASH_SECTOR, FLASH_BANK);
+	iap_erase(FLASH_SECTOR_ID, FLASH_SECTOR_ID, FLASH_BANK);
 	
 	// Write Bluetooth persistent data to flash
 	flashAddress = FLASH_START_ADDR;
 	for (i = 0; i < STORAGE_SIZE; i++, flashAddress += FLASH_WRITE_SIZE)
 	{
 		// Prepare sector containing Bluetooth persistent data writing
-		iap_write_prepare(FLASH_SECTOR, FLASH_SECTOR, FLASH_BANK);
+		iap_write_prepare(FLASH_SECTOR_ID, FLASH_SECTOR_ID, FLASH_BANK);
 		
 		// Write data
 		iap_write((const char*)&mRamCopy[i * FLASH_WRITE_SIZE], (const char*)flashAddress, FLASH_WRITE_SIZE);
@@ -137,6 +137,39 @@ static void timerCallback(void)
 	mCallback();
 }
 
+// write a 512 byte multiple of data to flash starting at sector boundary
+// whole sectors of flash are erased and programmed
+// data to be written must be multiple of 512 bytes
+// location to write to must be multiple of 512 bytes
+int storage_write(unsigned int start, unsigned int end, unsigned int bank, void *pvflash,
+                   void *pvData, int size)
+{
+  int written_ok = 0;
+
+  if ( ( end >= start ) && 
+       ((((bt_ulong)pvflash) & (FLASH_WRITE_SIZE-1)) == 0) &&
+       (((bt_ulong)pvData) & 0x01 == 0) &&
+       (size & (FLASH_WRITE_SIZE-1) == 0) )
+  {
+    // prepare IAP subsystem
+    iap_init();
+
+    // Prepare sectors for write
+    iap_write_prepare(start, end, bank);
+
+    // Write data into the flash
+    iap_write((const char*)&pvData, (const char*)pvflash, size);
+
+    // Verify written data
+    if (iap_compare((const char*)pvflash, (const char*)pvData, size) == CMD_SUCCESS)
+    {
+      written_ok = 1;
+    }
+  }
+
+  return written_ok;
+}
+
 // erase the link keys effectively unpairing us.
 void storage_erase_keys(void)
 {
@@ -144,8 +177,8 @@ void storage_erase_keys(void)
   iap_init();
 
   // Prepare sector containing Bluetooth persistent data writing
-  iap_write_prepare(FLASH_SECTOR, FLASH_SECTOR, FLASH_BANK);
+  iap_write_prepare(FLASH_SECTOR_ID, FLASH_SECTOR_ID, FLASH_BANK);
 
   // Erase sector containing Bluetooth persistent data
-  iap_erase(FLASH_SECTOR, FLASH_SECTOR, FLASH_BANK);
+  iap_erase(FLASH_SECTOR_ID, FLASH_SECTOR_ID, FLASH_BANK);
 }

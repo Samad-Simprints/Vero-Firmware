@@ -88,7 +88,9 @@ enum
   MSG_STATUS_NO_QUALITY,        // No current quality value for current image
   MSG_STATUS_NO_TEMPLATE,       // No current template to operate on
   MSG_STATUS_SAVE_ERROR,        // Unable to save image
-  MSG_STATUS_SDK_ERROR          // Error in UN20 SDK caused operation to fail
+  MSG_STATUS_SDK_ERROR,         // Error in UN20 SDK caused operation to fail
+  MSG_STATUS_NO_CRASH_LOG,      // no crash log data available
+  MSG_STATUS_BAD_PARAMETER      // parameter specified is not valid
 };
 
 // message-ids as held in the message bMsgId field.
@@ -109,8 +111,8 @@ enum
   MSG_CAPTURE_ABORT = 7,        // Processed by UN20 App
   MSG_RECOVER_IMAGE = 8,        // Processed by UN20 App
   MSG_IMAGE_FRAGMENT = 9,       // Processed by UN20 App
-  MSG_STORE_IMAGE = 10,          // Processed by UN20 App
-  MSG_IMAGE_QUALITY = 11,   // Processed by UN20 App
+  MSG_STORE_IMAGE = 10,         // Processed by UN20 App
+  MSG_IMAGE_QUALITY = 11,       // Processed by UN20 App
   MSG_GENERATE_TEMPLATE = 12,    // Processed by UN20 App
   MSG_RECOVER_TEMPLATE = 13,     // Processed by UN20 App
   MSG_COMPARE_TEMPLATE = 14,     // Processed by UN20 App
@@ -125,6 +127,10 @@ enum
   MSG_GET_IMAGE_FRAGMENT    = 21,   // Processed by UN20 App
   MSG_GET_TEMPLATE_FRAGMENT = 22,   // Processed by UN20 App
   MSG_UN20_SHUTDOWN_NO_ACK = 23,    // Like MSG_UN20_SHUTDOWN but the UN20 does not send an ACK response
+
+  MSG_GET_CRASH_LOG = 24,         // recover the crash log data
+  MSG_SET_HW_CONFIG = 25,         // set the hardware configuration
+
   MSG_NUM_MSGS,             // Number of valid message types
 
   MSG_REPLY = 0x80          // Top bit set indicates a reply
@@ -151,6 +157,15 @@ typedef enum
 }
 tUN20State;
 
+typedef enum
+{
+  HW_MODE_NORMAL,           // return configuration to operational state
+  HW_MODE_UN20_BOOTLOADER,  // Configure for and invoke UN20 bootloader
+  HW_MODE_UN20_FTP,         // Configure for and invoke UN20 IP over USB services
+  HW_MODE_LPC_BOOTLOADER    // Configure for and invoke LPC bootloader
+}
+tHardwareConfig;
+
 //
 // Scanner unit status information
 //
@@ -161,8 +176,9 @@ PACK( typedef struct tagSensorInfo
   int16	iUN20Version;	// UN20 client firmware version
   int16 iBatteryLevel1;	// Analog input 1
   int16 iBatteryLevel2;	// Analog Input 2
-  int16 iStoreCount;    // Number of stored images and templates
-  uint8 eUN20State;   // Current state of the UN20
+  uint8 iCrashLogValid; // true if crash log data available
+  uint8 iHwVersion;     // hardware version
+  uint8 eUN20State;     // Current state of the UN20
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })
 MsgSensorInfo;
@@ -389,6 +405,27 @@ PACK( typedef struct tagDummyPayload
 })
 MsgDummyPayload;
 
+PACK( typedef struct tagCrashLogRequest
+{
+  uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
+})
+MsgCrashLogRequest;
+
+PACK( typedef struct tagCrashLogResponse
+{
+  int16 iSize;                // size of crash data
+  uint8 bData[1];             // the crash log data
+  uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
+})
+MsgCrashLogResponse;
+
+PACK( typedef struct tagHardwareConfigRequest
+{
+  uint8  iHwConfig;           // How to configure the hardware
+  uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
+})
+MsgHardwareConfigRequest;
+
 //
 //
 //
@@ -434,6 +471,9 @@ PACK( typedef struct tagMsgPacket
     MsgRequestFragment  FragmentRequest;    // payload of MSG_GET_IMAGE_FRAGMENT and MSG_GET_TEMPLATE_FRAGMENT request
     MsgFragment         DataFragment;       // payload for MSG_GET_IMAGE_FRAGMENT and MSG_GET_TEMPLATE_FRAGMENT response
     MsgImageQuality     ScanQuality;        // payload for MSG_IMAGE_QUALITY
+    MsgCrashLogRequest  CrashLogRequest;    // payload for MSG_GET_CRASH_LOG request
+    MsgCrashLogResponse CrashLogResponse;   // payload for MSG_GET_CRASH_LOG response
+    MsgHardwareConfigRequest HardwareConfig;// payload for MSG_SET_HW_CONFIG request
     MsgDummyPayload     DummyPayload;       // Used for creating no-payload messages
   })
   oPayload;

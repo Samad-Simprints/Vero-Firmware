@@ -147,6 +147,17 @@ PINFUNC_DEF( DEBUG_GPIO3,             4, 15, H, GPIO, PIN_OUT )                 
 PINFUNC_DEF( DEBUG_TXD0,              3,  3, L, ALT2, PIN_OUT )                 // pin 6_4
 PINFUNC_DEF( DEBUG_RXD0,              3,  4, L, ALT2, PIN_IN )                  // pin 6_5
 
+//
+// Phase 2 extensions
+//
+// Programming support
+PINFUNC_DEF( LPC_USB_BYPASS_EN,       2, 13, H, GPIO, PIN_OUT )                 // pin 5_4
+PINFUNC_DEF( LPC_BOOTLDR_EN,          2, 14, H, GPIO, PIN_OUT )                 // pin 5_5
+PINFUNC_DEF( UN20_BOOTSEL0_EN,        2, 15, H, GPIO, PIN_OUT )                 // pin 5_6
+// Hardware version information
+PINFUNC_DEF( HW_ID_0,                 7,  1, L, ALT4, PIN_IN | PIN_PULL_UP )    // pin e_1
+PINFUNC_DEF( HW_ID_1,                 7,  2, L, ALT4, PIN_IN | PIN_PULL_UP )    // pin e_2
+PINFUNC_DEF( HW_ID_2,                 7,  3, L, ALT4, PIN_IN | PIN_PULL_UP )    // pin e_3
 
 #ifdef __cplusplus
 }

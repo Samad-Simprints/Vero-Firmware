@@ -467,6 +467,22 @@ static bool boUsb( char **papzArgs, int iInstance, int iNumArgs )
     }
     break;
 
+  case MSG_GET_CRASH_LOG:    // Processed by lpc App
+    {
+      vSetupMessage( &sMsg, MSG_GET_CRASH_LOG, MSG_STATUS_GOOD, &sCrashLog.oPayload, sizeof( sCrashLog.oPayload.CrashLogRequest ));
+      vUSBRx( &sMsg );
+    }
+    break;
+
+  case MSG_SET_HW_CONFIG:    // Processed by lpc App
+    {
+      sHwConfig.oPayload.HardwareConfig.iHwConfig = iArg;
+      vSetupMessage( &sMsg, MSG_SET_HW_CONFIG, MSG_STATUS_GOOD, &sHwConfig.oPayload, sizeof( sHwConfig.oPayload.HardwareConfig ));
+      vUSBRx( &sMsg );
+    }
+    break;
+
+
   default:
     break;
 
@@ -566,6 +582,16 @@ void vHalInit(void)
   // Make sure the UN20 is powered off
   UN20B_POWER->vConfigure();
   UN20B_POWER->vSet( false );
+
+  LPC_USB_BYPASS_EN->vConfigure();
+  LPC_BOOTLDR_EN->vConfigure();
+  UN20_BOOTSEL0_EN->vConfigure();
+
+  // Hardware version information
+  HW_ID_0->vConfigure();
+  HW_ID_1->vConfigure();
+  HW_ID_2->vConfigure();
+
 #if 0
   BAT_MON_0->vConfigure();
   BAT_MON_1->vConfigure();
@@ -834,6 +860,51 @@ int iBatteryVoltage(int iChannel)
   //iReadBandGap();
   return iChannelValue;
 
+}
+
+//
+// read the hardware version id from the board
+//
+int iHardwareVersion(void)
+{
+  int iVersion = 0;
+
+#if !defined(EVAL_BOARD)
+  iVersion |= ( HW_ID_0->boGet() ? 0x1 : 0x00 );
+  iVersion |= ( HW_ID_1->boGet() ? 0x2 : 0x00 );
+  iVersion |= ( HW_ID_2->boGet() ? 0x4 : 0x00 );
+#endif
+  return iVersion;
+}
+
+//
+// Control the switches used to permit reprogramming of devices
+//
+void vSetHardwareConfig( int iMode )
+{
+  DEBUGMSG(ZONE_COMMANDS,("vSetHardwareConfig(%d)\n", iMode));
+
+#if !defined(EVAL_BOARD)
+  switch ( iMode )
+  {
+    case MODE_NORMAL:
+      LPC_USB_BYPASS_EN->vSet(false);
+      LPC_BOOTLDR_EN->vSet(false);
+      break;
+    case MODE_UN20_BOOTLOADER:
+      LPC_USB_BYPASS_EN->vSet(true);
+      LPC_BOOTLDR_EN->vSet(true);
+      break;
+    case MODE_UN20_FTP:
+      LPC_USB_BYPASS_EN->vSet(true);
+      LPC_BOOTLDR_EN->vSet(false);
+      break;
+    case MODE_LPC_BOOTLOADER:
+      LPC_USB_BYPASS_EN->vSet(false);
+      LPC_BOOTLDR_EN->vSet(true);
+      break;
+  }
+#endif
 }
 
 //

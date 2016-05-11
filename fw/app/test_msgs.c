@@ -153,3 +153,14 @@
   .oPayload.StoreScan = { 14, "this-is-a-guid", 0, 0xF5F5F5F5 }
   };
 
+  const MsgPacket sCrashLog = {
+  .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgCrashLogRequest ), MSG_GET_CRASH_LOG, 0x00 },
+  .oPayload.CrashLogRequest = { 0xF5F5F5F5 }
+  };
+
+  MsgPacket sHwConfig = {
+  .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgHardwareConfigRequest ), MSG_SET_HW_CONFIG, 0x00 },
+  .oPayload.HardwareConfig = { 0x00, 0xF5F5F5F5 }
+  };
+
+

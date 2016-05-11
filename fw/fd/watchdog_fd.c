@@ -35,8 +35,8 @@
 //******************************************************************************
 // Constants
 //******************************************************************************
-#undef WATCHDOG_HARDWARE_ENABLED
-#define WATCHDOG_HARDWARE_ENABLED (1)
+//#undef WATCHDOG_HARDWARE_ENABLED
+//#define WATCHDOG_HARDWARE_ENABLED (1)
 
 #define WDOG_MAX_TASKS            20
 #define WDOG_SLEEP_PERIOD_MS    1000
@@ -141,9 +141,10 @@ static void vWatchdogTask( void *pvParams )
 
 void vWATCHDOGstart( void )
 {
-#if WATCHDOG_HARDWARE_ENABLED
   // log a default watchdog event which will be inplace should the watchdog trigger
   vLogWatchdog();
+
+#if WATCHDOG_HARDWARE_ENABLED
   // enable the watchdog hardware
   vWDOGDDinit();
 

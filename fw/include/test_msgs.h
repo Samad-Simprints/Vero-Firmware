@@ -56,6 +56,9 @@ extern MsgPacket sGetImageFragment;
 extern MsgPacket sGetTemplateFragment;
 extern MsgPacket sSaveImage;
 
+extern MsgPacket sCrashLog;
+extern MsgPacket sHwConfig;
+
 #ifdef __cplusplus
 }
 #endif

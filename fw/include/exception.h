@@ -140,6 +140,9 @@ extern void vLogAssert( const byte bReason, const char *pzFile, dword dwLine, co
 extern void vLogGeneral( byte bReason, void *pvRecord, word wLength );
 extern void vLogWatchdog( void );
 extern void vPrintCrashRecord( tExceptionRecord *poException );
+extern bool boLogCache( tExceptionRecord *poLogCache );
+extern bool boLogCacheGet( tExceptionRecord **poException, word *pwLength );
+extern void vLogCacheClear();
 
 #ifdef __cplusplus
 }

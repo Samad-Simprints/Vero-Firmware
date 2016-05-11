@@ -48,6 +48,8 @@
 #include "timers.h"
 #include "semphr.h"
 
+extern byte *pbGetBluetoothAddress(void);
+
 //******************************************************************************
 // Private Function Prototypes
 //******************************************************************************
@@ -103,6 +105,9 @@ enum {
 // Default system idle timer value: 60 minutes in ms.
 #define SYSTEM_IDLE_TIMEOUT_MS             ( 60 * 60 * 1000 )
 
+// Default delay before actioning a hardware configuration change
+#define LPC_HARDWARE_CONFIG_DELAY_MS        ( 2 * 1000 )
+
 //******************************************************************************
 // Definitions
 //******************************************************************************
@@ -138,9 +143,6 @@ static bool boPhoneBtConnected = false;
 static bool boPhoneUsbConnected = false;
 static bool boUn20UsbConnected = false;
 
-// Our Bluetooth address.
-static BT_ADDR sScannerBtAddr = { 0, 0, 0, 0, 0, 0 };
-
 static bool boNeedUn20Info = false;        // True if we want the UN20's config info. This is set
                                            // when the UN20 reports READY (to get the UN20 version information)
 
@@ -171,7 +173,7 @@ static xTimerHandle hTimer;
 
 // UN20 Config items.
 
-static int16 iUn20Version = 0;	           // UN20 client firmware version
+static int16 iUn20Version = 0;	           // UN20 client firmware version (0 means not recovered yet)
 static int16 iUn20StoreCount = 0;          // Number of stored images and templates
 
 // message structure used for internally generated messages to the UN20
@@ -313,24 +315,31 @@ static void vVibrateTrigger(int iVibrateMs)
 static void vReturnSensorInfo( MsgPacket *psMsg, int iMsglength )
 {
   MsgSensorInfo sInfo;
+  tExceptionRecord *poException;
+  word wLogEventLength;
 
   DEBUGMSG(ZONE_TRACE,("vReturnSensorInfo\n"));
 
   // Build up the payload.
-  memcpy((void *) &sInfo.btAddr, (void *) sScannerBtAddr, sizeof( sScannerBtAddr ));
-  sInfo.iUCVersion = 0 /* TODO */;
+  memcpy((void *) &sInfo.btAddr, (void *) pbGetBluetoothAddress, 6);
+  sInfo.iUCVersion = INDEX_REVISION_NUMBER;
   sInfo.iUN20Version = iUn20Version;
   sInfo.iBatteryLevel1 = iBatteryVoltage( 0 );
   sInfo.iBatteryLevel2 = iBatteryVoltage( 1 );
-  sInfo.iStoreCount = iUn20StoreCount;
   sInfo.eUN20State = eUN20State;
+  sInfo.iCrashLogValid = ( boLogCacheGet( &poException, &wLogEventLength ) && poException->sHeader.dwReason != ERROR_REQUESTED );
+  sInfo.iHwVersion = iHardwareVersion();
 
   vSetupMessage( psMsg, (MSG_GET_SENSOR_INFO | MSG_REPLY), MSG_STATUS_GOOD, &sInfo, sizeof( sInfo ) );
 
-  DEBUGMSG(ZONE_TRACE,("Status: UN20:%d, Bat1:%d, Bat2:%d\n",
+  DEBUGMSG(ZONE_TRACE,("Status: UN20:%d, Bat1:%d, Bat2:%d, Clog:%d, Hw:%d, UN20Ver:%d, LPCVer:%d\n",
                         psMsg->oPayload.SensorInfo.eUN20State,
                         psMsg->oPayload.SensorInfo.iBatteryLevel1,
-                        psMsg->oPayload.SensorInfo.iBatteryLevel2));
+                        psMsg->oPayload.SensorInfo.iBatteryLevel2,
+                        psMsg->oPayload.SensorInfo.iCrashLogValid,
+                        psMsg->oPayload.SensorInfo.iHwVersion,
+                        psMsg->oPayload.SensorInfo.iUN20Version,
+                        psMsg->oPayload.SensorInfo.iUCVersion));
 
   // Send the response message from the UN20 on to the phone
   iIfSend((IF_USB | IF_BT), psMsg, psMsg->Msgheader.iLength);
@@ -738,7 +747,83 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     // Else ignore this button press.
     break;
 
+  case MSG_GET_CRASH_LOG:
+  {
+    tExceptionRecord *poException;
+    word wLogEventLength;
 
+    // if the log is valid send it and then clear it, otherwise reject the request
+    if ( boLogCacheGet( &poException, &wLogEventLength ) )
+    {
+      sInternalMsg.oPayload.CrashLogResponse.iSize = wLogEventLength;
+      memcpy(&sInternalMsg.oPayload.CrashLogResponse.bData, poException, wLogEventLength);
+
+      vSetupMessage( psPacket, (MSG_GET_CRASH_LOG | MSG_REPLY), MSG_STATUS_GOOD,
+                     &sInternalMsg.oPayload, sizeof(sInternalMsg.oPayload.CrashLogResponse.iSize) + wLogEventLength );
+#ifdef DEBUG
+    vPrintCrashRecord( poException );
+#endif
+      vLogCacheClear();
+    }
+    else
+    {
+      vSetupNACK( psPacket, MSG_STATUS_NO_CRASH_LOG );
+    }
+
+    // Send the response message  on to the phone
+    iIfSend((IF_USB | IF_BT), (void *) psPacket, psPacket->Msgheader.iLength);
+  }
+    break;
+
+  case MSG_SET_HW_CONFIG:
+  {
+    int iHwConfig = psPacket->oPayload.HardwareConfig.iHwConfig;
+
+    if ( eUN20State != UN20_STATE_SHUTDOWN )
+    {
+      vSetupNACK( psPacket, MSG_STATUS_UN20_STATE_ERROR );
+    }
+    else if ( (iHwConfig != HW_MODE_NORMAL ) &&
+              (iHwConfig != HW_MODE_UN20_BOOTLOADER ) &&
+              (iHwConfig != HW_MODE_UN20_FTP ) &&
+              (iHwConfig != HW_MODE_LPC_BOOTLOADER ) )
+    {
+      vSetupNACK( psPacket, MSG_STATUS_BAD_PARAMETER );
+    }
+    else
+    {
+      vSetupACK( psPacket );
+    }
+
+    // Send the response message from to the phone
+    iIfSend((IF_USB | IF_BT), (void *) psPacket, psPacket->Msgheader.iLength);
+
+    // small delay before we action the hardware changes
+    vTaskDelay( MS_TO_TICKS( LPC_HARDWARE_CONFIG_DELAY_MS ));
+
+    switch ( iHwConfig )
+    {
+      case HW_MODE_NORMAL:
+        vSetHardwareConfig( MODE_NORMAL );
+        vPowerUn20Off();
+        break;
+      case HW_MODE_UN20_BOOTLOADER:
+        vSetHardwareConfig( MODE_UN20_BOOTLOADER );
+        vPowerUn20On();
+        break;
+      case HW_MODE_UN20_FTP:
+        vSetHardwareConfig( MODE_UN20_FTP );
+        vPowerUn20On();
+        break;
+      case HW_MODE_LPC_BOOTLOADER:
+        vSetHardwareConfig( MODE_LPC_BOOTLOADER );
+        vLogGeneral( ERROR_REQUESTED, 0, 0 );
+        break;
+      default:
+        break;
+    }
+    break;
+  }
   case MSG_REPORT_UI:
   case MSG_UN20_WAKINGUP:
   default:
@@ -1152,7 +1237,7 @@ void vLpcAppTask( void *pvParameters )
     // See if we need to retrieve config info from the UN20.
     if ( boNeedUn20Info == true )
     {
-      if ( boUn20UsbConnected == true )
+      if ( ( boUn20UsbConnected == true ) && ( eUN20State == UN20_STATE_READY ) )
       {
         // Connected to the UN20 and need its config. Fire off a request.
         vSetupMessage( &sInternalMsg, MSG_UN20_GET_INFO, MSG_STATUS_GOOD, NULL, 0 );

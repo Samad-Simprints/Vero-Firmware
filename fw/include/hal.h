@@ -90,6 +90,14 @@ typedef enum
 }
 tInterfaceEvent;
 
+typedef enum
+{
+  MODE_NORMAL,
+  MODE_UN20_BOOTLOADER,
+  MODE_UN20_FTP,
+  MODE_LPC_BOOTLOADER
+} tHardwareMode;
+
 // Event data for an INTERFACE_EVENT_RX_DATA event.
 PACK ( typedef struct
 {
@@ -153,6 +161,10 @@ extern void vPowerSelfOn();	// called early to latch power on
 extern void vPowerSelfNotify(vCallback pvCallback); // notification of power button press
 
 extern int iBatteryVoltage(int iChannel);
+
+extern int iHardwareVersion(void);
+
+extern void vSetHardwareConfig( int iMode );
 
 #ifdef __cplusplus
 }

@@ -34,6 +34,7 @@
 //#include "global.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "cli.h"
 #include "gpio_dd.hpp"
@@ -89,23 +90,31 @@ public:
   tLock                    *poGetPrintfLock()                       { return &oPrintfLock; }
 
   inline ISerialPort       *poGetDebugPort()                        { return poDebugPort; }
-  bool                      boCrashDataAvailable;
 
 private:
 
   tLock                     oPrintfLock;
 
   ISerialPort              *poDebugPort;
-
 };
 
 unsigned long ulRunTimeStatsClock;
+
+// structure in CPU flash that contains the BTADDR
+PACK(
+struct flash_bt_addr
+{
+  byte BDADDR[6];
+  word crc;
+});
+
 
 //******************************************************************************
 // Local Storage
 //******************************************************************************
 
 static tMain oMain;
+static tExceptionRecord oExceptionRecord;
 
 //******************************************************************************
 //******************************************************************************
@@ -124,6 +133,7 @@ static bool boQuit(char **papzArgs, int iInstance, int iNumArgs);
 static bool boUN20Echo(char **papzArgs, int iInstance, int iNumArgs);
 static bool boSleep(char **papzArgs, int iInstance, int iNumArgs);
 static bool boCrashLog(char **papzArgs, int iInstance, int iNumArgs);
+static bool boLogEntry(char **papzArgs, int iInstance, int iNumArgs);
 
 const tParserEntry asMainCLI[] =
 {
@@ -132,7 +142,8 @@ const tParserEntry asMainCLI[] =
 #endif
   CLICMD( "un20ser", "Send to UN20 Uart", 2, "", boUN20Echo, 0 ),
   CLICMD( "sleep", "Sleep", 1, "", boSleep, 0 ),
-  CLICMD( "clog", "Crash log", 1, "", boCrashLog, 0 )
+  CLICMD( "clog", "Crash log", 1, "", boCrashLog, 0 ),
+  CLICMD( "abort","make crash log entry", 1, "", boLogEntry, 0 )
 };
 
 //******************************************************************************
@@ -157,13 +168,14 @@ static const tLineCoding sUN20portConfig = {
   /*.bDataBits =*/ 8                                // Number of data bits
 };
 
-static tExceptionRecord oException;
-
 static bool boCrashLog(char **papzArgs, int iInstance, int iNumArgs)
 {
-  if ( oMain.boCrashDataAvailable )
+  tExceptionRecord *poException;
+  word wLogEventLength;
+
+  if ( boLogCacheGet( &poException, &wLogEventLength ) )
   {
-    vPrintCrashRecord( &oException );
+    vPrintCrashRecord( poException );
   }
   else
   {
@@ -202,6 +214,11 @@ static bool boSleep(char **papzArgs, int iInstance, int iNumArgs)
   return true;
 }
 
+static bool boLogEntry(char **papzArgs, int iInstance, int iNumArgs)
+{
+  abort();
+  return true;
+}
 
 //******************************************************************************
 // main
@@ -302,22 +319,6 @@ void check_failed(uint8_t *file, uint32_t line)
   vLogAssert( ERROR_SOFTWARE_ASSERT, (const char*)file, line, "LPClib" );
 }
 
-void tMain::vRecoverCrashLog()
-{
-  tExceptionRecord *poException;
-  word wLength;
-  bool boLogEventPresent = boLogGet( &poException, &wLength );
-
-  if ( boLogEventPresent && poException->sHeader.dwReason != ERROR_REQUESTED )
-  {
-      memcpy( &oException, poException, wLength );
-      boCrashDataAvailable = true;
-  }
-
-  // Invalidate whatever was stored in RAM
-  vLogClear();
-}
-
 uint32_t	xCGU_Init(void)
 {
   CGU_SetXTALOSC(12000000);
@@ -338,8 +339,7 @@ uint32_t	xCGU_Init(void)
 
 tMain::tMain()
   : oPrintfLock(),
-    poDebugPort( 0 ),
-    boCrashDataAvailable( false )
+    poDebugPort( 0 )
 {
 }
 
@@ -366,7 +366,7 @@ bool vCheckForPairingClear()
 {
   bool boScan;
   bool boPower;
-  /* configure the buttons so we can sense then */
+  /* configure the buttons so we can sense them */
   BUTTON_0_POWER->vConfigure();
   BUTTON_1_SCAN->vConfigure();
 
@@ -380,22 +380,16 @@ bool vCheckForPairingClear()
   }
 }
 
-// structure in CPU flash that contains the BTADDR
-PACK(
-struct flash_bt_addr
-{
-  byte BDADDR[6];
-  word crc;
-});
-
 // return a pointer to a 6 byte BTADDR, called from the bluetooth stack
+// must return something that can be used as a Bluetooth address
 byte *pbGetBluetoothAddress(void)
 {
+  static flash_bt_addr default_addr = { { 0x12, 0x34, 0x56, 0x00, 0x00, 0x00 }, 0 };
   struct flash_bt_addr *paddr = (struct flash_bt_addr *)FLASH_ADDR(FLASH_BANK_B, FLASH_SECTOR_1);
 
   if ( paddr->crc != wCRCgenerateCRC( CRC_SEED, paddr->BDADDR, sizeof(paddr->BDADDR) ) )
   {
-    paddr = NULL;
+    paddr = &default_addr;
   }
   return paddr->BDADDR;
 }
@@ -420,7 +414,10 @@ int main( void )
   // latch the power on
   vPowerSelfOn();
 
-  //vHalTest();
+  // preserve the crash log
+  boLogCache( &oExceptionRecord );
+
+  vLogInit( INDEX_REVISION_NUMBER );
 
   oMain.vInit();
 
@@ -435,9 +432,6 @@ int main( void )
   {
     boCLIregisterEntry( &asMainCLI[i] );
   }
-
-  // recover the crash log if present
-  oMain.vRecoverCrashLog();
 
   // clear link keys if scan button pressed at power up
   vCheckForPairingClear();
