@@ -66,7 +66,7 @@
     (DRC_Run_Physical_Custom_DRC "FALSE")
     (Netlist_TAB "8")
     (OTHER_Part_Value "{Value}")
-    (OTHER_Netlist_File "SCANNER.asc")
+    (OTHER_Netlist_File "SCANNER_revB.asc")
     (OTHER_Netlist_File2 "SCANNER.CMP")
     (OTHER_View_Output "TRUE")
     (OTHER_View_Output2 "FALSE")
@@ -81,7 +81,8 @@
     (OTHER_Switch6 "FALSE")
     (BOM_Scope "0")
     (BOM_Mode "0")
-    (BOM_Report_File "C:\Working\index\trunk\hw\scanner\schematic\SCANNER.BOM")
+    (BOM_Report_File
+       "C:\Working\index\trunk\hw\scanner\schematic\SCANNER_revb.BOM")
     (BOM_Merge_Include "FALSE")
     (BOM_Property_Combine_7.0
        "{Item}\t{Quantity}\t{Reference}\t{Value}\t{PCB Footprint}\t{Manufacturer}\t{Manufacturer Part Number}\t{Supplier}\t{Supplier Part number}\t\t")
@@ -103,13 +104,31 @@
       (DisplayName ".\scanner.asc"))
     (File ".\scanner.bom"
       (Type "Report")
-      (DisplayName ".\scanner.bom")))
+      (DisplayName ".\scanner.bom"))
+    (File ".\scanner_revb.bom"
+      (Type "Report")))
   (Folder "Referenced Projects")
   (PartMRUSelector
+    (AT45DB161E-SSHD-B
+      (FullPartName "AT45DB161E-SSHD-B.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
     (BC847BS
       (FullPartName "BC847BSB.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "1"))
+    (Wurth_LED_BLUE
+      (FullPartName "Wurth_LED_BLUE.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (TS3USB221E
+      (FullPartName "TS3USB221E.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (MCDHN-02F-V
+      (FullPartName "MCDHN-02F-V.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
     (Wurth_LED_BICOLOUR_RED_GREEN
       (FullPartName "Wurth_LED_BICOLOUR_RED_GREEN.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
@@ -122,10 +141,6 @@
       (FullPartName "SN74LVC2G02DCURB.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "1"))
-    (TS3USB221E
-      (FullPartName "TS3USB221E.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
     ("SPST-NO, SKRAALE010"
       (FullPartName "SPST-NO, SKRAALE010.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
@@ -196,19 +211,6 @@
       (FullPartName "SPST-NO, KSEM31G LFS.Normal")
       (LibraryName
          "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (LED_0603_RED
-      (FullPartName "LED_0603_RED.Normal")
-      (LibraryName
-         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (FERRITE_BEAD
-      (FullPartName "FERRITE_BEAD.Normal")
-      (LibraryName
-         "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (OFFPAGELEFT-L
-      (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
       (DeviceIndex "0")))
   (GlobalState
     (FileView
@@ -217,7 +219,6 @@
       (Path "Design Resources" ".\scanner_revb.dsn" "SCHEMATIC1")
       (Path "Design Resources" ".\scanner_revb.dsn" "Bluetooth")
       (Path "Design Resources" ".\scanner_revb.dsn" "CPU")
-      (Path "Design Resources" ".\scanner_revb.dsn" "External Memory")
       (Path "Design Resources" ".\scanner_revb.dsn" "Sensor Interface")
       (Path "Design Resources" ".\scanner_revb.dsn" "USB and Battery")
       (Path "Design Resources" ".\scanner_revb.dsn" "USB Connector")
@@ -231,7 +232,103 @@
       (Type "COrCapturePMDoc")
       (Frame
         (Placement "44 2 3 -1 -1 -8 -30 0 200 0 415"))
-      (Tab 0))) >>>>>>> .r24
+      (Tab 0))
+    (Doc
+      (Type "TextFile")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 150 1218 150 603"))
+      (Path "c:\working\index\trunk\hw\scanner\schematic\scanner.asc")
+      (Scroll "27"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 50 1118 50 503")
+        (Scroll "0 231")
+        (Zoom "88")
+        (Occurrence "/User Interface"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "User Interface")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 75 1143 75 528")
+        (Scroll "-72 0")
+        (Zoom "53")
+        (Occurrence "/USB and Battery"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "USB and Battery")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 100 1168 100 553")
+        (Scroll "0 367")
+        (Zoom "88")
+        (Occurrence "/"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 175 1243 175 628")
+        (Scroll "-72 0")
+        (Zoom "53")
+        (Occurrence "/CPU"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "CPU")
+      (Page "PAGE2"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 200 1268 200 653")
+        (Scroll "176 514")
+        (Zoom "88")
+        (Occurrence "/CPU"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "CPU")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 0 1068 0 453")
+        (Scroll "-72 0")
+        (Zoom "53")
+        (Occurrence "/CPU"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "CPU")
+      (Page "PAGE3"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 125 900 125 578")
+        (Scroll "1414 428")
+        (Zoom "212")
+        (Occurrence "/USB Connector"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "USB Connector")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 200 975 200 653")
+        (Scroll "41 71")
+        (Zoom "85")
+        (Occurrence "/Bluetooth"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "Bluetooth")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 50 825 50 503")
+        (Scroll "484 0")
+        (Zoom "100")
+        (Occurrence "/Sensor Interface"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "Sensor Interface")
+      (Page "PAGE1"))) >>>>>>> .r24
   (HierarchyView)
   (Doc
     (Type "COrCapturePMDoc")
