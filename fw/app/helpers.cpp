@@ -409,9 +409,7 @@ extern "C" void vApplicationIdleHook( void )
   // put the processor to sleep, as there is nothing to do right now
   //
 #if 1//ndef DEBUG
-  DEBUG_GPIO0->vSet(true);
   __asm__( "WFI" );
-  DEBUG_GPIO0->vSet(false);
 #endif
 #endif
 }

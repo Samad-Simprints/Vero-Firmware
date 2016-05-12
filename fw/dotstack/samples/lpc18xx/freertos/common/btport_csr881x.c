@@ -349,15 +349,26 @@ static void execScriptCallback(bt_bool success, btx_csr_exec_script_buffer_t* bu
   }
 }
 
+// define a key set array that will define our MAC address
+static bt_uint BC7_PS_VALUES_2[7] = { SET_PS_VALUE_BDADDR(PSKEY_BDADDR, 0x00, 0x00),  0x0000 };
+
+// a version of SET_PS_VALUE_BDADDR that can generate the address dynamically into an array
+#define SET_PS_VALUE_BDADDR_ARRAY(array, key, m, l) \
+   array[0]=key, array[1]=4, \
+   array[2]=(uint16_t)((((uint32_t)l) >> 16) & 0xFF), array[3]=(uint16_t)(l &0xFFFF), \
+   array[4]=(uint16_t)((((uint32_t)l) >> 24) & 0xFF), array[5]=(uint16_t)(m &0xFFFF), \
+   array[6]=0x0000
+
+
 static void setPsVarsCallback0(bt_bool success, btx_csr_set_ps_vars_buffer_t* buffer)
 {
-  bt_uint BC7_PS_VALUES_1[] = {
-      SET_PS_VALUE_BDADDR(PSKEY_BDADDR, mModuleAddress.bd_addr_l, mModuleAddress.bd_addr_m),  0x0000 };
+  // generate the PSKEY_BDADDR command
+  SET_PS_VALUE_BDADDR_ARRAY(BC7_PS_VALUES_2, PSKEY_BDADDR, mModuleAddress.bd_addr_l, mModuleAddress.bd_addr_m);
 
   if (success)
   {
     // Set configuration parameters (the Bluetooth address).
-    btx_csr_set_ps_vars(BC7_PS_VALUES_1, &mWorkBuffers.btx_csr_set_ps_vars, setPsVarsCallback, NULL);
+    btx_csr_set_ps_vars(BC7_PS_VALUES_2, &mWorkBuffers.btx_csr_set_ps_vars, setPsVarsCallback, NULL);
   }
   else
   {

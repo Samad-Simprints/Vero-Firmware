@@ -398,7 +398,7 @@ int main( void )
 {
   DEBUG_MODULE_INIT( INDEX_DEFAULTS );
 
-#ifdef DEBUG
+#if 1
   // debug builds always have output unlocked
   boOutputEnable = true;
 #endif
