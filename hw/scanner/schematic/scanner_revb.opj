@@ -113,6 +113,22 @@
       (Type "Report")))
   (Folder "Referenced Projects")
   (PartMRUSelector
+    (bq27426
+      (FullPartName "bq27426.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (TS3USB221E
+      (FullPartName "TS3USB221E.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (MUN5211DW1T1G
+      (FullPartName "MUN5211DW1T1G.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "1"))
+    (DDC114EU
+      (FullPartName "DDC114EU.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "1"))
     (OFFPAGELEFT-R
       (LibraryName "C:\CADENCE\SPB_16.6\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
       (DeviceIndex "0"))
@@ -130,10 +146,6 @@
       (DeviceIndex "1"))
     (Wurth_LED_BLUE
       (FullPartName "Wurth_LED_BLUE.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (TS3USB221E
-      (FullPartName "TS3USB221E.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0"))
     (MCDHN-02F-V
@@ -201,25 +213,19 @@
     (LED_BICOLOUR_RED_GREEN
       (FullPartName "LED_BICOLOUR_RED_GREEN.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    ("SPST-NO, KSC341GLFS"
-      (FullPartName "SPST-NO, KSC341GLFS.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    ("Vibration Motor"
-      (FullPartName "Vibration Motor.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (BC857
-      (FullPartName "BC857.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0")))
   (GlobalState
     (FileView
       (Path "Design Resources")
+      (Path "Design Resources" ".\scanner_revb.dsn")
+      (Path "Design Resources" ".\scanner_revb.dsn" "SCHEMATIC1")
+      (Path "Design Resources" ".\scanner_revb.dsn" "Bluetooth")
+      (Path "Design Resources" ".\scanner_revb.dsn" "USB Connector")
+      (Path "Design Resources" ".\scanner_revb.dsn" "Design Cache")
       (Path "Design Resources" "Library")
       (Path "Design Resources" "Library" ".\scanner.olb")
-      (Path "Outputs"))
+      (Path "Outputs")
+      (Select "Design Resources" ".\scanner_revb.dsn"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
@@ -230,8 +236,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 100 1168 100 553")
-        (Scroll "-72 0")
-        (Zoom "53")
+        (Scroll "1522 1174")
+        (Zoom "212")
         (Occurrence "/"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "SCHEMATIC1")
@@ -240,8 +246,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 175 1243 175 628")
-        (Scroll "209 276")
-        (Zoom "88")
+        (Scroll "1925 1056")
+        (Zoom "212")
         (Occurrence "/CPU"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "CPU")
@@ -260,8 +266,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 0 1068 0 453")
-        (Scroll "708 367")
-        (Zoom "212")
+        (Scroll "-72 0")
+        (Zoom "53")
         (Occurrence "/CPU"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "CPU")
@@ -269,32 +275,12 @@
     (Doc
       (Type "COrSchematicDoc")
       (Frame
-        (Placement "44 0 1 -1 -1 -8 -30 200 975 200 653")
-        (Scroll "0 71")
-        (Zoom "85")
-        (Occurrence "/Bluetooth"))
-      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
-      (Schematic "Bluetooth")
-      (Page "PAGE1"))
-    (Doc
-      (Type "COrSchematicDoc")
-      (Frame
         (Placement "44 0 1 -1 -1 -8 -30 25 1093 25 478")
-        (Scroll "134 477")
-        (Zoom "106")
+        (Scroll "2237 1423")
+        (Zoom "212")
         (Occurrence "/USB and Battery"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "USB and Battery")
-      (Page "PAGE1"))
-    (Doc
-      (Type "COrSchematicDoc")
-      (Frame
-        (Placement "44 0 1 -1 -1 -8 -30 50 1118 50 503")
-        (Scroll "-72 0")
-        (Zoom "53")
-        (Occurrence "/User Interface"))
-      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
-      (Schematic "User Interface")
       (Page "PAGE1"))
     (Doc
       (Type "COrSchematicDoc")
@@ -310,12 +296,28 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 0 1068 0 453")
-        (Scroll "-72 0")
-        (Zoom "53")
+        (Scroll "1518 1031")
+        (Zoom "212")
         (Occurrence "/Sensor Interface"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "Sensor Interface")
-      (Page "PAGE1"))) >>>>>>> .r24
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 175 950 175 628")
+        (Scroll "0 0")
+        (Zoom "100")
+        (Occurrence "/User Interface"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
+      (Schematic "User Interface")
+      (Page "PAGE1"))
+    (Doc
+      (Type "TextFile")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 125 900 125 578"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_revB.asc")
+      (Scroll "117"))) >>>>>>> .r24
   (HierarchyView)
   (Doc
     (Type "COrCapturePMDoc")
@@ -353,4 +355,5 @@
     (Schematic "USB and Battery")
     (Page "PAGE1"))
   (MPSSessionName "paul")
-  (ISPCBBASICLICENSE "false"))
+  (ISPCBBASICLICENSE "false")
+  (LastUsedLibraryBrowseDirectory "C:\Cadence\SPB_16.6\tools\capture\library"))
