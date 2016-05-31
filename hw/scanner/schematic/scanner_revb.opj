@@ -113,6 +113,14 @@
       (Type "Report")))
   (Folder "Referenced Projects")
   (PartMRUSelector
+    (TP_DFM_NOFILL
+      (FullPartName "TP_DFM_NOFILL.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
+    (LTC2941
+      (FullPartName "LTC2941.Normal")
+      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
+      (DeviceIndex "0"))
     (bq27426
       (FullPartName "bq27426.Normal")
       (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
@@ -205,14 +213,6 @@
       (FullPartName "TPVIA.Normal")
       (LibraryName
          "C:\WORKDIRECTORY\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (LED_0603_GREEN
-      (FullPartName "LED_0603_GREEN.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
-      (DeviceIndex "0"))
-    (LED_BICOLOUR_RED_GREEN
-      (FullPartName "LED_BICOLOUR_RED_GREEN.Normal")
-      (LibraryName "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER.OLB")
       (DeviceIndex "0")))
   (GlobalState
     (FileView
@@ -233,11 +233,18 @@
         (Placement "44 2 3 -1 -1 -8 -30 0 200 0 415"))
       (Tab 0))
     (Doc
+      (Type "TextFile")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 150 925 150 603"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_revB.asc")
+      (Scroll "202")
+      (Select "204 1 204 4"))
+    (Doc
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 100 1168 100 553")
-        (Scroll "1522 1174")
-        (Zoom "212")
+        (Scroll "-72 0")
+        (Zoom "53")
         (Occurrence "/"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "SCHEMATIC1")
@@ -256,8 +263,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 200 1268 200 653")
-        (Scroll "-72 0")
-        (Zoom "53")
+        (Scroll "480 108")
+        (Zoom "106")
         (Occurrence "/CPU"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "CPU")
@@ -266,8 +273,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 0 1068 0 453")
-        (Scroll "-72 0")
-        (Zoom "53")
+        (Scroll "2122 1590")
+        (Zoom "212")
         (Occurrence "/CPU"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "CPU")
@@ -276,8 +283,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 25 1093 25 478")
-        (Scroll "2237 1423")
-        (Zoom "212")
+        (Scroll "0 124")
+        (Zoom "106")
         (Occurrence "/USB and Battery"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "USB and Battery")
@@ -286,7 +293,7 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 75 1168 75 447")
-        (Scroll "353 151")
+        (Scroll "653 286")
         (Zoom "106")
         (Occurrence "/USB Connector"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
@@ -296,8 +303,8 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 0 1068 0 453")
-        (Scroll "1518 1031")
-        (Zoom "212")
+        (Scroll "722 167")
+        (Zoom "106")
         (Occurrence "/Sensor Interface"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "Sensor Interface")
@@ -306,18 +313,12 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 175 950 175 628")
-        (Scroll "0 0")
-        (Zoom "100")
+        (Scroll "762 227")
+        (Zoom "106")
         (Occurrence "/User Interface"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "User Interface")
-      (Page "PAGE1"))
-    (Doc
-      (Type "TextFile")
-      (Frame
-        (Placement "44 0 1 -1 -1 -8 -30 125 900 125 578"))
-      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_revB.asc")
-      (Scroll "117"))) >>>>>>> .r24
+      (Page "PAGE1"))) >>>>>>> .r24
   (HierarchyView)
   (Doc
     (Type "COrCapturePMDoc")
