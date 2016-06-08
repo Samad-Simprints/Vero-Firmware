@@ -1,11 +1,15 @@
 #!/bin/sh
+{
+DEBUG_OPTION=""
 echo "Starting UN20 server application"
 if [ -e /data/un20-debug ]; then
 echo "UN20 debug enabled"
-/data/index-un20app /dev/ttyS1 debug
-else
-/data/index-un20app /dev/ttyS1
+DEBUG_OPTION="debug"
 fi
+
+/data/index-un20app /dev/ttyS1 ${DEBUG_OPTION}
+
+if [ "$?" = "0" ]; then
 # when the app exits we need to halt
 if [ -e /data/no-shutdown ]; then
 echo "Shutdown inhibited by /data/no-shutdown"
@@ -13,3 +17,8 @@ else
 echo "Requesting system to shutdown"
 /sbin/halt
 fi
+else
+echo "Application returned error NOT shutting down"
+fi
+
+} > /dev/ttyS3 2>&1

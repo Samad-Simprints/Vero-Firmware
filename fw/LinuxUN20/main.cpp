@@ -157,7 +157,11 @@ static int serial_startup(char *port, struct termios *oldtio, int iBaudRate)
   because we don't want to get killed if linenoise sends CTRL-C.
   */
   fd = open(port, O_RDWR | O_NOCTTY );
-  if (fd <0) {perror(port); exit(-1); }
+  if ( fd < 0 )
+  {
+    perror(port);
+    return -1;
+  }
 
   tcgetattr(fd,oldtio); /* save current serial port settings */
   bzero(&newtio, sizeof(newtio)); /* clear struct for new port settings */
@@ -667,7 +671,7 @@ static void vMessageErrorCallback( tMsgError eErrorCode )
 main(int argc, char *argv[])
 {
   struct termios oldtio;
-  int iExitStatus = EXIT_SUCCESS;
+  int iExitStatus = EXIT_FAILURE;
 
   DEBUG_MODULE_INIT( INDEX_DEFAULTS );
 
@@ -680,27 +684,35 @@ main(int argc, char *argv[])
 
   if ( argc >= 2 )
   {
-    un20_sdk_startup();
     port_fd = serial_startup(argv[1], &oldtio, BAUDRATE);
-
-    vProtocolInit();
-    vProtocolMsgNotify( vMessageProcess );
-    vProtocolMsgError( vMessageErrorCallback );
+    if ( port_fd >= 0 )
+    {
+      if ( un20_sdk_startup() )
+      {
+        vProtocolInit();
+        vProtocolMsgNotify( vMessageProcess );
+        vProtocolMsgError( vMessageErrorCallback );
 
 #if 0
-    CLI_PRINT(("Please place finger on sensor and press <ENTER> "));
-    getc(stdin);
-    vIncomingBytes(MSG_SOURCE_UN20_USB, (uint8*)&sCaptureImagePacket, sCaptureImagePacket.Msgheader.iLength);
+        CLI_PRINT(("Please place finger on sensor and press <ENTER> "));
+        getc(stdin);
+        vIncomingBytes(MSG_SOURCE_UN20_USB, (uint8*)&sCaptureImagePacket, sCaptureImagePacket.Msgheader.iLength);
 #else
-    receiver(port_fd);
+        receiver(port_fd);
 #endif
-    un20_sdk_shutdown();
-    serial_shutdown(port_fd, &oldtio);
+        un20_sdk_shutdown();
+        serial_shutdown(port_fd, &oldtio);
+        iExitStatus = EXIT_SUCCESS;
+      }
+      else
+      {
+        serial_shutdown(port_fd, &oldtio);
+      }
+    }
   }
   else
   {
     CLI_PRINT(("usage: %s <serial-port> [debug]\n", argv[0]));
-    iExitStatus = EXIT_FAILURE;
   }
 
   return iExitStatus;

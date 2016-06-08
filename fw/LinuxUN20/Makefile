@@ -37,9 +37,10 @@ update:
 	adb push  $(TARGET)	/data
 
 install:
+	-rm index.tar.gz
 	tar cvz -f index.tar.gz un20-lib/* lib/* runtimes/* $(TARGET) InitScript start-index-un20
-	adb push index.tar.gz /data
-	adb push install-index-un20 /data
+	echo "Start ftp server on UN20 if required (ssh root@10.0.1.3 \"inetd /etc/inetd.conf; exit\")"
+	echo "Use push-files.sh to transfer the installation files to the UN20EX1"
 
 get-results:
 		

@@ -1,4 +1,6 @@
 #!/bin/sh
+#echo "Configuring inetd"
+#inetd /etc/inetd.conf
 echo "Configuring Linux runtime for Index app"
 #Setup the libraries
 cd /data

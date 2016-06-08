@@ -384,7 +384,7 @@ bool vCheckForPairingClear()
 // must return something that can be used as a Bluetooth address
 byte *pbGetBluetoothAddress(void)
 {
-  static flash_bt_addr default_addr = { { 0x12, 0x34, 0x56, 0x00, 0x00, 0x00 }, 0 };
+  static flash_bt_addr default_addr = { { 0xF0, 0xAC, 0xD7, 0xC0, 0x00, 0x00 }, 0 };
   struct flash_bt_addr *paddr = (struct flash_bt_addr *)FLASH_ADDR(FLASH_BANK_B, FLASH_SECTOR_1);
 
   if ( paddr->crc != wCRCgenerateCRC( CRC_SEED, paddr->BDADDR, sizeof(paddr->BDADDR) ) )
