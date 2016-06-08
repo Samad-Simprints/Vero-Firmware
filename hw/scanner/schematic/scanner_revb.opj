@@ -224,21 +224,13 @@
       (Path "Design Resources" ".\scanner_revb.dsn" "Design Cache")
       (Path "Design Resources" "Library")
       (Path "Design Resources" "Library" ".\scanner.olb")
-      (Path "Outputs")
-      (Select "Design Resources" ".\scanner_revb.dsn"))
+      (Path "Outputs"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
       (Frame
         (Placement "44 2 3 -1 -1 -8 -30 0 200 0 415"))
       (Tab 0))
-    (Doc
-      (Type "TextFile")
-      (Frame
-        (Placement "44 0 1 -1 -1 -8 -30 150 925 150 603"))
-      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_revB.asc")
-      (Scroll "202")
-      (Select "204 1 204 4"))
     (Doc
       (Type "COrSchematicDoc")
       (Frame
@@ -263,7 +255,7 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 200 1268 200 653")
-        (Scroll "480 108")
+        (Scroll "334 256")
         (Zoom "106")
         (Occurrence "/CPU"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
@@ -303,7 +295,7 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 0 1 -1 -1 -8 -30 0 1068 0 453")
-        (Scroll "722 167")
+        (Scroll "0 365")
         (Zoom "106")
         (Occurrence "/Sensor Interface"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
@@ -318,7 +310,13 @@
         (Occurrence "/User Interface"))
       (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_REVB.DSN")
       (Schematic "User Interface")
-      (Page "PAGE1"))) >>>>>>> .r24
+      (Page "PAGE1"))
+    (Doc
+      (Type "TextFile")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -30 150 925 150 603"))
+      (Path "C:\WORKING\INDEX\TRUNK\HW\SCANNER\SCHEMATIC\SCANNER_revB.asc")
+      (Scroll "505"))) >>>>>>> .r24
   (HierarchyView)
   (Doc
     (Type "COrCapturePMDoc")
