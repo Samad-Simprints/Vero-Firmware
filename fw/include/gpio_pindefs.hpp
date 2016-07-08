@@ -42,29 +42,20 @@ PINFUNC_DEF( BT_SPARE2,               2,  4, H, GPIO, PIN_IN )                //
 // LEDs
 //
 // Smile ring
-PINFUNC_DEF( LED_0_GREEN,             6, 14, L, ALT4, PIN_OUT )                 // pin D_0 - D3
-PINFUNC_DEF( LED_0_RED,               7, 16, L, ALT4, PIN_OUT )                 // pin F_1
-PINFUNC_DEF( LED_1_GREEN,             6, 15, L, ALT4, PIN_OUT )                 // pin D_1 - D4
-PINFUNC_DEF( LED_1_RED,               7, 17, L, ALT4, PIN_OUT )                 // pin F_2
-PINFUNC_DEF( LED_2_GREEN,             6, 16, L, ALT4, PIN_OUT )                 // pin D_2 - D5
-PINFUNC_DEF( LED_2_RED,               7, 18, L, ALT4, PIN_OUT )                 // pin F_3
-PINFUNC_DEF( LED_3_GREEN,             6, 17, L, ALT4, PIN_OUT )                 // pin D_3 - D6
-PINFUNC_DEF( LED_3_RED,               7, 19, L, ALT4, PIN_OUT )                 // pin F_5
-PINFUNC_DEF( LED_4_GREEN,             6, 18, L, ALT4, PIN_OUT )                 // pin D_4 - D7
-PINFUNC_DEF( LED_4_RED,               7, 20, L, ALT4, PIN_OUT )                 // pin F_6
-PINFUNC_DEF( LED_5_GREEN,             6, 19, L, ALT4, PIN_OUT )                 // pin D_5 - D9
-PINFUNC_DEF( LED_5_RED,               7, 21, L, ALT4, PIN_OUT )                 // pin F_7
-PINFUNC_DEF( LED_6_GREEN,             6, 20, L, ALT4, PIN_OUT )                 // pin D_6 - D11
-PINFUNC_DEF( LED_6_RED,               7, 22, L, ALT4, PIN_OUT )                 // pin F_8
-// Scan good indication
-PINFUNC_DEF( LED_SCAN_GOOD_GREEN,     6, 21, L, ALT4, PIN_OUT )                 // pin D_7 - D8
-PINFUNC_DEF( LED_SCAN_GOOD_RED,       7, 23, L, ALT4, PIN_OUT )                 // pin F_9
-// Scan bad indication
-PINFUNC_DEF( LED_SCAN_BAD_GREEN,      6, 22, L, ALT4, PIN_OUT )                 // pin D_8 - D10
-PINFUNC_DEF( LED_SCAN_BAD_RED,        7, 24, L, ALT4, PIN_OUT )                 // pin F_10
+PINFUNC_DEF( LED_0_GREEN,             6, 14, H, ALT4, PIN_OUT )                 // pin D_0 - D3
+PINFUNC_DEF( LED_0_RED,               7, 16, H, ALT4, PIN_OUT )                 // pin F_1
+PINFUNC_DEF( LED_1_GREEN,             6, 15, H, ALT4, PIN_OUT )                 // pin D_1 - D4
+PINFUNC_DEF( LED_1_RED,               7, 17, H, ALT4, PIN_OUT )                 // pin F_2
+PINFUNC_DEF( LED_2_GREEN,             6, 16, H, ALT4, PIN_OUT )                 // pin D_2 - D5
+PINFUNC_DEF( LED_2_RED,               7, 18, H, ALT4, PIN_OUT )                 // pin F_3
+PINFUNC_DEF( LED_3_GREEN,             6, 17, H, ALT4, PIN_OUT )                 // pin D_3 - D6
+PINFUNC_DEF( LED_3_RED,               7, 19, H, ALT4, PIN_OUT )                 // pin F_5
+PINFUNC_DEF( LED_4_GREEN,             6, 18, H, ALT4, PIN_OUT )                 // pin D_4 - D7
+PINFUNC_DEF( LED_4_RED,               7, 20, H, ALT4, PIN_OUT )                 // pin F_6
 // Status Leds
-PINFUNC_DEF( LED_CONNECTION,          6, 24, L, ALT4, PIN_OUT )                 // pin D_10 - D1
-PINFUNC_DEF( LED_BATTERY_RED,         6, 25, L, ALT4, PIN_OUT )                 // pin D_11 - D2
+PINFUNC_DEF( LED_CONNECTION,          6, 24, H, ALT4, PIN_OUT )                 // pin D_10 - D1
+PINFUNC_DEF( LED_BATT_RED,            6, 25, H, ALT4, PIN_OUT )                 // pin D_11 - D2
+PINFUNC_DEF( LED_BATT_GREEN,          6, 28, H, ALT4, PIN_OUT )                 // pin D_14 - D2
 //
 // Vibrate motor
 //
@@ -73,6 +64,8 @@ PINFUNC_DEF( VIBRATE_POWER,           6, 26, L, ALT4, PIN_OUT )                 
 // Buttons
 //
 PINFUNC_DEF( BUTTON_0_POWER,           2,  5, H, GPIO, PIN_IN | PIN_NONE )      // pin 4_5 (rising edge)
+// defined as active High to avoid turning the power off when initialised
+PINFUNC_DEF( BUTTON_0_POWER_OFF,       2,  5, H, GPIO, PIN_OUT )                // pin 4_5 (Active Low)
 PINFUNC_DEF( BUTTON_1_SCAN,            6, 27, H, ALT4, PIN_IN | PIN_NONE )      // pin D_13 (falling edge)
 //
 // SSP port for Flash
@@ -103,7 +96,9 @@ PINFUNC_DEF( EMC_A14,                 5, 16, H, ALT1, PIN_OUT | PIN_FAST_SLEW ) 
 PINFUNC_DEF( EMC_A15,                 5, 15, H, ALT1, PIN_OUT | PIN_FAST_SLEW ) // pin 6_7
 PINFUNC_DEF( EMC_A16,                 6, 30, H, ALT2, PIN_OUT | PIN_FAST_SLEW ) // pin D_16
 PINFUNC_DEF( EMC_A17,                 6, 29, H, ALT2, PIN_OUT | PIN_FAST_SLEW ) // pin D_15
+#if 0
 PINFUNC_DEF( EMC_A18,                 7,  0, H, ALT3, PIN_OUT | PIN_FAST_SLEW ) // pin E_0
+#endif
 // Data bus
 PINFUNC_DEF( EMC_D0,                  1, 0,  H, ALT3, PIN_OUT | PIN_FAST_SLEW ) // pin 1_7
 PINFUNC_DEF( EMC_D1,                  1, 1,  H, ALT3, PIN_OUT | PIN_FAST_SLEW ) // pin 1_8
@@ -130,7 +125,9 @@ PINFUNC_DEF( EMC_nLB,                 0, 11, L, ALT3, PIN_OUT | PIN_FAST_SLEW ) 
 //
 // Misc
 //
+#if 0
 PINFUNC_DEF( nPWR_DOWN,               2,  2, L, GPIO, PIN_OUT )                 // pin 4_2
+#endif
 //
 // Camera interface - to be defined
 //
@@ -152,12 +149,17 @@ PINFUNC_DEF( DEBUG_RXD0,              3,  4, L, ALT2, PIN_IN )                  
 //
 // Programming support
 PINFUNC_DEF( LPC_USB_BYPASS_EN,       2, 13, H, GPIO, PIN_OUT )                 // pin 5_4
-PINFUNC_DEF( LPC_BOOTLDR_EN,          2, 14, H, GPIO, PIN_OUT )                 // pin 5_5
-PINFUNC_DEF( UN20_BOOTSEL0_EN,        2, 15, H, GPIO, PIN_OUT )                 // pin 5_6
+PINFUNC_DEF( LPC_BOOTLDR_EN,          2, 14, L, GPIO, PIN_OUT )                 // pin 5_5
+PINFUNC_DEF( UN20_BOOTSEL0_EN,        2, 15, L, GPIO, PIN_OUT )                 // pin 5_6
+
 // Hardware version information
 PINFUNC_DEF( HW_ID_0,                 7,  1, L, ALT4, PIN_IN | PIN_PULL_UP )    // pin e_1
 PINFUNC_DEF( HW_ID_1,                 7,  2, L, ALT4, PIN_IN | PIN_PULL_UP )    // pin e_2
 PINFUNC_DEF( HW_ID_2,                 7,  3, L, ALT4, PIN_IN | PIN_PULL_UP )    // pin e_3
+
+// Charge monitoring
+PINFUNC_DEF( BAT_nCHRG,               7,  0, L, ALT4, PIN_IN | PIN_NONE )       // pin E_0 Low == Charging/ High == Charged
+PINFUNC_DEF( BAT_nVBUS,               7,  4, L, ALT4, PIN_IN | PIN_NONE )       // pin E_4 Low == USB 5V present
 
 #ifdef __cplusplus
 }

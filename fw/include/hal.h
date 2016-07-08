@@ -51,12 +51,10 @@ typedef enum
   LED_RING_2,
   LED_RING_3,
   LED_RING_4,
-  LED_RING_5,
-  LED_RING_6,
-  LED_SCAN_GOOD,
-  LED_SCAN_BAD,
+  LED_MAX_USER_COUNT,
   LED_CONNECTED,
-  LED_BATTERY,
+  LED_BATTERY_RED,
+  LED_BATTERY_GREEN,
   LED_MAX_LED_COUNT
 }
 tLeds;
@@ -165,6 +163,9 @@ extern int iBatteryVoltage(int iChannel);
 extern int iHardwareVersion(void);
 
 extern void vSetHardwareConfig( int iMode );
+
+extern bool boHalBatteryIsCharging();
+extern bool boHalUSBChargePresent();
 
 #ifdef __cplusplus
 }

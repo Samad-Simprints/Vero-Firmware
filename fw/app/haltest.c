@@ -164,38 +164,17 @@ int iDelay, iSec;
   vUiLedSet(LED_RING_4, GREEN);
   vUiLedSet(LED_RING_4, ORANGE);
   vUiLedSet(LED_RING_4, OFF);
-
-  vUiLedSet(LED_RING_5, OFF);
-  vUiLedSet(LED_RING_5, RED);
-  vUiLedSet(LED_RING_5, GREEN);
-  vUiLedSet(LED_RING_5, ORANGE);
-  vUiLedSet(LED_RING_5, OFF);
-
-  vUiLedSet(LED_RING_6, OFF);
-  vUiLedSet(LED_RING_6, RED);
-  vUiLedSet(LED_RING_6, GREEN);
-  vUiLedSet(LED_RING_6, ORANGE);
-  vUiLedSet(LED_RING_6, OFF);
-
-  vUiLedSet(LED_SCAN_GOOD, OFF);
-  vUiLedSet(LED_SCAN_GOOD, RED);
-  vUiLedSet(LED_SCAN_GOOD, GREEN);
-  vUiLedSet(LED_SCAN_GOOD, ORANGE);
-  vUiLedSet(LED_SCAN_GOOD, OFF);
-
-  vUiLedSet(LED_SCAN_BAD, OFF);
-  vUiLedSet(LED_SCAN_BAD, RED);
-  vUiLedSet(LED_SCAN_BAD, GREEN);
-  vUiLedSet(LED_SCAN_BAD, ORANGE);
-  vUiLedSet(LED_SCAN_BAD, OFF);
-
   vUiLedSet(LED_CONNECTED, OFF);
   vUiLedSet(LED_CONNECTED, ON);
   vUiLedSet(LED_CONNECTED, OFF);
 
-  vUiLedSet(LED_BATTERY, OFF);
-  vUiLedSet(LED_BATTERY, ON);
-  vUiLedSet(LED_BATTERY, OFF);
+  vUiLedSet(LED_BATTERY_RED, OFF);
+  vUiLedSet(LED_BATTERY_RED, ON);
+  vUiLedSet(LED_BATTERY_RED, OFF);
+
+  vUiLedSet(LED_BATTERY_GREEN, OFF);
+  vUiLedSet(LED_BATTERY_GREEN, ON);
+  vUiLedSet(LED_BATTERY_GREEN, OFF);
 
   vUiVibrateControl(false);
   vUiVibrateControl(true);
@@ -228,12 +207,15 @@ int iDelay, iSec;
   vUiLedSet(LED_RING_2, ORANGE);
   vUiLedSet(LED_RING_3, ORANGE);
   vUiLedSet(LED_RING_4, ORANGE);
+#if 0
   vUiLedSet(LED_RING_5, ORANGE);
   vUiLedSet(LED_RING_6, ORANGE);
   vUiLedSet(LED_SCAN_GOOD, ORANGE);
   vUiLedSet(LED_SCAN_BAD, ORANGE);
+#endif
   vUiLedSet(LED_CONNECTED, ON);
-  vUiLedSet(LED_BATTERY, ON);
+  vUiLedSet(LED_BATTERY_RED, ON);
+  vUiLedSet(LED_BATTERY_GREEN, ON);
 
   vPowerSelfOff();	// turn the LPC1800 off (Power button wakes)
 

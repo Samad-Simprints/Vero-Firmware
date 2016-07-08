@@ -77,11 +77,11 @@
   //    bool boEnableTrigger;               // enable the trigger button
   //    bool boSetLeds;                     // set LED's according to bLedState
   //    bool boTriggerVibrate;              // set vibrate according to boVibrateState
-  //    uint8 bLedState[LED_MAX_LED_COUNT]; // off, red, green, orange, on
+  //    uint8 bLedState[LED_MAX_USER_COUNT]; // off, red, green, orange, on
   //    int16 iVibrateMs;                   // 0 = off, > 0 trigger vibrate for Ms (then stop)
   const MsgPacket sSetuiPacket = {
   .Msgheader = { 0xFAFAFAFA, sizeof( MsgPacketheader ) + sizeof( MsgUIControl ), MSG_SET_UI, 0x00 },
-  .oPayload.UIControl = { true, true, true, GREEN, GREEN, ORANGE, RED, ORANGE, GREEN, GREEN, GREEN, RED, ON, ON, 3000, 0xF5F5F5F5 }
+  .oPayload.UIControl = { true, true, true, GREEN, ORANGE, RED, ORANGE, GREEN, 3000, 0xF5F5F5F5 }
   };
 
   // MsgSensorConfig     SensorConfig;

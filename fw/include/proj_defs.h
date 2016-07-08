@@ -39,7 +39,7 @@
 #endif
 
 // firmware version number
-#define INDEX_REVISION_NUMBER         100
+#define INDEX_REVISION_NUMBER         101
 
 //
 // Processor clock frequency

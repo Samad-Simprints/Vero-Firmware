@@ -89,7 +89,10 @@
           <configuration Name="THUMB Debug" build_exclude_from_build="No" />
         </file>
         <file file_name="../dd/emc_dd.cpp">
-          <configuration Name="THUMB Debug" build_exclude_from_build="No" />
+          <configuration Name="THUMB Debug" build_exclude_from_build="Yes" />
+          <configuration
+            Name="THUMB Release"
+            build_exclude_from_build="Yes" />
         </file>
         <file file_name="../dd/adc_dd.cpp" />
         <file file_name="../dd/watchdog_dd.c" />

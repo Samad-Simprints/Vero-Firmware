@@ -111,9 +111,10 @@ enum {
 //******************************************************************************
 // Definitions
 //******************************************************************************
-#define BATT_WARN_LOW_MV  3680      // flash RED LED below 3.68V
-#define BATT_SHUTOFF_MV   3500      // power unit off below 3.5V
-#define BATT_AVG_SAMPLES  5         // number of samples to average over
+#define BATT_UN20_REJECT_MV 3575      // refuse to start UN20 if below threshold
+#define BATT_WARN_LOW_MV    3680      // flash RED LED below 3.68V
+#define BATT_SHUTOFF_MV     3500      // power unit off below 3.5V
+#define BATT_AVG_SAMPLES    5         // number of samples to average over
 
 #define LPCAPP_MSG_QUEUE_SIZE 10
 
@@ -136,37 +137,43 @@ DEBUG_MODULE_USE( LPC_FD );
 static xQueueHandle hMsgQueue = NULL;
 
 static xTimerHandle hUn20ShutdownTimer;
-static xTimerHandle hUn20IdleTimer;        // Times idle seconds before UN20 power off
-static xTimerHandle hInactivityTimer;      // Times idle seconds before total power off
+static xTimerHandle hUn20IdleTimer;         // Times idle seconds before UN20 power off
+static xTimerHandle hInactivityTimer;       // Times idle seconds before total power off
 
 static bool boPhoneBtConnected = false;
 static bool boPhoneUsbConnected = false;
 static bool boUn20UsbConnected = false;
 
-static bool boNeedUn20Info = false;        // True if we want the UN20's config info. This is set
-                                           // when the UN20 reports READY (to get the UN20 version information)
+static bool boNeedUn20Info = false;         // True if we want the UN20's config info. This is set
+                                            // when the UN20 reports READY (to get the UN20 version information)
 
 // Sensor Config items.
 
-static int16 iPowerOffTimeoutSecs = 0; // idle seconds before total power off
-static int16 iUn20IdleTimeoutSecs = 0; // idle seconds before UN20 power off
-static int16 iGoodImageThreshold = 0;  // good image quality threshold for LED
+static int16 iPowerOffTimeoutSecs = 0;      // idle seconds before total power off
+static int16 iUn20IdleTimeoutSecs = 0;      // idle seconds before UN20 power off
+static int16 iGoodImageThreshold = 0;       // good image quality threshold for LED
 static int16 iSmileThresholds[MAX_SMILE_STAGES]; // thesholds used to drive the smile
-static int16 iScanTimeout = 0;         // default scan timeout
-static int16 iScanBrightness = 0;      // default scan brightness
-static int16 iRetryLimit = 0;          // default scan retry limit
+static int16 iScanTimeout = 0;              // default scan timeout
+static int16 iScanBrightness = 0;           // default scan brightness
+static int16 iRetryLimit = 0;               // default scan retry limit
 
 // Set UI items.
 
-static bool boEnableTrigger = false;       // True if the trigger button is enabled
-static bool boSetLeds = false;             // LED setting
-static bool boTriggerVibrate = false;      // True if vibrate requested
-static uint8 bLedState[LED_MAX_LED_COUNT]; // off, red, green, orange, on, <flash choice>
+static bool boEnableTrigger = false;        // True if the trigger button is enabled
+static bool boSetLeds = false;              // LED setting
+static bool boTriggerVibrate = false;       // True if vibrate requested
+static uint8 bLedState[LED_MAX_USER_COUNT]; // off, red, green, orange, on, <flash choice>
 
-static bool boFlashConnectionLed = true;   // True if we are flashing the blue Connection LED
-static bool boFlashBatteryLed = false;     // True if we are flashing the red battery LED
+static bool boFlashConnectionLed = true;    // True if we are flashing the blue Connection LED
+static bool boFlashBatteryLed = false;      // True if we are flashing the red battery LED
+static bool boCharging = false;             // True if battery is charging (forces charge led on)
+static bool boVBUSPresent = false;          // True if USB cable connected
 static int iLedState = 0;                   // current state of flashing LED
 
+
+static int iCurrentBatteryVoltage = 0;
+static int iAverageBatteryVoltage = 0;
+static int iVoltageAccumulator = ((BATT_WARN_LOW_MV+1) * BATT_AVG_SAMPLES);
 
 static xTimerHandle hFlashTimer;
 static xTimerHandle hTimer;
@@ -266,7 +273,7 @@ static void vFlashTimerCallback( xTimerHandle xTimer )
   iLedState ^= 1;
 
   // Re-evaluate LEDs needing to be flashed.
-  if ( boFlashConnectionLed == true )
+  if ( boFlashConnectionLed )
   {
     vUiLedSet( LED_CONNECTED, (iLedState ? ON : OFF) );
   }
@@ -275,13 +282,31 @@ static void vFlashTimerCallback( xTimerHandle xTimer )
     vUiLedSet( LED_CONNECTED, ON );
   }
 
-  if ( boFlashBatteryLed == true )
+  if ( boVBUSPresent ) 
   {
-    vUiLedSet( LED_BATTERY, (iLedState ? ON : OFF) );
+      if ( boCharging )
+      {
+        vUiLedSet( LED_BATTERY_RED, OFF );
+        vUiLedSet( LED_BATTERY_GREEN, (iLedState ? ON : OFF) );
+      }
+      else
+      {
+        vUiLedSet( LED_BATTERY_RED, OFF );
+        vUiLedSet( LED_BATTERY_GREEN, ON );
+      }
   }
   else
   {
-    vUiLedSet( LED_BATTERY, OFF );
+    if ( boFlashBatteryLed )
+    {
+      vUiLedSet( LED_BATTERY_RED, (iLedState ? ON : OFF) );
+      vUiLedSet( LED_BATTERY_GREEN, OFF );
+    }
+    else
+    {
+      vUiLedSet( LED_BATTERY_RED, OFF );
+      vUiLedSet( LED_BATTERY_GREEN, OFF );
+    }
   }
 
   return;
@@ -395,7 +420,7 @@ static void vSetUi( MsgPacket *psMsg, int iMsglength )
   boTriggerVibrate = psEventData->boTriggerVibrate;         // set vibrate according to boVibrateState
   iVibrateMs = psEventData->iVibrateMs;                     // 0 = off, > 0 trigger vibrate for Ms (then stop)
 
-  for ( iLoop = 0; iLoop < LED_MAX_LED_COUNT; iLoop++ )
+  for ( iLoop = 0; iLoop < LED_MAX_USER_COUNT; iLoop++ )
   {
     bLedState[ iLoop ] = psEventData->bLedState[ iLoop ];
   }
@@ -407,7 +432,7 @@ static void vSetUi( MsgPacket *psMsg, int iMsglength )
 
   if ( boSetLeds == true )
   {
-    for ( iLoop = 0; iLoop < LED_MAX_LED_COUNT; iLoop++ )
+    for ( iLoop = 0; iLoop < LED_MAX_USER_COUNT; iLoop++ )
     {
       //CLI_PRINT(( "vSetUi: LED %d state %d\n", iLoop, bLedState[ iLoop ] ));
 
@@ -555,32 +580,40 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   case MSG_UN20_WAKEUP:
     if (( bSource == MSG_SOURCE_PHONE_BT ) || ( bSource == MSG_SOURCE_PHONE_USB ))
     {
-      DEBUGMSG(ZONE_TRACE,("%sWaking up UN20\n", (eUN20State == UN20_STATE_SHUTDOWN ? "" :"Not ")));
-
-      switch ( eUN20State )
+      if ( iAverageBatteryVoltage > BATT_UN20_REJECT_MV )
       {
-        case UN20_STATE_READY:
-        case UN20_STATE_STARTING_UP:
-          // already actioned required state change
-          vSetupACK( psPacket );
-          break;
+        DEBUGMSG(ZONE_TRACE,("%sWaking up UN20\n", (eUN20State == UN20_STATE_SHUTDOWN ? "" :"Not ")));
+        switch ( eUN20State )
+        {
+          case UN20_STATE_READY:
+          case UN20_STATE_STARTING_UP:
+            // already actioned required state change
+            vSetupACK( psPacket );
+            break;
 
-        case UN20_STATE_SHUTTING_DOWN:
-          // in the process of shutting down so cant stop it
-          vSetupNACK( psPacket, MSG_STATUS_UN20_STATE_ERROR );
-          break;
+          case UN20_STATE_SHUTTING_DOWN:
+            // in the process of shutting down so cant stop it
+            vSetupNACK( psPacket, MSG_STATUS_UN20_STATE_ERROR );
+            break;
 
-        case UN20_STATE_SHUTDOWN:
-          // Start the UN20 powering up.
-          eUN20State = UN20_STATE_STARTING_UP;
-          vPowerUn20On();
-          vSetupACK( psPacket );
+          case UN20_STATE_SHUTDOWN:
+            // Start the UN20 powering up.
+            eUN20State = UN20_STATE_STARTING_UP;
+            vPowerUn20On();
+            vSetupACK( psPacket );
 
-          // restart the UN20 inactivity timer.
-          xTimerReset( hUn20IdleTimer, 0 );
+            // restart the UN20 inactivity timer.
+            xTimerReset( hUn20IdleTimer, 0 );
 
-          break;
+            break;
+        }
       }
+      else
+      {
+        DEBUGMSG(ZONE_TRACE,("Not Waking up UN20 - battery voltage too low\n"));
+        vSetupNACK( psPacket, MSG_STATUS_UN20_VOLTAGE );
+      }
+
       // send ACK or NACK on behalf of the UN20 as it cannot respond
       iIfSend((IF_USB | IF_BT), psPacket, psPacket->Msgheader.iLength);
     }
@@ -1091,10 +1124,6 @@ static void vUIReset()
   vUiLedSet(LED_RING_2, OFF);
   vUiLedSet(LED_RING_3, OFF);
   vUiLedSet(LED_RING_4, OFF);
-  vUiLedSet(LED_RING_5, OFF);
-  vUiLedSet(LED_RING_6, OFF);
-  vUiLedSet(LED_SCAN_GOOD, OFF);
-  vUiLedSet(LED_SCAN_BAD, OFF);
 }
 
 //******************************************************************************
@@ -1122,7 +1151,8 @@ void vLpcAppInit()
   vUIReset();
 
   vUiLedSet(LED_CONNECTED, OFF);
-  vUiLedSet(LED_BATTERY, OFF);
+  vUiLedSet(LED_BATTERY_RED, OFF);
+  vUiLedSet(LED_BATTERY_GREEN, OFF);
 
   // Register callbacks.
   
@@ -1200,17 +1230,13 @@ void vLpcAppTask( void *pvParameters )
 
   // Perform a start-up dance on the LEDs.
   vUiLedSet(LED_RING_0, GREEN);
-  vUiLedSet(LED_RING_1, GREEN);
-  vUiLedSet(LED_RING_2, ORANGE);
-  vUiLedSet(LED_RING_3, RED);
-  vUiLedSet(LED_RING_4, ORANGE);
-  vUiLedSet(LED_RING_5, GREEN);
-  vUiLedSet(LED_RING_6, GREEN);
-  vUiLedSet(LED_SCAN_GOOD, GREEN);
-  vUiLedSet(LED_SCAN_BAD, RED);
-
+  vUiLedSet(LED_RING_1, ORANGE);
+  vUiLedSet(LED_RING_2, RED);
+  vUiLedSet(LED_RING_3, ORANGE);
+  vUiLedSet(LED_RING_4, GREEN);
   vUiLedSet(LED_CONNECTED, ON);
-  vUiLedSet(LED_BATTERY, ON);
+  vUiLedSet(LED_BATTERY_RED, ON);
+  vUiLedSet(LED_BATTERY_GREEN, ON);
 
   vTaskDelay( 1000 );
 
@@ -1218,15 +1244,13 @@ void vLpcAppTask( void *pvParameters )
   vUIReset();
 
   vUiLedSet(LED_CONNECTED, OFF);
-  vUiLedSet(LED_BATTERY, OFF);
+  vUiLedSet(LED_BATTERY_RED, OFF);
+  vUiLedSet(LED_BATTERY_GREEN, OFF);
 
   // Main loop.
   while ( 1 )
   {
     MsgInternalPacket *psMsg;
-    int iCurrentBatteryVoltage;
-    int iAverageBatteryVoltage = 0;
-    static int iVoltageAccumulator = ((BATT_WARN_LOW_MV+1) * BATT_AVG_SAMPLES);
 
     // wait for a message to process
     if ( xQueueReceive( hMsgQueue, &psMsg, MS_TO_TICKS(500) ) == pdTRUE )
@@ -1255,6 +1279,12 @@ void vLpcAppTask( void *pvParameters )
 
     // turn on the power led if  less than threshold
     boFlashBatteryLed = ( iAverageBatteryVoltage < BATT_WARN_LOW_MV );
+
+    // turn on charge led if we are charging
+    boCharging = boHalBatteryIsCharging();
+
+    // record if VBUS is present (i.e. USB cable connected)
+    boVBUSPresent = boHalUSBChargePresent();
 
     // if the battery voltage has reached critical level action a shutdown
     if ( iAverageBatteryVoltage < BATT_SHUTOFF_MV )

@@ -90,7 +90,8 @@ enum
   MSG_STATUS_SAVE_ERROR,        // Unable to save image
   MSG_STATUS_SDK_ERROR,         // Error in UN20 SDK caused operation to fail
   MSG_STATUS_NO_CRASH_LOG,      // no crash log data available
-  MSG_STATUS_BAD_PARAMETER      // parameter specified is not valid
+  MSG_STATUS_BAD_PARAMETER,     // parameter specified is not valid
+  MSG_STATUS_UN20_VOLTAGE       // battery voltage is too low to start UN20
 };
 
 // message-ids as held in the message bMsgId field.
@@ -219,7 +220,7 @@ PACK( typedef struct tagUIControl
   uint8 boEnableTrigger;              // Enable the trigger button
   uint8 boSetLeds;                    // Set LED's according to bLedState
   uint8 boTriggerVibrate;             // Set vibrate according to boVibrateState
-  uint8 bLedState[LED_MAX_LED_COUNT]; // Off, red, green, orange, on
+  uint8 bLedState[LED_MAX_USER_COUNT];// Off, red, green, orange, on
   int16 iVibrateMs;                   // 0 = off, > 0 trigger vibrate for Ms (then stop)
   uint32 uMsgFooterSyncWord;  // Message footer sync word - used to detect unsynchronisation
 })

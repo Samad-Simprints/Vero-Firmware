@@ -34,6 +34,8 @@
 #include <stdlib.h>
 
 #include "global.h"
+#include "watchdog_dd.h"
+
 #include "hal.h"
 #include "msg_format.h"
 #include "lpcapp.h"
@@ -96,19 +98,17 @@ struct tagLedInfo
 };
 
 
-static struct tagLedInfo oLedInfo[] =
+static struct tagLedInfo oLedInfo[ LED_MAX_LED_COUNT ] =
 {
   { false, "LED_RING_0",    LED_0_GREEN, LED_0_RED },
   { false, "LED_RING_1",    LED_1_GREEN, LED_1_RED },
   { false, "LED_RING_2",    LED_2_GREEN, LED_2_RED },
   { false, "LED_RING_3",    LED_3_GREEN, LED_3_RED },
   { false, "LED_RING_4",    LED_4_GREEN, LED_4_RED },
-  { false, "LED_RING_5",    LED_5_GREEN, LED_5_RED },
-  { false, "LED_RING_6",    LED_6_GREEN, LED_6_RED },
-  { false, "LED_SCAN_GOOD", LED_SCAN_GOOD_GREEN, LED_SCAN_GOOD_RED },
-  { false, "LED_SCAN_BAD",  LED_SCAN_BAD_GREEN,  LED_SCAN_BAD_RED },
+  { true,  "!Not Valid!",   0, 0 },
   { true,  "LED_CONNECTED", LED_CONNECTION, 0 },
-  { true,  "LED_BATTERY",   LED_BATTERY_RED, 0 }
+  { true,  "LED_BATT_RED",  LED_BATT_RED, 0 },
+  { true,  "LED_BATT_GREEN",LED_BATT_GREEN, 0 }
 };
 
 static char const *pszLedColor[] =
@@ -168,6 +168,7 @@ static bool boOff( char **papzArgs, int iInstance, int iNumArgs );
 static bool boVibrate( char **papzArgs, int iInstance, int iNumArgs );
 
 static bool boVbus( char **papzArgs, int iInstance, int iNumArgs );
+static bool boHWConfig( char **papzArgs, int iInstance, int iNumArgs );
 
 static const tParserEntry asHalCLI[] =
 {
@@ -183,7 +184,7 @@ static const tParserEntry asHalCLI[] =
   CLICMD("off",                   "Power off", 1, "", boOff, 0),
   CLICMD("vibrate",               "Vibrate state", 2, "", boVibrate, 0),
   CLICMD("vbus",                  "Vbus state", 2, "", boVbus, 0),
-
+  CLICMD("hwconfig",               "Configure HW", 2, "", boHWConfig, 0),
 };
 
 tParserEntry asHalMainCLI =
@@ -306,7 +307,9 @@ static bool boBattery( char **papzArgs, int iInstance, int iNumArgs )
 {
   int channel = atoi(papzArgs[1]);
 
-  CLI_PRINT(("Battery(%d): %d\n", channel, iBatteryVoltage(channel)));
+  CLI_PRINT(("Battery(%d): %dmV, Charging: %d, USBPresent: %d\n",
+              channel, iBatteryVoltage(channel), boHalBatteryIsCharging(), boHalUSBChargePresent()));
+
   return true;
 }
 
@@ -323,6 +326,21 @@ static bool boVibrate( char **papzArgs, int iInstance, int iNumArgs )
   bool boOnOff = (atoi(papzArgs[1]) ? true : false);
 
   vUiVibrateControl(boOnOff);
+  return true;
+}
+
+// Configure the hardware for reprogramming operations
+static bool boHWConfig( char **papzArgs, int iInstance, int iNumArgs )
+{
+  int iMode = atoi(papzArgs[1]);
+
+  CLI_PRINT(("Setting Hardware Mode:%d\n",iMode ));
+  // small delay to let the message get out
+  vTaskDelay(SECS_TO_TICKS(1));
+
+  vSetHardwareConfig( iMode );
+
+  return true;
 }
 
 // inject the message into the Phones USB RX stream
@@ -571,10 +589,6 @@ void vHalInit(void)
   DEBUG_GPIO2->vConfigure();
   DEBUG_GPIO3->vConfigure();
 
-  // Latch the power on to the CPU
-  nPWR_DOWN->vConfigure();
-  nPWR_DOWN->vSet( false );
-
   // Make sure the UN20 is reset
   UN20B_nRESET->vConfigure();
   UN20B_nRESET->vSet( true );
@@ -583,14 +597,20 @@ void vHalInit(void)
   UN20B_POWER->vConfigure();
   UN20B_POWER->vSet( false );
 
+  // Configure hardware control Pins
   LPC_USB_BYPASS_EN->vConfigure();
   LPC_BOOTLDR_EN->vConfigure();
   UN20_BOOTSEL0_EN->vConfigure();
+  vSetHardwareConfig( MODE_NORMAL );
 
   // Hardware version information
   HW_ID_0->vConfigure();
   HW_ID_1->vConfigure();
   HW_ID_2->vConfigure();
+
+  // Battery charging monitoring
+  BAT_nCHRG->vConfigure();
+  BAT_nVBUS->vConfigure();
 
 #if 0
   BAT_MON_0->vConfigure();
@@ -690,27 +710,30 @@ void vUiLedSet(tLeds eLed, tColorOptions eColor)
   else
   {
     PBC_ASSERT( (eColor == OFF) || (eColor == RED) || (eColor == GREEN) || (eColor == ORANGE));
-#if !defined(EVAL_BOARD)
-    switch (eColor)
+    if ( (oLedInfo[ eLed ].oGreenLed) && (oLedInfo[ eLed ].oRedLed))
     {
-      case OFF:
-        oLedInfo[ eLed ].oGreenLed->vSet( false );
-        oLedInfo[ eLed ].oRedLed->vSet( false );
-        break;
-      case RED:
-        oLedInfo[ eLed ].oGreenLed->vSet( false );
-        oLedInfo[ eLed ].oRedLed->vSet( true );
-        break;
-      case GREEN:
-        oLedInfo[ eLed ].oGreenLed->vSet( true );
-        oLedInfo[ eLed ].oRedLed->vSet( false );
-        break;
-      case ORANGE:
-        oLedInfo[ eLed ].oGreenLed->vSet( true );
-        oLedInfo[ eLed ].oRedLed->vSet( true );
-        break;
-    }
+#if !defined(EVAL_BOARD)
+      switch (eColor)
+      {
+        case OFF:
+          oLedInfo[ eLed ].oGreenLed->vSet( false );
+          oLedInfo[ eLed ].oRedLed->vSet( false );
+          break;
+        case RED:
+          oLedInfo[ eLed ].oGreenLed->vSet( false );
+          oLedInfo[ eLed ].oRedLed->vSet( true );
+          break;
+        case GREEN:
+          oLedInfo[ eLed ].oGreenLed->vSet( true );
+          oLedInfo[ eLed ].oRedLed->vSet( false );
+          break;
+        case ORANGE:
+          oLedInfo[ eLed ].oGreenLed->vSet( true );
+          oLedInfo[ eLed ].oRedLed->vSet( true );
+          break;
+      }
 #endif
+    }
   }
 
   DEBUGMSG(ZONE_COMMANDS, ("Led: %s: %s\n", oLedInfo[ eLed ].pszName, pszLedColor[eColor]));
@@ -815,18 +838,22 @@ void vPowerSelfOff()	// turn the LPC1800 off (Power button wakes)
 {
   DEBUGMSG(ZONE_COMMANDS,("vPowerSelfOff()\n"));
 #if !defined(EVAL_BOARD)
-  nPWR_DOWN->vSet( true );
+  BUTTON_0_POWER_OFF->vConfigure();
+  BUTTON_0_POWER_OFF->vSet( false );
   //CLI_PRINT(("NOTE: Hardware power off disabled\n"));
 #endif
-  for (;;);
+  // spin waiting for the power to decay and the CPU to stop
+  // must keep kicking the watchdog to stop it going off and
+  // the subsequent reset re-enabling power (via CPU pullups)
+  for (;;)
+  {
+    vWDOGDDkick();
+  }
 }
 
 void vPowerSelfOn()	// called early to latch power on
 {
   DEBUGMSG(ZONE_COMMANDS,("vPowerSelfOn()\n"));
-#if !defined(EVAL_BOARD)
-  nPWR_DOWN->vSet( false );
-#endif
 }
 
 //
@@ -870,9 +897,9 @@ int iHardwareVersion(void)
   int iVersion = 0;
 
 #if !defined(EVAL_BOARD)
-  iVersion |= ( HW_ID_0->boGet() ? 0x1 : 0x00 );
-  iVersion |= ( HW_ID_1->boGet() ? 0x2 : 0x00 );
-  iVersion |= ( HW_ID_2->boGet() ? 0x4 : 0x00 );
+  iVersion |= ( HW_ID_0->boGet() ? 0x0 : 0x01 );
+  iVersion |= ( HW_ID_1->boGet() ? 0x0 : 0x02 );
+  iVersion |= ( HW_ID_2->boGet() ? 0x0 : 0x04 );
 #endif
   return iVersion;
 }
@@ -888,23 +915,43 @@ void vSetHardwareConfig( int iMode )
   switch ( iMode )
   {
     case MODE_NORMAL:
-      LPC_USB_BYPASS_EN->vSet(false);
       LPC_BOOTLDR_EN->vSet(false);
+      LPC_USB_BYPASS_EN->vSet(false);
+      UN20_BOOTSEL0_EN->vSet(false);
       break;
     case MODE_UN20_BOOTLOADER:
+      LPC_BOOTLDR_EN->vSet(false);
       LPC_USB_BYPASS_EN->vSet(true);
-      LPC_BOOTLDR_EN->vSet(true);
+      UN20_BOOTSEL0_EN->vSet(true);
       break;
     case MODE_UN20_FTP:
-      LPC_USB_BYPASS_EN->vSet(true);
       LPC_BOOTLDR_EN->vSet(false);
+      LPC_USB_BYPASS_EN->vSet(true);
+      UN20_BOOTSEL0_EN->vSet(false);
       break;
     case MODE_LPC_BOOTLOADER:
-      LPC_USB_BYPASS_EN->vSet(false);
       LPC_BOOTLDR_EN->vSet(true);
+      LPC_USB_BYPASS_EN->vSet(false);
+      UN20_BOOTSEL0_EN->vSet(false);
       break;
   }
 #endif
+}
+
+//
+// Return true if battery charger indicates it is charging the battery
+//
+bool boHalBatteryIsCharging()
+{
+  return BAT_nCHRG->boGet();
+}
+
+//
+// Return true if the USB cable is present (with 5v on it)
+//
+bool boHalUSBChargePresent()
+{
+  return BAT_nVBUS->boGet();
 }
 
 //
