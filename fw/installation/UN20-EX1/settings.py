@@ -8,7 +8,7 @@ Global variables and settings
 # text file containing key for manufacturing API
 MANU_API = 'manukey.txt'
 # build path
-BUILD_PATH = '../fw/LinuxUN20'
+BUILD_PATH = '../../LinuxUN20'
 # path to plink exe
 PLINK = "C:\Program Files (x86)\PuTTY\plink.exe"
 # path to WinSCP exe

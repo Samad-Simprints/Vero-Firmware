@@ -18,12 +18,14 @@ if sys_name == 'Windows':
 		    )
 elif sys_name == 'Linux':
 	processes = (
+			# set ip address (assumes that the UN20 will appear as usb0)
+			['sudo','ifconfig','usb0','10.0.1.2','netmask','255.255.0.0'],
 			# start ftp server on un20ex1 process 
 			['ssh','root@%s'%settings.HOST,'inetd /etc/inetd.conf; exit'],
 			# transfer files using ftp to un20ex1
 			['./push-files.sh', settings.BUILD_PATH],
 			# call install script on un20ex1
-			['ssh','root@%s'%settings.HOST,'cd /data; chmod +x install-index-un20; sync; source install-index-un20; exit'],
+			['ssh','root@%s'%settings.HOST,'cd /data; chmod +x install-index-un20; sync; source install-index-un20; halt; exit'],
 		    )
 else:
     raise Exception
