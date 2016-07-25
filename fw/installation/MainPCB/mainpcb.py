@@ -4,6 +4,8 @@ Programming Main PCB workflow
 '''
 
 import sys
+import os
+import shutil
 import logging
 import requests
 import settings
@@ -173,12 +175,16 @@ def install( workOrder, serialNumber ):
         4. Update status 
         5. Return MAC address or error code
     '''
+    localBin = 'SIMindex.bin'
     try:
         board = None
-        
+
+        # copy binary file to local directory
+        shutil.copyfile( settings.FIRMWARE, localBin) 
+
         print('--> Program firmware')
         # program binary
-        programMainPcb( settings.FIRMWARE )
+        programMainPcb( localBin )
         
         # now the board has been successful flashed, create a DB record for the board
         # Getting a MAC in the process
@@ -214,6 +220,9 @@ def install( workOrder, serialNumber ):
         ret = eToken.unknown_error.value
     else:
         ret = board.MacAddress
+
+    # remove temp binary
+    os.remove( localBin )
 
     if board:
         # update status

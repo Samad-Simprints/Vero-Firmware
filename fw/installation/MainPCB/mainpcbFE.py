@@ -6,7 +6,9 @@ Takes a barcode string, programs a board and displays its MAC address as a QR co
 
 
 import qrcode
+
 from mainpcb import install
+import settings
 
 
 def displayQRCode( mstring ):
@@ -15,6 +17,7 @@ def displayQRCode( mstring ):
     '''
     img = qrcode.make( mstring )
     img.show()
+    img.save( settings.QR_NAME )
 
 def convertToAndroidHex( val ):
     '''
