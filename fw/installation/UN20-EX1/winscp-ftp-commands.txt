@@ -1,0 +1,11 @@
+# connect as root
+open ftp://root@10.0.1.3
+# Force binary mode transfer
+option transfer binary
+# Put files
+put index.tar.gz 
+put install-index-un20
+# Disconnect WinSCP
+close
+# Exit WinSCP
+exit

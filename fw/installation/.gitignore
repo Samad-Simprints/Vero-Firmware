@@ -1,0 +1,10 @@
+# ignore binary files in this directory
+*.bin
+# ignore the py cache
+/MainPCB/__pycache__
+# don't sync the manufacturing API key
+/MainPCB/manukey.txt
+# VIM temp files
+*~
+# logs
+*.log
