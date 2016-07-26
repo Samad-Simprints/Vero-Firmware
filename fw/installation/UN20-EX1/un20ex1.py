@@ -131,20 +131,21 @@ def installUN20():
                               params = {'apiKey' : apiKeyVal, 'WorkOrder' : interfaceWO, 'Serial': interfaceSN})
     if response.ok:
         iData = response.json()
-        print( '--> PUT id = %s'%iData['Id'])
+        print( '--> Interface PUT id = %s'%iData['Id'])
         #print( iData )
         iData['Status'] = status
         response = requests.put( '%s/%s/%d'%(settings.INTERFACE_URL, 'PutInterfacePCB', iData['Id']), 
                                   params = {'apiKey' : apiKeyVal}, data = iData)
     elif response.status_code == 404:
         # Can't find, so post
-        print( '--> POST')
+        print( '--> Interface POST')
         iData = {'WorkOrder': interfaceWO, 'SerialNumber':interfaceSN, 'Status' : status}
         #print( iData )
         response = requests.post( '%s/%s'%(settings.INTERFACE_URL, 'PostInterfacePCB'), 
                                   params = {'apiKey' : apiKeyVal}, data = iData)
 
     # raise anything untoward in response
+    # print( response.url )
     response.raise_for_status()
 
     ##################
@@ -154,14 +155,14 @@ def installUN20():
                               params = {'apiKey' : apiKeyVal, 'serial': un20SN})
     if response.ok:
         uData = response.json()
-        print( '--> PUT id = %s'%uData['Id'])
+        print( '--> Scanner PUT id = %s'%uData['Id'])
         #print( uData )
         uData['Status'] = status
         response = requests.put( '%s/%s/%d'%(settings.SCANNER_URL, 'PutScannerUnit', uData['Id']), 
                                   params = {'apiKey' : apiKeyVal}, data = uData)
     elif response.status_code == 404:
         # Can't find, so post
-        print( '--> POST')
+        print( '--> Scanner POST')
         uData = {'SerialNumber':un20SN, 'Status' : status}
         #print( uData )
         response = requests.post( '%s/%s'%(settings.SCANNER_URL, 'PostScannerUnit'), 

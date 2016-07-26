@@ -19,8 +19,8 @@ PPK='id_rsa.ppk'
 
 ''' Other variables - be careful about changing '''
 # Base URL of interface board\scanner unit manufacturing API
-__MANU_URL = 'https://simprintsmanufacturingapi.azurewebsites.net/api/InterfacePcbs/' 
+__MANU_URL = 'https://simprintsmanufacturingapi.azurewebsites.net/api/' 
 INTERFACE_URL = '%sInterfacePcbs/'%__MANU_URL
-SCANNER_URL = '%sSannerUnits/'%__MANU_URL
+SCANNER_URL = '%sScannerUnits/'%__MANU_URL
 # IP address of UN20-EX1
 HOST='10.0.1.3'
