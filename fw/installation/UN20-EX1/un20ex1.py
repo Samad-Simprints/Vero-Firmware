@@ -92,7 +92,8 @@ def installUN20():
     ##############################################
     ## wait for user to say it is okay to continue
     ##############################################
-    userInput = input('--> Please attach the combined unit to the SimPi and then press any key to continue: ')
+    userInput = input('--> Please connect UN20 to Test Rig (see programming instructions).\nThen press any key to continue.')
+
 
     ###################
     ## run each process
