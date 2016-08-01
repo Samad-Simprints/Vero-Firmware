@@ -147,6 +147,10 @@ static bool boUn20UsbConnected = false;
 static bool boNeedUn20Info = false;         // True if we want the UN20's config info. This is set
                                             // when the UN20 reports READY (to get the UN20 version information)
 
+// Power off led sequence state
+static int16 iPowerOffSequenceValue = 0;
+static int16 iPowerOffSequenceStep = 0;
+
 // Sensor Config items.
 
 static int16 iPowerOffTimeoutSecs = 0;      // idle seconds before total power off
@@ -306,6 +310,16 @@ static void vFlashTimerCallback( xTimerHandle xTimer )
     {
       vUiLedSet( LED_BATTERY_RED, OFF );
       vUiLedSet( LED_BATTERY_GREEN, OFF );
+    }
+  }
+
+  // Power off Sequence
+  if (iPowerOffSequenceStep != 0) {
+    for (int iLoop = 0 ; iLoop < LED_MAX_USER_COUNT; iLoop++) {
+      vUiLedSet((tLeds) iLoop, (iLoop < iPowerOffSequenceValue/2) ? GREEN : OFF);
+    }
+    if (iLedState) {
+      iPowerOffSequenceValue += iPowerOffSequenceStep;
     }
   }
 
@@ -742,6 +756,13 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       sppCancelAndDisconnect();
     }
 
+    // The power off sequence value will go from LED_MAX_USER_COUNT*2 to 0
+    // by power off step
+    if (iPowerOffSequenceStep == 0) {
+      iPowerOffSequenceValue = LED_MAX_USER_COUNT*2;
+      iPowerOffSequenceStep = (eUN20State != UN20_STATE_SHUTDOWN) ? -1 : -2;
+    }
+
     if ( eUN20State != UN20_STATE_SHUTDOWN )
     {
       // Cleanly shut down the UN20 app if it is running (UN20 powered up).
@@ -949,7 +970,9 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
     // Check for total disconnection from the phone.
     if (( boPhoneBtConnected == false ) && ( boPhoneUsbConnected == false ))
     {
-      vUIReset();
+      if (iPowerOffSequenceValue < 0) {
+        vUIReset();
+      }
       boFlashConnectionLed = true;
     }
 

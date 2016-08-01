@@ -49,6 +49,7 @@ extern "C" {
 extern void vWDOGDDinit(void);
 extern void vWDOGDDkick(void);
 extern void vWDOGDDreboot(void);
+extern void vWDOGDDstop(void);
 
 #ifdef __cplusplus
 }

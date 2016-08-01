@@ -845,10 +845,11 @@ void vPowerSelfOff()	// turn the LPC1800 off (Power button wakes)
   // spin waiting for the power to decay and the CPU to stop
   // must keep kicking the watchdog to stop it going off and
   // the subsequent reset re-enabling power (via CPU pullups)
-  for (;;)
-  {
-    vWDOGDDkick();
-  }
+  vWDOGDDstop();
+//  for (;;)
+//  {
+//    vWDOGDDkick();
+//  }
 }
 
 void vPowerSelfOn()	// called early to latch power on
