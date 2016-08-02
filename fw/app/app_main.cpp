@@ -440,17 +440,24 @@ int main( void )
   //vWDOGDDinit();
   vWATCHDOGstart();
 
-  /* Create the LPC App task. */
-  vLpcAppInit();
+  BAT_nVBUS->vConfigure();
+  if (BAT_nVBUS->boGet()) 
+  {
+    vLpcChargeAppInit();
+  } 
+  else 
+  {
+    /* Create the LPC App task. */
+    vLpcAppInit();
 
-  // initialise the Bluetooth stack
-  bt_main();
+    // initialise the Bluetooth stack
+    bt_main();
 
-  // initialise the USB stack
-  // REINSTATE usb_main();
-
-  /* Start the scheduler. */
-  vTaskStartScheduler();
+    // initialise the USB stack
+    // REINSTATE usb_main();
+  }
+    /* Start the scheduler. */
+    vTaskStartScheduler();
 
   /* Will only get here if there was insufficient memory to create the idle
   task.  The idle task is created within vTaskStartScheduler(). */
