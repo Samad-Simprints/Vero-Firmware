@@ -1306,11 +1306,6 @@ void vLpcAppTask( void *pvParameters )
     // turn on charge led if we are charging
     boCharging = boHalBatteryIsCharging();
 
-    // shut down if USB cqble is disconnected
-    if (boVBUSPresent & !boHalUSBChargePresent()) {
-        vCallbackPowerOffHandler();
-    }
-
     // record if VBUS is present (i.e. USB cable connected)
     boVBUSPresent = boHalUSBChargePresent();
 
