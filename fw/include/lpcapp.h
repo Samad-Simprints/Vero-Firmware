@@ -47,9 +47,7 @@ extern "C" {
 //******************************************************************************
 
 void vLpcAppInit();
-void vLpcChargeAppInit();
 void vLpcAppTask( void *pvParameters );
-void vLpcChargeAppTask( void *pvParameters );
 
 #ifdef __cplusplus
 }

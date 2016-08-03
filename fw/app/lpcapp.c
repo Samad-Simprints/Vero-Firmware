@@ -63,7 +63,6 @@ static void vUn20UsbCallbackHandler(void *context, tInterfaceEvent event, void *
 
 static void vVibTimerCallback( xTimerHandle xTimer );
 static void vFlashTimerCallback( xTimerHandle xTimer );
-static void vChargeFlashTimerCallback( xTimerHandle xTimer );
 
 static void vUn20ShutdownTimerCallback( xTimerHandle xTimer );
 static void vUn20IdleTimerCallback( xTimerHandle xTimer );
@@ -286,52 +285,6 @@ static void vFlashTimerCallback( xTimerHandle xTimer )
   {
     vUiLedSet( LED_CONNECTED, ON );
   }
-
-  if ( boVBUSPresent ) 
-  {
-      if ( boCharging )
-      {
-        vUiLedSet( LED_BATTERY_RED, OFF );
-        vUiLedSet( LED_BATTERY_GREEN, (iLedState ? ON : OFF) );
-      }
-      else
-      {
-        vUiLedSet( LED_BATTERY_RED, OFF );
-        vUiLedSet( LED_BATTERY_GREEN, ON );
-      }
-  }
-  else
-  {
-    if ( boFlashBatteryLed )
-    {
-      vUiLedSet( LED_BATTERY_RED, (iLedState ? ON : OFF) );
-      vUiLedSet( LED_BATTERY_GREEN, OFF );
-    }
-    else
-    {
-      vUiLedSet( LED_BATTERY_RED, OFF );
-      vUiLedSet( LED_BATTERY_GREEN, OFF );
-    }
-  }
-
-  // Power off Sequence
-  if (iPowerOffSequenceStep != 0) {
-    for (int iLoop = 0 ; iLoop < LED_MAX_USER_COUNT; iLoop++) {
-      vUiLedSet((tLeds) iLoop, (iLoop < iPowerOffSequenceValue/2) ? GREEN : OFF);
-    }
-    if (iLedState) {
-      iPowerOffSequenceValue += iPowerOffSequenceStep;
-    }
-  }
-
-  return;
-}
-
-// Callback for the LED-flash timer while charging
-static void vChargeFlashTimerCallback( xTimerHandle xTimer )
-{
-  // Toggle the LED state for this cycle
-  iLedState ^= 1;
 
   if ( boVBUSPresent ) 
   {
@@ -1293,54 +1246,6 @@ void vLpcAppInit()
 
 }
 
-void vLpcChargeAppInit() {
-  DEBUG_MODULE_INIT( LPC_FD );
-  const char acFlashTimerName[] = "Flash timer";
-
-  CLI_PRINT(("vLpcChargeAppInit: Initialising LpcTask\n"));
-
-  boCLIregisterEntry( &asLpcMainCLI );
-
-  vProtocolInit();
-
-  // reset the UI elements controlled by the App
-  vUIReset();
-
-  vUiLedSet(LED_CONNECTED, OFF);
-  vUiLedSet(LED_BATTERY_RED, OFF);
-  vUiLedSet(LED_BATTERY_GREEN, OFF);
-
- // Register callbacks.
-  
-  vUiButtonCapture( vCallbackCaptureHandler, NULL );
-
-  vPowerSelfNotify( vCallbackPowerOffHandler ); // notification of power button press
-
-  vProtocolMsgNotify( vQueueMessageCompleteCallback );
-  vProtocolMsgError( vMessageErrorCallback );
-
-  vUiVibrateControl( false );
-
-  // Create the LED flash timer
-  hFlashTimer = xTimerCreate( acFlashTimerName,
-                         MS_TO_TICKS(FLASH_TICK_MS),
-                         pdTRUE,    // Continuous timeouts
-                         NULL,
-                         vChargeFlashTimerCallback );
-
-  // Start the flash timer.
-  xTimerStart( hFlashTimer, 0 );
-
-  hMsgQueue = xQueueCreate( LPCAPP_MSG_QUEUE_SIZE, sizeof(MsgInternalPacket*) );
-
-  iUsbInit( USB_HOST, vPhoneUsbCallbackHandler, NULL );
-  iUsbInit (USB_UN20, vUn20UsbCallbackHandler, NULL );
-
-  /* Create the LPC App task. */
-  xTaskCreate( vLpcChargeAppTask, ( signed char * ) "LPC", LPCAPP_TASK_STACK_SIZE, ( void * ) NULL, LPCAPP_TASK_PRIORITY, NULL );
-
-}
-
 void vLpcAppTask( void *pvParameters )
 {
 
@@ -1401,6 +1306,11 @@ void vLpcAppTask( void *pvParameters )
     // turn on charge led if we are charging
     boCharging = boHalBatteryIsCharging();
 
+    // shut down if USB cqble is disconnected
+    if (boVBUSPresent & !boHalUSBChargePresent()) {
+        vCallbackPowerOffHandler();
+    }
+
     // record if VBUS is present (i.e. USB cable connected)
     boVBUSPresent = boHalUSBChargePresent();
 
@@ -1409,38 +1319,6 @@ void vLpcAppTask( void *pvParameters )
     {
       vSystemIdleTimerCallback( NULL );
     }
-  }
-}
-
-void vLpcChargeAppTask( void *pvParameters )
-{
-
-  CLI_PRINT(("vLpcAppTask: Starting\n"));
-
-  // Main loop.
-  while ( 1 )
-  {
-  
-    MsgInternalPacket *psMsg;
-    // wait for a message to process
-    if ( xQueueReceive( hMsgQueue, &psMsg, MS_TO_TICKS(500) ) == pdTRUE )
-    {
-      vMessageProcess( psMsg );
-    }
-
-    // get the current battery voltage
-    iCurrentBatteryVoltage = iBatteryVoltage( 0 );
-
-    // turn on charge led if we are charging
-    boCharging = boHalBatteryIsCharging();
-
-    // shut down if USB cqble is disconnected
-    if (boVBUSPresent & !boHalUSBChargePresent()) {
-        vCallbackPowerOffHandler();
-    }
-
-    // record if VBUS is present (i.e. USB cable connected)
-    boVBUSPresent = boHalUSBChargePresent();
   }
 }
 
