@@ -35,6 +35,7 @@
 // Constants
 //******************************************************************************
 #define WATCHDOG_MODE                 (0x03)
+#define WATCHDOG_DISABLED             (0x02)
 
 //******************************************************************************
 // Definitions
@@ -120,6 +121,21 @@ void vWDOGDDkick(void)
 }
 
 /* -----------------------------------------------------------------------
+   vWDOGDDstop
+   .......................................................................
+   Description  : Stop the watchdog timer
+
+   Params : None
+
+   Returns : Doesn't return
+   ----------------------------------------------------------------------- */
+
+void vWDOGDDstop(void)
+{
+  LPC_WWDT->MOD = WATCHDOG_DISABLED;
+}
+
+/* -----------------------------------------------------------------------
    vWDOGDDreboot
    .......................................................................
    Description  : Reboot the unit, using the watchdog
@@ -128,6 +144,7 @@ void vWDOGDDkick(void)
 
    Returns : Doesn't return
    ----------------------------------------------------------------------- */
+
 
 void vWDOGDDreboot(void)
 {

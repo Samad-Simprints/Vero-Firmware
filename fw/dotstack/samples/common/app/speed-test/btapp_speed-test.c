@@ -217,7 +217,7 @@ static char device_name[32] = { "Undefined" };
 
 const char* bt_oem_get_device_name(void)
 {
-  snprintf(device_name, sizeof(device_name), "SP%06d", ((mModuleAddress.bd_addr_m & 0x000FFFFF) % 999999L));
+  snprintf(device_name, sizeof(device_name), "SP%06d", ((mModuleAddress.bd_addr_m & 0x000FFFFF) % 1000000L));
   return device_name;
 }
 
