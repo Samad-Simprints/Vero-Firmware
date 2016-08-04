@@ -873,9 +873,9 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
 
       // Perform a start-up dance on the LEDs.
       vUiLedSet(LED_RING_0, GREEN);
-      vUiLedSet(LED_RING_1, ORANGE);
-      vUiLedSet(LED_RING_2, RED);
-      vUiLedSet(LED_RING_3, ORANGE);
+      vUiLedSet(LED_RING_1, GREEN);
+      vUiLedSet(LED_RING_2, GREEN);
+      vUiLedSet(LED_RING_3, GREEN);
       vUiLedSet(LED_RING_4, GREEN);
 
       vTaskDelay( 1000 );
