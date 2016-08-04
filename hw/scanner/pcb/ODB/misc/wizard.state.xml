@@ -1,0 +1,66 @@
+<wfState parentWizardPath="C:/MentorGraphics/9.5PADS/SDD_HOME/dfm/sys//wizards/camc4pads.xmlz" >
+    <variables>
+        <variable value="yes" name="oPreferClosedShapes" />
+        <variable value="cam_compare" name="oInvocationMode" />
+        <variable value="silent" name="textCurrentMode" />
+        <variable value="" name="listDBList" />
+        <variable value="" name="pCamFilesPath" />
+        <variable value="false" name="bOpenODBViewer" />
+        <variable value="27" name="iComponentOutlinesLayer" />
+        <variable value="full" name="oPartialODB" />
+        <variable value="inch" name="oApplicationUnits" />
+        <variable value="true" name="boolIsDirectMode" />
+        <variable value="C:\PADS Projects\20160708_145424/spn00093_vc_odb_8_jul" name="textCOMANS" />
+        <variable value="false" name="bNetlistFailed" />
+        <variable value="" name="elDPRS" />
+        <variable value="C:\PADS Projects\20160708_145424" name="pDesignDirVar" />
+        <variable value="C:\PADS Projects\SPN00093_vC_ODB_8-Jul_PCB\SPN00093_vC_ODB_8-Jul_tmp.tmp" name="pEDASourcePath" />
+        <variable value="spn00093_vc_odb_8_jul" name="elJOB" />
+        <variable value="true" name="bNetlist" />
+        <variable value="use_drill" name="oNoneShapedPins" />
+        <variable value="0" name="intSTATUS" />
+        <variable value="false" name="bAttrAssignment" />
+        <variable value="no" name="oDisplayODBPPGenerationParameters" />
+        <variable value="pads_powerpcb" name="oEDA" />
+        <variable value="C:\PADS Projects\20160708_145424/spn00093_vc_odb_8_jul" name="tActualDesignPath" />
+        <variable value="gencad" name="oASM" />
+        <variable value="false" name="bOpenNetlistReport" />
+        <variable value="yes" name="oDefaultCamLayers" />
+        <variable value="" name="textCurrentDC" />
+        <variable value="discard" name="oUnhatchedCopperPours" />
+        <variable value="tar_gzip" name="oCompression" />
+        <variable value="pcb" name="elSTEP" />
+        <variable value="yes" name="oKeepNetNames" />
+        <variable value="spn00093_vc_odb_8_jul" name="tDesignName" />
+        <variable value="false" name="bCamCompareFailed" />
+        <variable value="pcb" name="tStepName" />
+    </variables>
+    <stages>
+        <stage name="Design_Input" >
+            <variables>
+                <variable value="1" name="iNumSteps" />
+                <variable value="true" name="bTranslationPassed" />
+                <variable value="" name="tFirstEntity" />
+                <variable value="C:\PADS Projects\20160708_145424" name="tTempText" />
+            </variables>
+        </stage>
+        <stage name="Netlist_Validation" >
+            <variables>
+                <variable value="" name="tempCOMANS" />
+            </variables>
+        </stage>
+        <stage name="CAM_Compare" >
+            <variables>
+                <variable value="" name="tGuiLessModeYesNo" />
+                <variable value="" name="tempCOMANS" />
+            </variables>
+        </stage>
+        <stage name="Quit_App" >
+            <variables>
+                <variable value="" name="tActualConfigPath" />
+                <variable value="" name="tFileExt" />
+            </variables>
+        </stage>
+    </stages>
+    <executionState nextCmdIndex="0" nextStageIndex="2" executionMode="silent" designCenter="" nextStageName="Save_Design" running="true" nextBlockIndex="2" />
+</wfState>

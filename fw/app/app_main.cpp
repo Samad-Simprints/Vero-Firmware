@@ -236,6 +236,7 @@ extern "C" void usb_main(void);
 extern "C" void check_failed(uint8_t *file, uint32_t line);
 extern "C" void storage_erase_keys(void);
 extern "C" byte *pbGetBluetoothAddress(void);
+extern "C" void vBTFatalError(void);
 
 extern "C" void vHalTest(void);
 
@@ -394,8 +395,16 @@ byte *pbGetBluetoothAddress(void)
   return paddr->BDADDR;
 }
 
+// callback from Bluetooth stack when its world falls apart
+void vBTFatalError(void)
+{
+  vLogAssert( ERROR_SOFTWARE_ERROR, __FILE__, __LINE__, "Bluetooth Abort" );
+}
+
 int main( void )
 {
+  bool boPowerButtonAtStartup;
+
   DEBUG_MODULE_INIT( INDEX_DEFAULTS );
 
 #if 1
@@ -436,12 +445,15 @@ int main( void )
   // clear link keys if scan button pressed at power up
   vCheckForPairingClear();
 
+  // remember if power button was pressed at startup
+  boPowerButtonAtStartup = !BUTTON_0_POWER->boGet();
+
   // start up the watchdog and its monitor
   //vWDOGDDinit();
   vWATCHDOGstart();
 
   /* Create the LPC App task. */
-  vLpcAppInit();
+  vLpcAppInit( boPowerButtonAtStartup );
 
   // initialise the Bluetooth stack
   bt_main();

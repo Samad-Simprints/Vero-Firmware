@@ -108,6 +108,15 @@ enum {
 // Default delay before actioning a hardware configuration change
 #define LPC_HARDWARE_CONFIG_DELAY_MS        ( 2 * 1000 )
 
+typedef enum
+{
+  // Possible Scanner states
+  SFS_OFF,          // SFS is powered off
+  SFS_CHARGING,     // SFS in charge mode
+  SFS_ON,           // SFS is in operating mode
+}
+tScannerState;
+
 //******************************************************************************
 // Definitions
 //******************************************************************************
@@ -168,10 +177,11 @@ static bool boSetLeds = false;              // LED setting
 static bool boTriggerVibrate = false;       // True if vibrate requested
 static uint8 bLedState[LED_MAX_USER_COUNT]; // off, red, green, orange, on, <flash choice>
 
-static bool boFlashConnectionLed = true;    // True if we are flashing the blue Connection LED
+static bool boFlashConnectionLed = false;   // True if we are flashing the blue Connection LED
 static bool boFlashBatteryLed = false;      // True if we are flashing the red battery LED
 static bool boCharging = false;             // True if battery is charging (forces charge led on)
 static bool boVBUSPresent = false;          // True if USB cable connected
+static bool boPowerButtonAtStartup = false; // True if Power button pressed at powerup
 static int iLedState = 0;                   // current state of flashing LED
 
 
@@ -194,6 +204,7 @@ static MsgPacket sInternalMsg;
 static MsgInternalPacket sPowerButtonMsg  = { .eSource = MSG_SOURCE_INTERNAL };
 static MsgInternalPacket sScanButtonMsg   = { .eSource = MSG_SOURCE_INTERNAL };
 static MsgInternalPacket sUN20ShutdownMsg = { .eSource = MSG_SOURCE_INTERNAL };
+static MsgInternalPacket sPowerStateMsg   = { .eSource = MSG_SOURCE_INTERNAL };
 
 // This app operates mostly stateless (except for some hardware peripheral states such as
 // the vibrate motor, LED flash state etc.
@@ -202,11 +213,15 @@ static MsgInternalPacket sUN20ShutdownMsg = { .eSource = MSG_SOURCE_INTERNAL };
 // current state of the UN20 reported to the outside world
 static tUN20State eUN20State = UN20_STATE_SHUTDOWN;
 
+// current state of the main scanner board
+static tScannerState eScannerState = SFS_OFF;
+
 enum
 {
   // Internal message ID's used to process button events
   MSG_POWER_BUTTON = (MSG_NUM_MSGS + 0),
-  MSG_SCAN_BUTTON = (MSG_NUM_MSGS + 1)
+  MSG_SCAN_BUTTON  = (MSG_NUM_MSGS + 1),
+  MSG_POWER_STATE  = (MSG_NUM_MSGS + 2),
 };
 
 enum
@@ -277,15 +292,25 @@ static void vFlashTimerCallback( xTimerHandle xTimer )
   iLedState ^= 1;
 
   // Re-evaluate LEDs needing to be flashed.
-  if ( boFlashConnectionLed )
+
+  // control state of the Bluetooth connection LED
+  if ( eScannerState == SFS_ON )
   {
-    vUiLedSet( LED_CONNECTED, (iLedState ? ON : OFF) );
+    if ( boFlashConnectionLed )
+    {
+      vUiLedSet( LED_CONNECTED, (iLedState ? ON : OFF) );
+    }
+    else
+    {
+      vUiLedSet( LED_CONNECTED, ON );
+    }
   }
   else
   {
-    vUiLedSet( LED_CONNECTED, ON );
+    vUiLedSet( LED_CONNECTED, OFF );
   }
 
+  // control state of the charge indication LED's
   if ( boVBUSPresent ) 
   {
       if ( boCharging )
@@ -538,6 +563,17 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   // Reset the system inactivity timeout.
   xTimerReset( hInactivityTimer, 0 );
 
+  // if scanner is not "on" reject commands from USB and Bluetooth
+  if ( ( bSource != MSG_SOURCE_INTERNAL ) && ( eScannerState != SFS_ON ) )
+  {
+    DEBUGMSG(ZONE_TRACE,("Rejecting command - scanner is in charge mode\n"));
+    vSetupNACK( psPacket, MSG_STATUS_CHARGING );
+
+    // send NACK and exit quickly
+    iIfSend((IF_USB | IF_BT), psPacket, psPacket->Msgheader.iLength);
+    return;
+  }
+
   // Decode the message type (ignoring the Response bit).
   switch ( psMsg->oMsg.Msgheader.bMsgId & ~MSG_REPLY )
   {
@@ -747,41 +783,107 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     // Else invalid source - discard the message.
     break;
 
+  case MSG_POWER_STATE:
+    // Either the battery charge state or the state of the USB charge has changed
+    CLI_PRINT(("*** Power state change ***\n"));
+ 
+    switch ( eScannerState )
+    {
+      case SFS_OFF:
+        if ( boVBUSPresent )
+        {
+          // powered up by USB charge source go to charging mode
+          CLI_PRINT(("*** Power up: Enter charging state ***\n"));
+          eScannerState = SFS_CHARGING;
+        }
+        else
+        {
+          // assume powered up with button pressed request entry to full on mode
+          CLI_PRINT(("*** Power up: Enter power-on state ***\n"));
+          boPowerButtonAtStartup = false;
+          vSystemIdleTimerCallback( NULL );
+        }
+        break;
+
+      case SFS_CHARGING:
+        if ( !boVBUSPresent )
+        {
+          CLI_PRINT(("*** Charging: charge source lost - turning off ***\n"));
+          eScannerState = SFS_OFF;
+          vPowerSelfOff();
+        }
+        break;
+
+      case SFS_ON:
+        // no action required. Pressing power button will cause reevaluation of power state
+        break;
+    }
+    break;
+
   case MSG_POWER_BUTTON:
-    CLI_PRINT(("*** Powering off ***\n"));
+    // power button has been pressed to either turn us on or off
+    CLI_PRINT(("*** Turning %s ***\n", (eScannerState == SFS_ON) ? "Off" : "On"));
 
-    // cancel any pending transfers and disconnect from remote device (if any)
+    if ( eScannerState == SFS_ON )
     {
-      extern int sppCancelAndDisconnect();
-      sppCancelAndDisconnect();
-    }
+      // cancel any pending transfers and disconnect from remote device (if any)
+      {
+        extern int sppCancelAndDisconnect();
+        sppCancelAndDisconnect();
+      }
 
-    // The power off sequence value will go from LED_MAX_USER_COUNT*2 to 0
-    // by power off step
-    if (iPowerOffSequenceStep == 0) {
-      iPowerOffSequenceValue = LED_MAX_USER_COUNT*2;
-      iPowerOffSequenceStep = (eUN20State != UN20_STATE_SHUTDOWN) ? -1 : -2;
-    }
+      // The power off sequence value will go from LED_MAX_USER_COUNT*2 to 0
+      // by power off step
+      if (iPowerOffSequenceStep == 0) {
+        iPowerOffSequenceValue = LED_MAX_USER_COUNT*2;
+        iPowerOffSequenceStep = (eUN20State != UN20_STATE_SHUTDOWN) ? -1 : -2;
+		}
 
-    if ( eUN20State != UN20_STATE_SHUTDOWN )
+      if ( eUN20State != UN20_STATE_SHUTDOWN )
+      {
+        // Cleanly shut down the UN20 app if it is running (UN20 powered up).
+        vSetupMessage( &sInternalMsg, MSG_UN20_SHUTDOWN_NO_ACK, MSG_STATUS_GOOD, NULL, 0 );
+
+        // send shutdown message to UN20
+        iIfSend(IF_UN20, (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
+
+        // Pause here for a short while to allow the UN20 to cleanly shut down.
+        vTaskDelay( MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ));
+      }
+
+      // Power down the UN20.
+      vPowerUn20Off();
+
+      // now determine if we enter charging mode or turn off
+      if ( boVBUSPresent )
+      {
+        // charge source available, enter charging mode
+        eScannerState = SFS_CHARGING;
+      }
+      else
+      {
+        // no charge source present so shutdown
+        eScannerState = SFS_OFF;
+        vPowerSelfOff();
+      }
+    }
+    else
     {
-      // Cleanly shut down the UN20 app if it is running (UN20 powered up).
-      vSetupMessage( &sInternalMsg, MSG_UN20_SHUTDOWN_NO_ACK, MSG_STATUS_GOOD, NULL, 0 );
+      eScannerState = SFS_ON;
 
-      // send shutdown message to UN20
-      iIfSend(IF_UN20, (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
+      // Perform a start-up dance on the LEDs.
+      vUiLedSet(LED_RING_0, GREEN);
+      vUiLedSet(LED_RING_1, ORANGE);
+      vUiLedSet(LED_RING_2, RED);
+      vUiLedSet(LED_RING_3, ORANGE);
+      vUiLedSet(LED_RING_4, GREEN);
 
-      // Pause here for a short while to allow the UN20 to cleanly shut down.
-      vTaskDelay( MS_TO_TICKS( UN20_SHUTDOWN_DELAY_MS ));
+      vTaskDelay( 1000 );
+
+      // restore startup UI
+      vUIReset();
     }
 
-    // Power down the UN20.
-    vPowerUn20Off();
-
-    // Now power down the whole scanner.
-    vPowerSelfOff();
-
-    // Should never be reached!
     break;
 
   case MSG_SCAN_BUTTON:
@@ -1125,6 +1227,17 @@ static void vSystemIdleTimerCallback( xTimerHandle xTimer )
   return;
 }
 
+// Post message indicating change of charge state.
+static void vSystemPowerStateChange(void)
+{
+  DEBUGMSG(ZONE_TRACE,("vSystemPowerStateChange\n"));
+
+  // Notify the system that the charge state has changed.
+  sPowerStateMsg.oMsg.Msgheader.bMsgId = MSG_POWER_STATE;
+  vQueueMessageCompleteCallback( &sPowerStateMsg  );
+  return;
+}
+
 // Power button pressed. Called from ISR context
 static void vCallbackPowerOffHandler(void)
 {
@@ -1154,13 +1267,15 @@ static void vUIReset()
 // Public Functions
 //******************************************************************************
 //******************************************************************************
-void vLpcAppInit()
+void vLpcAppInit( bool boPowerButtonState )
 {
   const char acShutdownTimerName[] = "UN20 shutdown timer";
   const char acUn20IdleTimerName[] = "UN20 idle timer";
   const char acInactivityTimerName[] = "System idle timer";
   const char acFlashTimerName[] = "Flash timer";
   const char acVibrateTimerName[] = "Vibrate timer";
+
+  boPowerButtonAtStartup = boPowerButtonState;
 
   DEBUG_MODULE_INIT( LPC_FD );
 
@@ -1173,6 +1288,7 @@ void vLpcAppInit()
   // reset the UI elements controlled by the App
   vUIReset();
 
+  // reset the UI controlled by the system
   vUiLedSet(LED_CONNECTED, OFF);
   vUiLedSet(LED_BATTERY_RED, OFF);
   vUiLedSet(LED_BATTERY_GREEN, OFF);
@@ -1248,27 +1364,12 @@ void vLpcAppInit()
 
 void vLpcAppTask( void *pvParameters )
 {
+  bool boLastCharging = false;
+  bool boLastVBUSPresent = false;
+  bool boNotify = true;
+  bool boFirst = true;
 
   CLI_PRINT(("vLpcAppTask: Starting\n"));
-
-  // Perform a start-up dance on the LEDs.
-  vUiLedSet(LED_RING_0, GREEN);
-  vUiLedSet(LED_RING_1, ORANGE);
-  vUiLedSet(LED_RING_2, RED);
-  vUiLedSet(LED_RING_3, ORANGE);
-  vUiLedSet(LED_RING_4, GREEN);
-  vUiLedSet(LED_CONNECTED, ON);
-  vUiLedSet(LED_BATTERY_RED, ON);
-  vUiLedSet(LED_BATTERY_GREEN, ON);
-
-  vTaskDelay( 1000 );
-
-  // restore startup UI
-  vUIReset();
-
-  vUiLedSet(LED_CONNECTED, OFF);
-  vUiLedSet(LED_BATTERY_RED, OFF);
-  vUiLedSet(LED_BATTERY_GREEN, OFF);
 
   // Main loop.
   while ( 1 )
@@ -1308,6 +1409,30 @@ void vLpcAppTask( void *pvParameters )
 
     // record if VBUS is present (i.e. USB cable connected)
     boVBUSPresent = boHalUSBChargePresent();
+
+    // if there is a change of charge state notify the system
+    if ( ( boLastVBUSPresent != boVBUSPresent ) || boFirst )
+    {
+      CLI_PRINT(("*** Charge Source: %s ***\n", (boVBUSPresent ? "Present" : "Lost")));
+      boNotify = true;
+    }
+
+    if ( ( boLastCharging != boCharging ) || boFirst )
+    {
+      CLI_PRINT(("*** Charge Status: %s ***\n", boCharging ? "Charging" : "Charged"));
+      boNotify = true;
+    }
+
+    // update previous state cache
+    boFirst = false;
+    boLastCharging = boCharging;
+    boLastVBUSPresent = boVBUSPresent;
+
+    if ( boNotify )
+    {
+      vSystemPowerStateChange();
+      boNotify = false;
+    }
 
     // if the battery voltage has reached critical level action a shutdown
     if ( iAverageBatteryVoltage < BATT_SHUTOFF_MV )

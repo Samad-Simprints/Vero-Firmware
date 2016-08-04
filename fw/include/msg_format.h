@@ -91,7 +91,8 @@ enum
   MSG_STATUS_SDK_ERROR,         // Error in UN20 SDK caused operation to fail
   MSG_STATUS_NO_CRASH_LOG,      // no crash log data available
   MSG_STATUS_BAD_PARAMETER,     // parameter specified is not valid
-  MSG_STATUS_UN20_VOLTAGE       // battery voltage is too low to start UN20
+  MSG_STATUS_UN20_VOLTAGE,      // battery voltage is too low to start UN20
+  MSG_STATUS_CHARGING           // unit is in charge mode, commands not accepted
 };
 
 // message-ids as held in the message bMsgId field.
