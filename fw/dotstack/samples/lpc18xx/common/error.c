@@ -28,20 +28,24 @@ static void DELAY(int ms)
 	}
 }
 
+extern void vBTFatalError(void);
 
 void error_onFatalError(void)
 {
-	taskDISABLE_INTERRUPTS();
-	
-	LED1_ON();
-	LED2_OFF();
-	
-	for (;;)
-	{
-		DELAY(60);
-		LED1_TOGGLE();
-		LED2_TOGGLE();
-	}
+  vBTFatalError();
+#if 0
+  taskDISABLE_INTERRUPTS();
+  
+  LED1_ON();
+  LED2_OFF();
+  
+  for (;;)
+  {
+    DELAY(60);
+    LED1_TOGGLE();
+    LED2_TOGGLE();
+  }
+#endif
 }
 
 

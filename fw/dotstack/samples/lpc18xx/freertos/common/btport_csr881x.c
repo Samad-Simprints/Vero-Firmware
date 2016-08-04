@@ -225,8 +225,6 @@ void bttask_pal_initBluetoothPort(void)
     LPC_TIM2->TCR  = 0x0001;            // enable the timer
 #endif	
 #if 0	
-    GPIO(LED1_PORT)->FIODIR |= 1 << LED1_PIN;
-#else
     configureGPIOOutputPin(LED1_PORT, LED1_PIN,  LED1_FUNC, LED1_GPIO_PORT, LED1_GPIO_PIN);
     configureGPIOOutputPin(LED2_PORT, LED2_PIN,  LED2_FUNC, LED2_GPIO_PORT, LED2_GPIO_PIN);
     GPIO_LOW(LED1_GPIO_PORT, LED1_GPIO_PIN);
@@ -237,30 +235,6 @@ void bttask_pal_initBluetoothPort(void)
     LED1_ON();
     LED1_OFF();
     LED1_TOGGLE();
-#if 0
-    configureGPIOOutputPin(BT_UART_TX_PORT, BT_UART_TX_PIN, 0, 1, 6);
-    configureGPIOOutputPin(BT_UART_RX_PORT, BT_UART_RX_PIN, 0, 1, 7);
-    configureGPIOOutputPin(BT_UART_RTS_PORT, BT_UART_RTS_PIN, 0, 1, 2);
-    configureGPIOOutputPin(BT_UART_CTS_PORT, BT_UART_CTS_PIN, 0, 1, 4);
-
-    id_pin(1, 6);
-    id_pin(1, 7);
-    id_pin(1, 2);
-    id_pin(1, 4);
-#endif
-#if 0
-    GPIO_HIGH(1, 6);
-    GPIO_HIGH(1, 7);
-    GPIO_HIGH(1, 2);
-    GPIO_HIGH(1, 4);
-    GPIO_HIGH(BT_RESET_GPIO_PORT, BT_RESET_GPIO_PIN);
-
-    GPIO_LOW(1, 6);
-    GPIO_LOW(1, 7);
-    GPIO_LOW(1, 2);
-    GPIO_LOW(1, 4);
-    GPIO_LOW(BT_RESET_GPIO_PORT, BT_RESET_GPIO_PIN);
-#endif
     LED1_TOGGLE();
 #endif
 

@@ -46,7 +46,7 @@ extern "C" {
 // Function Prototypes
 //******************************************************************************
 
-void vLpcAppInit();
+void vLpcAppInit( bool boPowerButtonState );
 void vLpcAppTask( void *pvParameters );
 
 #ifdef __cplusplus

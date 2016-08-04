@@ -16,6 +16,8 @@
 #define GPIO_LOW(port, pin)       GPIO_ClearValue(port, 1UL << (pin))
 #define GPIO_GET(port, pin)       (GPIO_ReadValue(port) & (1uL << (pin)))
 
+#if 0
+
 #define LED1_ON()        GPIO_LOW(LED1_GPIO_PORT, LED1_GPIO_PIN)
 #define LED1_OFF()       GPIO_HIGH(LED1_GPIO_PORT, LED1_GPIO_PIN)
 #define LED1_TOGGLE()    (GPIO_GET(LED1_GPIO_PORT, LED1_GPIO_PIN) ? LED1_OFF() : LED1_ON())
@@ -23,6 +25,18 @@
 #define LED2_ON()        GPIO_LOW(LED2_PORT, LED2_PIN)
 #define LED2_OFF()       GPIO_HIGH(LED2_PORT, LED2_PIN)
 #define LED2_TOGGLE()    (GPIO_GET(LED2_PORT, LED2_PIN) ? LED2_OFF() : LED2_ON())
+
+#else
+
+#define LED1_ON()
+#define LED1_OFF()
+#define LED1_TOGGLE()
+
+#define LED2_ON()
+#define LED2_OFF()
+#define LED2_TOGGLE()
+
+#endif
 
 #define LED3_ON()        
 #define LED3_OFF()       

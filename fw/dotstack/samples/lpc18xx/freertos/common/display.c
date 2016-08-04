@@ -11,6 +11,7 @@
 
 void btdisplay_onUpdate(const btdisplay_Data* data)
 {
+#if 0
   if (data->modified & BTDISPLAY_FLAG_CONNECTED)
   {
     if (data->connected)
@@ -22,6 +23,7 @@ void btdisplay_onUpdate(const btdisplay_Data* data)
       LED1_OFF();
     }
   }
+#endif
 }
 
 void btdisplay_clear(void)
