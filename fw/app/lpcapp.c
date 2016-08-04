@@ -534,6 +534,17 @@ static void vQueueMessageCompleteCallbackISR( MsgInternalPacket *psMsg )
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
+// Kick off power-off led dance switch
+static void vKickOffShutdownLEDs( void );
+{
+  // The power off sequence value will go from LED_MAX_USER_COUNT*2 to 0
+  // by power off step
+  if (iPowerOffSequenceStep == 0) {
+    iPowerOffSequenceValue = LED_MAX_USER_COUNT*2;
+    iPowerOffSequenceStep = (eUN20State != UN20_STATE_SHUTDOWN) ? -1 : -2;
+    }
+}
+
 // Called when a protocol message has been received from the UN20 or phone.
 static void vMessageProcess( MsgInternalPacket *psMsg )
 {
@@ -809,6 +820,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         if ( !boVBUSPresent )
         {
           CLI_PRINT(("*** Charging: charge source lost - turning off ***\n"));
+          vKickOffShutdownLEDs();
           eScannerState = SFS_OFF;
           vPowerSelfOff();
         }
@@ -832,12 +844,15 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         sppCancelAndDisconnect();
       }
 
+      vKickOffShutdownLEDs();
+      /*
       // The power off sequence value will go from LED_MAX_USER_COUNT*2 to 0
       // by power off step
       if (iPowerOffSequenceStep == 0) {
         iPowerOffSequenceValue = LED_MAX_USER_COUNT*2;
         iPowerOffSequenceStep = (eUN20State != UN20_STATE_SHUTDOWN) ? -1 : -2;
 		}
+      */
 
       if ( eUN20State != UN20_STATE_SHUTDOWN )
       {
