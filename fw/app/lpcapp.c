@@ -534,6 +534,17 @@ static void vQueueMessageCompleteCallbackISR( MsgInternalPacket *psMsg )
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
+// Kick off power-off led dance switch
+static void vKickOffShutdownLEDs( void )
+{
+  // The power off sequence value will go from LED_MAX_USER_COUNT*2 to 0
+  // by power off step
+  if (iPowerOffSequenceStep == 0) {
+    iPowerOffSequenceValue = LED_MAX_USER_COUNT*2;
+    iPowerOffSequenceStep = (eUN20State != UN20_STATE_SHUTDOWN) ? -1 : -2;
+    }
+}
+
 // Called when a protocol message has been received from the UN20 or phone.
 static void vMessageProcess( MsgInternalPacket *psMsg )
 {
@@ -832,12 +843,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         sppCancelAndDisconnect();
       }
 
-      // The power off sequence value will go from LED_MAX_USER_COUNT*2 to 0
-      // by power off step
-      if (iPowerOffSequenceStep == 0) {
-        iPowerOffSequenceValue = LED_MAX_USER_COUNT*2;
-        iPowerOffSequenceStep = (eUN20State != UN20_STATE_SHUTDOWN) ? -1 : -2;
-		}
+      vKickOffShutdownLEDs();
 
       if ( eUN20State != UN20_STATE_SHUTDOWN )
       {
@@ -871,11 +877,15 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     {
       eScannerState = SFS_ON;
 
+      // Reset led power off values
+      iPowerOffSequenceValue = 0;
+      iPowerOffSequenceStep = 0;
+
       // Perform a start-up dance on the LEDs.
       vUiLedSet(LED_RING_0, GREEN);
-      vUiLedSet(LED_RING_1, ORANGE);
-      vUiLedSet(LED_RING_2, RED);
-      vUiLedSet(LED_RING_3, ORANGE);
+      vUiLedSet(LED_RING_1, GREEN);
+      vUiLedSet(LED_RING_2, GREEN);
+      vUiLedSet(LED_RING_3, GREEN);
       vUiLedSet(LED_RING_4, GREEN);
 
       vTaskDelay( 1000 );
