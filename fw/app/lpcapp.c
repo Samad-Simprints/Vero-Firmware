@@ -113,7 +113,7 @@ typedef enum
   // Possible Scanner states
   SFS_OFF,              // SFS is powered off
   SFS_CHARGING,         // SFS in charge mode
-  SFS_CHARGING_TO_OFF,  // SFS is going from charge to off mode
+  SFS_SHUTTING_DOWN,    // SFS is shutting down (to deal with double power off events)
   SFS_ON,               // SFS is in operating mode
 }
 tScannerState;
@@ -820,7 +820,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         if ( !boVBUSPresent )
         {
           CLI_PRINT(("*** Charging: charge source lost - turning off ***\n"));
-          eScannerState = SFS_CHARGING_TO_OFF;
+          eScannerState = SFS_SHUTTING_DOWN;
           // Reset led power off values
           iPowerOffSequenceValue = 0;
           iPowerOffSequenceStep = 0;
@@ -838,7 +838,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     // power button has been pressed to either turn us on or off
     CLI_PRINT(("*** Turning %s ***\n", (eScannerState == SFS_ON) ? "Off" : "On"));
 
-    if ( eScannerState == SFS_CHARGING_TO_OFF )
+    if ( eScannerState == SFS_SHUTTING_DOWN )
       eScannerState == SFS_OFF;
     else if ( eScannerState == SFS_ON )
     {
@@ -847,6 +847,10 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         extern int sppCancelAndDisconnect();
         sppCancelAndDisconnect();
       }
+
+      // now determine if we enter charging mode or turn off
+      // do this before shutting down the UN20 because the time delay causes mixed led output (shutting down + BT)
+      eScannerState = boVBUSPresent?SFS_CHARGING:SFS_SHUTTING_DOWN;
 
       vKickOffShutdownLEDs();
 
@@ -866,15 +870,9 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       vPowerUn20Off();
 
       // now determine if we enter charging mode or turn off
-      if ( boVBUSPresent )
-      {
-        // charge source available, enter charging mode
-        eScannerState = SFS_CHARGING;
-      }
-      else
+      if ( eScannerState == SFS_SHUTTING_DOWN )
       {
         // no charge source present so shutdown
-        eScannerState = SFS_OFF;
         vPowerSelfOff();
       }
     }
@@ -1087,9 +1085,7 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
     // Check for total disconnection from the phone.
     if (( boPhoneBtConnected == false ) && ( boPhoneUsbConnected == false ))
     {
-      if (iPowerOffSequenceValue < 0) {
-        vUIReset();
-      }
+      vUIReset();
       boFlashConnectionLed = true;
     }
 
