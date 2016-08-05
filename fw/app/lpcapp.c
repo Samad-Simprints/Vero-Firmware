@@ -535,7 +535,7 @@ static void vQueueMessageCompleteCallbackISR( MsgInternalPacket *psMsg )
 }
 
 // Kick off power-off led dance switch
-static void vKickOffShutdownLEDs( void );
+static void vKickOffShutdownLEDs( void )
 {
   // The power off sequence value will go from LED_MAX_USER_COUNT*2 to 0
   // by power off step
@@ -845,14 +845,6 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       }
 
       vKickOffShutdownLEDs();
-      /*
-      // The power off sequence value will go from LED_MAX_USER_COUNT*2 to 0
-      // by power off step
-      if (iPowerOffSequenceStep == 0) {
-        iPowerOffSequenceValue = LED_MAX_USER_COUNT*2;
-        iPowerOffSequenceStep = (eUN20State != UN20_STATE_SHUTDOWN) ? -1 : -2;
-		}
-      */
 
       if ( eUN20State != UN20_STATE_SHUTDOWN )
       {
@@ -885,6 +877,10 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     else
     {
       eScannerState = SFS_ON;
+
+      // Reset led power off values
+      iPowerOffSequenceValue = 0;
+      iPowerOffSequenceStep = 0;
 
       // Perform a start-up dance on the LEDs.
       vUiLedSet(LED_RING_0, GREEN);
