@@ -820,7 +820,6 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         if ( !boVBUSPresent )
         {
           CLI_PRINT(("*** Charging: charge source lost - turning off ***\n"));
-          vKickOffShutdownLEDs();
           eScannerState = SFS_OFF;
           vPowerSelfOff();
         }
