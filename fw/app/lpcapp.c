@@ -111,9 +111,10 @@ enum {
 typedef enum
 {
   // Possible Scanner states
-  SFS_OFF,          // SFS is powered off
-  SFS_CHARGING,     // SFS in charge mode
-  SFS_ON,           // SFS is in operating mode
+  SFS_OFF,              // SFS is powered off
+  SFS_CHARGING,         // SFS in charge mode
+  SFS_CHARGING_TO_OFF,  // SFS is going from charge to off mode
+  SFS_ON,               // SFS is in operating mode
 }
 tScannerState;
 
@@ -815,16 +816,18 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
           vSystemIdleTimerCallback( NULL );
         }
         break;
-
       case SFS_CHARGING:
         if ( !boVBUSPresent )
         {
           CLI_PRINT(("*** Charging: charge source lost - turning off ***\n"));
-          eScannerState = SFS_OFF;
+          eScannerState = SFS_CHARGING_TO_OFF;
+          // Reset led power off values
+          iPowerOffSequenceValue = 0;
+          iPowerOffSequenceStep = 0;
+          vKickOffShutdownLEDs();
           vPowerSelfOff();
         }
         break;
-
       case SFS_ON:
         // no action required. Pressing power button will cause reevaluation of power state
         break;
@@ -835,7 +838,9 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     // power button has been pressed to either turn us on or off
     CLI_PRINT(("*** Turning %s ***\n", (eScannerState == SFS_ON) ? "Off" : "On"));
 
-    if ( eScannerState == SFS_ON )
+    if ( eScannerState == SFS_CHARGING_TO_OFF )
+      eScannerState == SFS_OFF;
+    else if ( eScannerState == SFS_ON )
     {
       // cancel any pending transfers and disconnect from remote device (if any)
       {
