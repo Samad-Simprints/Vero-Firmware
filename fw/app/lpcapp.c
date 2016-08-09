@@ -577,9 +577,6 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
                 ( bSource == MSG_SOURCE_UN20_USB )  ? "UN20USB" : "Internal",
                 iMsglength, psMsg->oMsg.Msgheader.bMsgId ));
 
-  // Reset the system inactivity timeout.
-  xTimerReset( hInactivityTimer, 0 );
-
   // if scanner is not "on" reject commands from USB and Bluetooth
   if ( ( bSource != MSG_SOURCE_INTERNAL ) && ( eScannerState != SFS_ON ) )
   {
@@ -590,6 +587,9 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     iIfSend((IF_USB | IF_BT), psPacket, psPacket->Msgheader.iLength);
     return;
   }
+
+  // Reset the system inactivity timeout.
+  xTimerReset( hInactivityTimer, 0 );
 
   // Decode the message type (ignoring the Response bit).
   switch ( psMsg->oMsg.Msgheader.bMsgId & ~MSG_REPLY )
@@ -811,6 +811,8 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
         {
           // powered up by USB charge source go to charging mode
           CLI_PRINT(("*** Power up: Enter charging state ***\n"));
+
+          xTimerStop( hInactivityTimer, 0 );
           eScannerState = SFS_CHARGING;
         }
         else
@@ -901,6 +903,11 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       {
         // no charge source present so shutdown
         vPowerSelfOff();
+      }
+      else
+      {
+        // entering charging mode so stop inactivity timer
+        xTimerStop( hInactivityTimer, 0 );
       }
     }
     else
@@ -1159,10 +1166,10 @@ static void vInterfaceConnDisconn( tInterfaceEvent event, tEventConnDisconn *psE
 static void vBtCallbackHandler(void *context, tInterfaceEvent event, void *event_data)
 {
   DEBUGMSG(ZONE_DATA,("vBtCallbackHandler: event %d\n", event));
-
+#if 0
   // Reset the system inactivity timeout.
   xTimerReset( hInactivityTimer, 0 );
-
+#endif
   switch( event )
   {
   case INTERFACE_EVENT_CONNECTED:
@@ -1189,10 +1196,10 @@ static void vUn20UsbCallbackHandler(void *context, tInterfaceEvent event, void *
   PRECOND( event_data != NULL );
   
   //CLI_PRINT(("vUn20UsbCallbackHandler: event %d\n", event));
-
+#if 0
   // Reset the system inactivity timeout.
   xTimerReset( hInactivityTimer, 0 );
-
+#endif
   switch( event )
   {
   case INTERFACE_EVENT_CONNECTED:
@@ -1224,10 +1231,10 @@ static void vPhoneUsbCallbackHandler(void *context, tInterfaceEvent event, void 
   PRECOND( event_data != NULL );
   
   DEBUGMSG(ZONE_DATA,("vPhoneUsbCallbackHandler: event %d\n", event));
-
+#if 0
   // Reset the system inactivity timeout.
   xTimerReset( hInactivityTimer, 0 );
-
+#endif
   switch( event )
   {
   case INTERFACE_EVENT_CONNECTED:
@@ -1384,10 +1391,10 @@ void vLpcAppInit( bool boPowerButtonState )
                                    pdFALSE,    // One-shot timeout
                                    NULL,
                                    vSystemIdleTimerCallback );
-
+#if 0
   // Start the timer.
   xTimerStart( hInactivityTimer, 0 );
-
+#endif
   // Create the vibrate control timer
   hTimer = xTimerCreate( acVibrateTimerName,
                          MS_TO_TICKS( 100 ),
