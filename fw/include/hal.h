@@ -167,6 +167,9 @@ extern void vSetHardwareConfig( int iMode );
 extern bool boHalBatteryIsCharging();
 extern bool boHalUSBChargePresent();
 
+extern bool boHalScanButtonPressed();
+extern bool boHalPowerButtonPressed();
+
 #ifdef __cplusplus
 }
 #endif

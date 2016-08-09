@@ -365,16 +365,11 @@ void tMain::vInit()
 // Are both the buttons pushed to indicate pairing erase
 bool vCheckForPairingClear()
 {
-  bool boScan;
-  bool boPower;
-  /* configure the buttons so we can sense them */
+  /* configure the buttons so we can sense them early*/
   BUTTON_0_POWER->vConfigure();
   BUTTON_1_SCAN->vConfigure();
 
-  boPower = BUTTON_0_POWER->boGet();
-  boScan  = BUTTON_1_SCAN->boGet();
-
-  if ( !boPower && !boScan )
+  if ( boHalPowerButtonPressed() && boHalScanButtonPressed() )
   {
     CLI_PRINT(("*** Erase link keys ***\n"));
     storage_erase_keys();
@@ -446,7 +441,7 @@ int main( void )
   vCheckForPairingClear();
 
   // remember if power button was pressed at startup
-  boPowerButtonAtStartup = !BUTTON_0_POWER->boGet();
+  boPowerButtonAtStartup = boHalPowerButtonPressed();
 
   // start up the watchdog and its monitor
   //vWDOGDDinit();

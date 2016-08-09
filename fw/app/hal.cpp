@@ -845,11 +845,10 @@ void vPowerSelfOff()	// turn the LPC1800 off (Power button wakes)
   // spin waiting for the power to decay and the CPU to stop
   // must keep kicking the watchdog to stop it going off and
   // the subsequent reset re-enabling power (via CPU pullups)
-  vWDOGDDstop();
-//  for (;;)
-//  {
-//    vWDOGDDkick();
-//  }
+  for (;;)
+  {
+    vWDOGDDkick();
+  }
 }
 
 void vPowerSelfOn()	// called early to latch power on
@@ -953,6 +952,23 @@ bool boHalBatteryIsCharging()
 bool boHalUSBChargePresent()
 {
   return BAT_nVBUS->boGet();
+}
+
+
+//
+// Return true if the scan button is being pressed
+//
+bool boHalScanButtonPressed()
+{
+  return (!BUTTON_1_SCAN->boGet());
+}
+
+//
+// Return true of the power button is being pressed
+//
+bool boHalPowerButtonPressed()
+{
+  return (!BUTTON_0_POWER->boGet());
 }
 
 //

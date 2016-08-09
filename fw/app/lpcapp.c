@@ -108,6 +108,9 @@ enum {
 // Default delay before actioning a hardware configuration change
 #define LPC_HARDWARE_CONFIG_DELAY_MS        ( 2 * 1000 )
 
+// Minimum time that a button has to be pressed to be actioned (x2)
+#define BUTTON_DEBOUNCE_DELAY_MS      ( 2 )
+
 typedef enum
 {
   // Possible Scanner states
@@ -206,6 +209,7 @@ static MsgInternalPacket sPowerButtonMsg  = { .eSource = MSG_SOURCE_INTERNAL };
 static MsgInternalPacket sScanButtonMsg   = { .eSource = MSG_SOURCE_INTERNAL };
 static MsgInternalPacket sUN20ShutdownMsg = { .eSource = MSG_SOURCE_INTERNAL };
 static MsgInternalPacket sPowerStateMsg   = { .eSource = MSG_SOURCE_INTERNAL };
+static MsgInternalPacket sPowerToggleMsg  = { .eSource = MSG_SOURCE_INTERNAL };
 
 // This app operates mostly stateless (except for some hardware peripheral states such as
 // the vibrate motor, LED flash state etc.
@@ -223,6 +227,7 @@ enum
   MSG_POWER_BUTTON = (MSG_NUM_MSGS + 0),
   MSG_SCAN_BUTTON  = (MSG_NUM_MSGS + 1),
   MSG_POWER_STATE  = (MSG_NUM_MSGS + 2),
+  MSG_POWER_TOGGLE = (MSG_NUM_MSGS + 3)
 };
 
 enum
@@ -816,6 +821,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
           vSystemIdleTimerCallback( NULL );
         }
         break;
+
       case SFS_CHARGING:
         if ( !boVBUSPresent )
         {
@@ -828,6 +834,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
           vPowerSelfOff();
         }
         break;
+
       case SFS_ON:
         // no action required. Pressing power button will cause reevaluation of power state
         break;
@@ -835,6 +842,26 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     break;
 
   case MSG_POWER_BUTTON:
+    {
+      bool boButtonSample0;
+      bool boButtonSample1;
+
+      // Require the power button to remain pressed for 2 consecutive sample periods
+      vTaskDelay( MS_TO_TICKS( BUTTON_DEBOUNCE_DELAY_MS ) );
+      boButtonSample0 = boHalPowerButtonPressed();
+
+      vTaskDelay( MS_TO_TICKS( BUTTON_DEBOUNCE_DELAY_MS ) );
+      boButtonSample1 = boHalPowerButtonPressed();
+
+      // if button did not remain pressed then ignore this notification
+      if ( !(boButtonSample0 && boButtonSample1) )
+      {
+        CLI_PRINT(("*** Ignorning spurious power button event ***\n"));
+        return;
+      }
+    }
+    // fall-thru to normal button processing code.
+  case MSG_POWER_TOGGLE:
     // power button has been pressed to either turn us on or off
     CLI_PRINT(("*** Turning %s ***\n", (eScannerState == SFS_ON) ? "Off" : "On"));
 
@@ -900,18 +927,37 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     break;
 
   case MSG_SCAN_BUTTON:
-    DEBUGMSG(ZONE_TRACE,("*** Scan request ***\n"));
+  {
+      bool boButtonSample0;
+      bool boButtonSample1;
 
-    // If the capture button is enabled, we pass this indication on to the phone.
-    if ( boEnableTrigger == true )
-    {
-      MsgUINotification sUINotification;
-      sUINotification.boTriggerPressed = true;
+      // Require the power button to remain pressed for 2 consecutive sample periods
+      vTaskDelay( MS_TO_TICKS( BUTTON_DEBOUNCE_DELAY_MS ) );
+      boButtonSample0 = boHalScanButtonPressed();
 
-      vSetupMessage( &sInternalMsg, MSG_REPORT_UI, MSG_STATUS_GOOD, &sUINotification, sizeof( sUINotification ) );
+      vTaskDelay( MS_TO_TICKS( BUTTON_DEBOUNCE_DELAY_MS ) );
+      boButtonSample1 = boHalScanButtonPressed();
 
-      // Send the response message from the UN20 on to the phone
-      iIfSend((IF_USB | IF_BT), (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
+      // if button did not remain pressed then ignore this notification
+      if ( !(boButtonSample0 && boButtonSample1) )
+      {
+        CLI_PRINT(("*** Ignorning spurious scan button event ***\n"));
+        return;
+      }
+
+      DEBUGMSG(ZONE_TRACE,("*** Scan request ***\n"));
+
+      // If the capture button is enabled, we pass this indication on to the phone.
+      if ( boEnableTrigger == true )
+      {
+        MsgUINotification sUINotification;
+        sUINotification.boTriggerPressed = true;
+
+        vSetupMessage( &sInternalMsg, MSG_REPORT_UI, MSG_STATUS_GOOD, &sUINotification, sizeof( sUINotification ) );
+
+        // Send the response message from the UN20 on to the phone
+        iIfSend((IF_USB | IF_BT), (void *) &sInternalMsg, sInternalMsg.Msgheader.iLength);
+      }
     }
     // Else ignore this button press.
     break;
@@ -1233,8 +1279,8 @@ static void vSystemIdleTimerCallback( xTimerHandle xTimer )
   DEBUGMSG(ZONE_TRACE,("vSystemIdleTimerCallback\n"));
 
   // We take the same actions as when the user presses the power button.
-  sPowerButtonMsg.oMsg.Msgheader.bMsgId = MSG_POWER_BUTTON;
-  vQueueMessageCompleteCallback( &sPowerButtonMsg  );
+  sPowerToggleMsg.oMsg.Msgheader.bMsgId = MSG_POWER_TOGGLE;
+  vQueueMessageCompleteCallback( &sPowerToggleMsg  );
   return;
 }
 
