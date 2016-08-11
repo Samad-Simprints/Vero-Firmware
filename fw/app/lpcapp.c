@@ -109,7 +109,7 @@ enum {
 #define LPC_HARDWARE_CONFIG_DELAY_MS        ( 2 * 1000 )
 
 // Minimum time that a button has to be pressed to be actioned (x2)
-#define BUTTON_DEBOUNCE_DELAY_MS      ( 2 )
+#define BUTTON_DEBOUNCE_DELAY_MS      ( 50 )
 
 typedef enum
 {
@@ -845,21 +845,14 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
 
   case MSG_POWER_BUTTON:
     {
-      bool boButtonSample0;
-      bool boButtonSample1;
-
-      // Require the power button to remain pressed for 2 consecutive sample periods
-      vTaskDelay( MS_TO_TICKS( BUTTON_DEBOUNCE_DELAY_MS ) );
-      boButtonSample0 = boHalPowerButtonPressed();
-
-      vTaskDelay( MS_TO_TICKS( BUTTON_DEBOUNCE_DELAY_MS ) );
-      boButtonSample1 = boHalPowerButtonPressed();
-
-      // if button did not remain pressed then ignore this notification
-      if ( !(boButtonSample0 && boButtonSample1) )
-      {
-        CLI_PRINT(("*** Ignorning spurious power button event ***\n"));
-        return;
+      
+      for (int i = 0; i < 2; i++) {
+        // Require the power button to remain pressed for 2 consecutive sample periods
+        vTaskDelay( MS_TO_TICKS( BUTTON_DEBOUNCE_DELAY_MS ) );
+        if (!boHalPowerButtonPressed()) {
+          CLI_PRINT(("*** Ignorning spurious power button event ***\n"));
+          return;
+        }
       }
     }
     // fall-thru to normal button processing code.

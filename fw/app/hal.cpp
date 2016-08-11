@@ -971,6 +971,11 @@ bool boHalPowerButtonPressed()
   return (!BUTTON_0_POWER->boGet());
 }
 
+void vSetDebugPin(bool bo)
+{
+  DEBUG_GPIO3->vSet( bo );
+}
+
 //
 // Bluetooth
 //

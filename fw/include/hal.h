@@ -170,6 +170,8 @@ extern bool boHalUSBChargePresent();
 extern bool boHalScanButtonPressed();
 extern bool boHalPowerButtonPressed();
 
+extern void vSetDebugPin(bool bo);
+
 #ifdef __cplusplus
 }
 #endif

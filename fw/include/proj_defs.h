@@ -40,7 +40,7 @@
 
 // firmware version number - SET automatically by Pre-Compile command
 // WARNING, this can be out of date until you compile locally
-#define INDEX_REVISION_NUMBER         1
+#define INDEX_REVISION_NUMBER         2
 
 //
 // Processor clock frequency
