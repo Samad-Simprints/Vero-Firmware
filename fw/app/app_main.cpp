@@ -51,9 +51,11 @@
 #include "hal.h"
 #include "lpcapp.h"
 #include "helpers.hpp"
+#include "delay.h"
 
 #include "flash_iap.h"
 #include "crc.h"
+
 
 //******************************************************************************
 // Private Function Prototypes
@@ -134,6 +136,7 @@ static bool boUN20Echo(char **papzArgs, int iInstance, int iNumArgs);
 static bool boSleep(char **papzArgs, int iInstance, int iNumArgs);
 static bool boCrashLog(char **papzArgs, int iInstance, int iNumArgs);
 static bool boLogEntry(char **papzArgs, int iInstance, int iNumArgs);
+static void vMilliSleep(long ms);
 
 const tParserEntry asMainCLI[] =
 {
@@ -218,6 +221,12 @@ static bool boLogEntry(char **papzArgs, int iInstance, int iNumArgs)
 {
   abort();
   return true;
+}
+
+static void vMilliSleep(long ms) {
+  for (long t = 0; t < ms * CCLK_KHZ / 4; t++) {
+    vSetDebugPin(t % 2 == 0);
+  }
 }
 
 //******************************************************************************
@@ -365,16 +374,11 @@ void tMain::vInit()
 // Are both the buttons pushed to indicate pairing erase
 bool vCheckForPairingClear()
 {
-  bool boScan;
-  bool boPower;
-  /* configure the buttons so we can sense them */
+  /* configure the buttons so we can sense them early*/
   BUTTON_0_POWER->vConfigure();
   BUTTON_1_SCAN->vConfigure();
 
-  boPower = BUTTON_0_POWER->boGet();
-  boScan  = BUTTON_1_SCAN->boGet();
-
-  if ( !boPower && !boScan )
+  if ( boHalPowerButtonPressed() && boHalScanButtonPressed() )
   {
     CLI_PRINT(("*** Erase link keys ***\n"));
     storage_erase_keys();
@@ -423,6 +427,34 @@ int main( void )
   // latch the power on
   vPowerSelfOn();
 
+
+  int count = 0;
+  int NB_MEASURES = 10;
+  bool measures[NB_MEASURES];
+  for (int i = 0; i < NB_MEASURES; i++) {
+    measures[i] = false;
+  }
+
+  // wait ~50 ms before actually doing any measure
+  vMilliSleep(50);
+
+  for (long t = 0; t < 60 * 20; t++) {
+    if (measures[t % NB_MEASURES]) count--;
+    measures[t % NB_MEASURES] = boHalPowerButtonPressed() || boHalUSBChargePresent();
+    if (measures[t % NB_MEASURES]) count++;
+
+    //vUiLedSet(LED_RING_0, measures[t % NB_MEASURES] ? GREEN : RED);
+    if (count == NB_MEASURES) {
+      break;
+    }
+    vMilliSleep(20);
+  }
+
+  if (count < NB_MEASURES) {
+    vPowerSelfOff();
+  }
+
+
   // preserve the crash log
   boLogCache( &oExceptionRecord );
 
@@ -443,10 +475,10 @@ int main( void )
   }
 
   // clear link keys if scan button pressed at power up
-  vCheckForPairingClear();
+  vCheckForPairingClear();  
 
   // remember if power button was pressed at startup
-  boPowerButtonAtStartup = !BUTTON_0_POWER->boGet();
+  boPowerButtonAtStartup = boHalPowerButtonPressed();
 
   // start up the watchdog and its monitor
   //vWDOGDDinit();
