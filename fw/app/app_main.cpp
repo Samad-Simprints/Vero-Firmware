@@ -27,9 +27,12 @@
 // Includes
 //******************************************************************************
 
+#ifndef IGNORE_CROSSWORKS
 #include <ctl_api.h>
-#include <LPC18xx.h>
 #include <cross_studio_io.h>
+#endif 
+
+#include <LPC18xx.h>
 
 //#include "global.h"
 
