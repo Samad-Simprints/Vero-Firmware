@@ -496,7 +496,6 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       boTemplateValid = false;
       boQualityValid = false;
 
-      vSetupNACK( psPacket, MSG_STATUS_SDK_ERROR );
 
       err = TIME(err, sgfplib->GetImage(ImageBuffer));
 
@@ -504,14 +503,36 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       {
         iSaveDataFixed("/data/debug", "un20-image", ImageBuffer, iImageBufferSize);
 
-#if COMPRESS_IMAGE
-      err1 = TIME(err1, un20_wsq_encode_mem(&wsq, &size, bitrate, ImageBuffer, deviceInfo.ImageWidth, deviceInfo.ImageHeight, 8, -1, NULL));
-      iSaveDataFixed("/data/debug", "un20-image-wsq", wsq, size);
+        #if COMPRESS_IMAGE
+          err1 = TIME(err1, un20_wsq_encode_mem(&wsq, &size, bitrate, ImageBuffer, deviceInfo.ImageWidth, deviceInfo.ImageHeight, 8, -1, NULL));
+          iSaveDataFixed("/data/debug", "un20-image-wsq", wsq, size);
 
-      DEBUG_PRINT(("UN20: Compress Image: %d, Raw: %d, Compressed: %d\n", err1, (deviceInfo.ImageWidth * deviceInfo.ImageHeight), size));
-#endif
+          DEBUG_PRINT(("UN20: Compress Image: %d, Raw: %d, Compressed: %d\n", err1, (deviceInfo.ImageWidth * deviceInfo.ImageHeight), size));
+        #endif
         boImageValid = true;
         vSetupACK( psPacket );
+      }
+      else
+      {
+        int msg_status = MSG_STATUS_SDK_ERROR;
+        switch( err )
+        {
+          case SGFDX_ERROR_WRONG_IMAGE:
+            msg_status = MSG_STATUS_SDK_WRONG_IMAGE;
+            break;
+
+          case SGFDX_ERROR_INVALID_PARAM:
+            msg_status = MSG_STATUS_SDK_INVALID_PARAM;
+            break;
+
+          case SGFDX_ERROR_LINE_DROPPED:
+            msg_status = MSG_STATUS_SDK_LINE_DROPPED;
+            break;
+
+          default:
+            break;
+        }
+        vSetupNACK( psPacket, msg_status );
       }
 
       DEBUG_PRINT(("UN20: Capture Image:(%d)\n", err));

@@ -92,7 +92,10 @@ enum
   MSG_STATUS_NO_CRASH_LOG,      // no crash log data available
   MSG_STATUS_BAD_PARAMETER,     // parameter specified is not valid
   MSG_STATUS_UN20_VOLTAGE,      // battery voltage is too low to start UN20
-  MSG_STATUS_CHARGING           // unit is in charge mode, commands not accepted
+  MSG_STATUS_CHARGING,          // unit is in charge mode, commands not accepted
+  MSG_STATUS_SDK_WRONG_IMAGE,   // Secugen error SGFDX_ERROR_WRONG_IMAGE
+  MSG_STATUS_SDK_INVALID_PARAM, // Secugen error SGFDX_ERROR_INVALID_PARAM
+  MSG_STATUS_SDK_LINE_DROPPED   // Secugen error SGFDX_ERROR_LINE_DROPPED
 };
 
 // message-ids as held in the message bMsgId field.
