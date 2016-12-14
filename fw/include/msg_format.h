@@ -136,6 +136,9 @@ enum
   MSG_GET_CRASH_LOG = 24,         // recover the crash log data
   MSG_SET_HW_CONFIG = 25,         // set the hardware configuration
 
+  MSG_DISABLE_FINGER_CHECK = 26,  // disable the finger check on the un20 
+  MSG_ENABLE_FINGER_CHECK = 27,   // enable the finger check on the un20
+
   MSG_NUM_MSGS,             // Number of valid message types
 
   MSG_REPLY = 0x80          // Top bit set indicates a reply

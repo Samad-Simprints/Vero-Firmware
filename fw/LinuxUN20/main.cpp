@@ -41,7 +41,7 @@
 #include <sys/time.h>
 
 #include "sgfplib.h"
-#include "wsq.h"
+//#include "wsq.h"
 
 #include "msg_format.h"
 #include "protocol_msg.h"
@@ -348,6 +348,13 @@ static int vUN20SerialSend(void *pvData, int iMsglength)
 #endif
 }
 
+static DWORD setFingerCheck( bool on )
+{
+  const unsigned char index = 0;
+  const unsigned char data = on? 1:0;
+  return sgfplib->WriteData( index, data);
+}
+ 
 static void receiver(int fd)
 {
   uint8 bData;
@@ -665,6 +672,13 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       CLI_PRINT(("UN20: *** UN20 server shutdown requested (%s) ***\n", (boSendResponse ? "ACK" : "NOACK")));
       vSetupACK( psPacket );
       boAppQuit = true;
+      break;
+
+    case MSG_ENABLE_FINGER_CHECK:
+    case MSG_DISABLE_FINGER_CHECK:
+      vSetupNACK( psPacket, MSG_STATUS_SDK_ERROR );
+      if( setFingerCheck((psHeader->bMsgId & ~MSG_REPLY) == MSG_ENABLE_FINGER_CHECK) != SGFDX_ERROR_NONE)
+        vSetupACK( psPacket );
       break;
 
     default:
