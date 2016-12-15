@@ -677,7 +677,7 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
     case MSG_ENABLE_FINGER_CHECK:
     case MSG_DISABLE_FINGER_CHECK:
       vSetupNACK( psPacket, MSG_STATUS_SDK_ERROR );
-      if( setFingerCheck((psHeader->bMsgId & ~MSG_REPLY) == MSG_ENABLE_FINGER_CHECK) != SGFDX_ERROR_NONE)
+      if( setFingerCheck((psHeader->bMsgId & ~MSG_REPLY) == MSG_ENABLE_FINGER_CHECK) == SGFDX_ERROR_NONE)
         vSetupACK( psPacket );
       break;
 
