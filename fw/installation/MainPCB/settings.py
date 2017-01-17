@@ -24,7 +24,8 @@ FIRMWARE = '../../build/index THUMB Release/index.bin'
 lpchelper.py
 '''
 # path to LPC script
-nxpPath = 'C:/NXP/LPCScrypt'
+# nxpPath = 'C:/NXP/LPCScrypt'  # windows
+nxpPath = '/Applications/lpcscrypt_1.7.0_696/'  # mac
 # Simprints MAC address prefix
 simPrintsPrefix = 0xf0acd7c00000
 

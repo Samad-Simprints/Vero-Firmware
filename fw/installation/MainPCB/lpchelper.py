@@ -5,6 +5,7 @@ import sys
 import time
 import os
 import settings
+import platform
 from enum import Enum
 
 '''
@@ -14,8 +15,9 @@ CONSTANTS
 '''
 Script paths
 '''
-lpcScript = settings.nxpPath + '/bin/lpcscrypt.exe'
-bootScript = settings.nxpPath + '/scripts/boot_lpcscrypt.cmd'
+isWindows = platform.system() == 'Windows'
+lpcScript = settings.nxpPath + '/bin/lpcscrypt' + ('.exe' if isWindows else '')
+bootScript = settings.nxpPath + '/scripts/boot_lpcscrypt' + ('.cmd' if isWindows else'')
 
 '''
 Memory addresses 
