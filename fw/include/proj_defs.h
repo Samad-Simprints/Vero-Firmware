@@ -38,9 +38,8 @@
 #define WATCHDOG_HARDWARE_ENABLED                ( 1 )
 #endif
 
-// firmware version number - SET automatically by Pre-Compile command
-// WARNING, this can be out of date until you compile locally
-#define INDEX_REVISION_NUMBER         2
+// firmware version number - used by a post-compile hook to auto create a vx.x.x tag if changed
+#define INDEX_REVISION_NUMBER         5
 
 //
 // Processor clock frequency

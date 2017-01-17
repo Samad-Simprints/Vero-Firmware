@@ -1,0 +1,15 @@
+#! /bin/bash
+
+# Script that creates tags if the Main PCB version name is changed
+# To use, create a symbolic link to this file in Scanner-Code/.git/hooks/post-commit
+# Currently assumes that the INDEX_REVISION_NUMBER is the minor release number only
+
+version=`git diff HEAD^..HEAD -- "$(git rev-parse --show-toplevel)"/fw/include/proj_defs.h | grep '^\+.*INDEX_REVISION_NUMBER' | sed -e 's/^.*INDEX_REVISION_NUMBER[ ]*//'`
+
+if [ "$version" != "" ]; then
+    fullVersion="v1.0.$version"
+    #git tag -a "v$version" -m "`git log -1 --format=%s`"
+    #echo "Created a new tag, v$version"
+    echo "$fullVersion"
+    echo "After this commit commit, please push the tags using 'git push --tags'"
+fi
