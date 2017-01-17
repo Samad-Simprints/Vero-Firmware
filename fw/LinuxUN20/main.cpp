@@ -41,7 +41,7 @@
 #include <sys/time.h>
 
 #include "sgfplib.h"
-#include "wsq.h"
+//#include "wsq.h"
 
 #include "msg_format.h"
 #include "protocol_msg.h"
@@ -348,6 +348,13 @@ static int vUN20SerialSend(void *pvData, int iMsglength)
 #endif
 }
 
+static DWORD setFingerCheck( bool on )
+{
+  const unsigned char index = 0;
+  const unsigned char data = on? 1:0;
+  return sgfplib->WriteData( index, data);
+}
+ 
 static void receiver(int fd)
 {
   uint8 bData;
@@ -496,7 +503,6 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       boTemplateValid = false;
       boQualityValid = false;
 
-      vSetupNACK( psPacket, MSG_STATUS_SDK_ERROR );
 
       err = TIME(err, sgfplib->GetImage(ImageBuffer));
 
@@ -504,14 +510,36 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       {
         iSaveDataFixed("/data/debug", "un20-image", ImageBuffer, iImageBufferSize);
 
-#if COMPRESS_IMAGE
-      err1 = TIME(err1, un20_wsq_encode_mem(&wsq, &size, bitrate, ImageBuffer, deviceInfo.ImageWidth, deviceInfo.ImageHeight, 8, -1, NULL));
-      iSaveDataFixed("/data/debug", "un20-image-wsq", wsq, size);
+        #if COMPRESS_IMAGE
+          err1 = TIME(err1, un20_wsq_encode_mem(&wsq, &size, bitrate, ImageBuffer, deviceInfo.ImageWidth, deviceInfo.ImageHeight, 8, -1, NULL));
+          iSaveDataFixed("/data/debug", "un20-image-wsq", wsq, size);
 
-      DEBUG_PRINT(("UN20: Compress Image: %d, Raw: %d, Compressed: %d\n", err1, (deviceInfo.ImageWidth * deviceInfo.ImageHeight), size));
-#endif
+          DEBUG_PRINT(("UN20: Compress Image: %d, Raw: %d, Compressed: %d\n", err1, (deviceInfo.ImageWidth * deviceInfo.ImageHeight), size));
+        #endif
         boImageValid = true;
         vSetupACK( psPacket );
+      }
+      else
+      {
+        int msg_status = MSG_STATUS_SDK_ERROR;
+        switch( err )
+        {
+          case SGFDX_ERROR_WRONG_IMAGE:
+            msg_status = MSG_STATUS_SDK_WRONG_IMAGE;
+            break;
+
+          case SGFDX_ERROR_INVALID_PARAM:
+            msg_status = MSG_STATUS_SDK_INVALID_PARAM;
+            break;
+
+          case SGFDX_ERROR_LINE_DROPPED:
+            msg_status = MSG_STATUS_SDK_LINE_DROPPED;
+            break;
+
+          default:
+            break;
+        }
+        vSetupNACK( psPacket, msg_status );
       }
 
       DEBUG_PRINT(("UN20: Capture Image:(%d)\n", err));
@@ -644,6 +672,13 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
       CLI_PRINT(("UN20: *** UN20 server shutdown requested (%s) ***\n", (boSendResponse ? "ACK" : "NOACK")));
       vSetupACK( psPacket );
       boAppQuit = true;
+      break;
+
+    case MSG_ENABLE_FINGER_CHECK:
+    case MSG_DISABLE_FINGER_CHECK:
+      vSetupNACK( psPacket, MSG_STATUS_SDK_ERROR );
+      if( setFingerCheck((psHeader->bMsgId & ~MSG_REPLY) == MSG_ENABLE_FINGER_CHECK) == SGFDX_ERROR_NONE)
+        vSetupACK( psPacket );
       break;
 
     default:

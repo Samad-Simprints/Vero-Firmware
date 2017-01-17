@@ -763,6 +763,8 @@ static void vMessageProcess( MsgInternalPacket *psMsg )
   case MSG_COMPARE_TEMPLATE:
   case MSG_GET_IMAGE_FRAGMENT:
   case MSG_GET_TEMPLATE_FRAGMENT:
+  case MSG_ENABLE_FINGER_CHECK:
+  case MSG_DISABLE_FINGER_CHECK:
 
     // These are UN20 image activity messages.
 
