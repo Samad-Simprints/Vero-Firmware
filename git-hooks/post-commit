@@ -8,11 +8,11 @@ version=`git diff HEAD^..HEAD -- "$(git rev-parse --show-toplevel)"/fw/include/p
 
 if [ "$version" != "" ]; then
     fullVersion="v1.0.$version"
-    git tag -a "v$version" -m "`git log -1 --format=%s`"
+    git tag -a "$fullVersion" -m "`git log -1 --format=%s`"
     echo 
     echo "Change in INDEX_REVISION_NUMBER found"
     echo "Commit is tagged as version $fullVersion"
-    echo "After pushing this commit commit, please push the tags using 'git push --tags'"
+    echo "After pushing this commit, please push the tags using 'git push --tags'"
     echo 
 else
     echo "No change in INDEX_REVISION_NUMBER"
