@@ -12,4 +12,6 @@ if [ "$version" != "" ]; then
     #echo "Created a new tag, v$version"
     echo "$fullVersion"
     echo "After this commit commit, please push the tags using 'git push --tags'"
+else
+    echo "No version change"
 fi

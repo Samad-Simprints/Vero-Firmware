@@ -39,7 +39,7 @@
 #endif
 
 // firmware version number - used by a post-compile hook to auto create a vx.x.x tag if changed
-#define INDEX_REVISION_NUMBER         5
+#define INDEX_REVISION_NUMBER         4
 
 //
 // Processor clock frequency
